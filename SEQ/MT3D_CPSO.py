@@ -430,44 +430,127 @@ ea = Evolutionary(F,lower = lower, upper = upper, popsize = popsize, max_iter = 
 # Initialize TIME
 starttime = time()
 
+# Initialize SOLVER
+ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter = max_iter, mpi = True, snap = True)
+
 # SOLVE
-ea.optimize(solver = "cpso", sync = True)
+xopt,gfit=ea.optimize(solver = "cpso", sync = True)
 
 
-#COMPUTE F with the solution array
-xopt=ea.xopt
-F(xopt)
-#print np.around(xopt,1)
-print (ea)
-###print 'Solution:',ea.xopt
-###print 'Fitness:',ea.gfit
-###print 'Number of iteration:',ea.n_iter
-###print 'Number of call to F:',ea.n_eval
-###print 'Flag:',ea.flag
-###
-print "Elapsed time: %.2f seconds" % (time() - starttime)
 
+#-----------------------------------------------#
+#                                               #
+#    COMPUTE FUNCTION DENSITY PROBABILITY       #
+#                                               #
+#-----------------------------------------------#
+if rank==0:
+    nparam=len(np.unique(model))
+    model_inv=np.zeros((popsize*max_iter,nparam))
+    fit_inv=np.zeros(popsize*max_iter)
+    cpt=0
+    for i in range(max_iter):
+        for j in range(popsize):
+            model_inv[cpt,:]=np.around(ea.models[j,:,i],1)
+            fit_inv[cpt]=ea.energy[j,i]/1e6
+            cpt=cpt+1
+    
+    #   print ea.models.shape, ea.energy.shape
+    #   print ea.models
+    #   print ea.energy
+    #   print model_inv, fit_inv
+    JPPD=np.exp(-fit_inv/2)/sum(np.exp(-fit_inv/2))
+    #   print JPPD
+    PMM=np.zeros(nparam)
+    for i in range(nparam):
+        PMM[i]=sum(model_inv[:,i]*JPPD[:])
+    
+    Cm=np.zeros((nparam,nparam))
+    Mm=PMM
+    Mm.shape=(nparam,1)
+    Mm_t=np.transpose(Mm)
+    for i in range(popsize*max_iter):
+        m=model_inv[i,:]
+        m.shape=(nparam,1)
+        m_t=np.transpose(m)
+        ma=(m-Mm)
+        mb=np.transpose(ma)
+        #Cm=Cm+np.dot(m,m_t)*JPPD[i]-np.dot(Mm,Mm_t)*JPPD[i]
+        Cm=Cm+np.dot(ma,mb)*JPPD[i]
+    
+    StD=np.zeros(nparam)
+    for i in range(nparam):
+        StD[i]=np.sqrt(Cm[i,i])
+    
+    print StD
 
 
 #-----------------------------------#
 #                                   #
-# WRITING FINAL RESISTIVITY MODEL   #
+#  WRITING BEST RESISTIVITY MODEL   #
 #                                   #
 #-----------------------------------#
-xopt=np.around(xopt,1)          
-Xd=10**xopt[model-1]
+if rank==0:
+    xopt=np.around(xopt,1)          
+    Xd=10**xopt[model-1]
+    model_i=np.zeros((nx,ny,nz))
+    cpt=1
+    for k in np.arange(nz):
+        for j in np.arange(ny):
+            for i in np.arange(nx):
+                model_i[i,j,k]=cpt
+                cpt=cpt+1
+    
+    
+    filefmt=open('3DRHO_BEST.rslt',"w")
+    filefmt.write(str(nx)+'     '+str(ny)+'     '+str(nz))
+    filefmt.write('\n')
+    for i in np.arange(nx):
+        filefmt.write(str(hx[i])+'      ')
+    
+    filefmt.write('\n')
+    for j in np.arange(ny):
+        filefmt.write(str(hy[j])+'      ')
+    
+    filefmt.write('\n')
+    for k in np.arange(nz):
+        filefmt.write(str(hz[k])+'      ')
+    
+    filefmt.write('\n')
+    for k in np.arange(nz):
+        filefmt.write(str(k+1))
+        filefmt.write('\n')
+        for j in np.arange(ny):
+            for i in np.arange(nx):
+                filefmt.write(str(int(model_i[i,j,k]))+'       ')
+    
+            filefmt.write('\n')
+    
+    
+    filefmt.write('0.00000000000      ')
+    for i in np.arange(nx*ny*nz):
+        filefmt.write(str(float(Xd[i]))+'     ')
+    
+    filefmt.write('\n')
+    filefmt.close()
 
-model=np.zeros((nx,ny,nz))
+
+#-----------------------------------#
+#                                   #
+#  WRITING MEAN RESISTIVITY MODEL   #
+#                                   #
+#-----------------------------------#
+
+Xd=10**PMM[model-1]
+model_i=np.zeros((nx,ny,nz))
 cpt=1
 for k in np.arange(nz):
     for j in np.arange(ny):
         for i in np.arange(nx):
-            model[i,j,k]=cpt
+            model_i[i,j,k]=cpt
             cpt=cpt+1
 
 
-
-filefmt=open('RESITIVITY_3dc.rslt',"w")
+filefmt=open('3DRHO_MEAN.rslt',"w")
 filefmt.write(str(nx)+'     '+str(ny)+'     '+str(nz))
 filefmt.write('\n')
 for i in np.arange(nx):
@@ -487,7 +570,7 @@ for k in np.arange(nz):
     filefmt.write('\n')
     for j in np.arange(ny):
         for i in np.arange(nx):
-            filefmt.write(str(int(model[i,j,k]))+'       ')
+            filefmt.write(str(int(model_i[i,j,k]))+'       ')
 
         filefmt.write('\n')
 
@@ -497,11 +580,84 @@ for i in np.arange(nx*ny*nz):
     filefmt.write(str(float(Xd[i]))+'     ')
 
 filefmt.write('\n')
-filefmt.close()
+filefmt.close()  
 
 
+#-----------------------------------#
+#                                   #
+#  WRITING STD RESISTIVITY MODEL   #
+#                                   #
+#-----------------------------------#
+
+Xd=10**StD[model-1]
+model_i=np.zeros((nx,ny,nz))
+cpt=1
+for k in np.arange(nz):
+    for j in np.arange(ny):
+        for i in np.arange(nx):
+            model_i[i,j,k]=cpt
+            cpt=cpt+1
 
 
+filefmt=open('3DRHO_STD.rslt',"w")
+filefmt.write(str(nx)+'     '+str(ny)+'     '+str(nz))
+filefmt.write('\n')
+for i in np.arange(nx):
+    filefmt.write(str(hx[i])+'      ')
+
+filefmt.write('\n')
+for j in np.arange(ny):
+    filefmt.write(str(hy[j])+'      ')
+
+filefmt.write('\n')
+for k in np.arange(nz):
+    filefmt.write(str(hz[k])+'      ')
+
+filefmt.write('\n')
+for k in np.arange(nz):
+    filefmt.write(str(k+1))
+    filefmt.write('\n')
+    for j in np.arange(ny):
+        for i in np.arange(nx):
+            filefmt.write(str(int(model_i[i,j,k]))+'       ')
+
+        filefmt.write('\n')
 
 
+filefmt.write('0.00000000000      ')
+for i in np.arange(nx*ny*nz):
+    filefmt.write(str(float(Xd[i]))+'     ')
+
+filefmt.write('\n')
+filefmt.close()  
+
+
+#COMPUTE F with the MEAN solution array
+#-------------------------------------
+F(PMM)
+print (ea)
+print "Elapsed time: %.2f seconds" % (time() - starttime)
     
+
+#PLOT MISFIT EVOLUTION
+#-----------------------
+mean_energy=np.zeros(max_iter)
+best_energy=np.zeros(max_iter)
+for i in range(max_iter):
+    mean_energy[i]=sum(ea.energy[:,i])/popsize
+    best_energy[i]=np.min(ea.energy[:,i])
+
+np.savetxt('Mean_Ener.txt',mean_energy)
+np.savetxt('Best_Ener.txt',best_energy)
+plt.plot(np.arange(max_iter)+1,mean_energy,c='b',linewidth=2,label='Mean F(m)')
+plt.plot(np.arange(max_iter)+1,best_energy,c='r',linewidth=2,label='Min F(m)')
+plt.xlabel('Iterations',fontsize=15)
+plt.ylabel('F(m)',fontsize=15)
+xtick=np.arange(1,max_iter+1,10)
+plt.xticks(fontsize=12)
+plt.yticks(fontsize=12)
+plt.xlim(1,max_iter+0.1)
+# plt.yscale('log', nonposy='clip')
+plt.legend()
+plt.savefig('MISFIT_Evol.png')
+plt.show()
