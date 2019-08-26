@@ -701,6 +701,8 @@ if rank==0:
         mean_energy[i]=sum(ea.energy[:,i])/popsize
         best_energy[i]=np.min(ea.energy[:,i])
 
+    np.savetxt('Mean_Ener.txt',mean_energy)
+    np.savetxt('Best_Ener.txt',best_energy)
     plt.plot(np.arange(max_iter)+1,mean_energy,c='b',linewidth=2,label='Mean F(m)')
     plt.plot(np.arange(max_iter)+1,best_energy,c='r',linewidth=2,label='Min F(m)')
     plt.xlabel('Iterations',fontsize=15)
