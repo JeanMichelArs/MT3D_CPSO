@@ -443,45 +443,45 @@ xopt,gfit=ea.optimize(solver = "cpso", sync = True)
 #    COMPUTE FUNCTION DENSITY PROBABILITY       #
 #                                               #
 #-----------------------------------------------#
-if rank==0:
-    nparam=len(np.unique(model))
-    model_inv=np.zeros((popsize*max_iter,nparam))
-    fit_inv=np.zeros(popsize*max_iter)
-    cpt=0
-    for i in range(max_iter):
-        for j in range(popsize):
-            model_inv[cpt,:]=np.around(ea.models[j,:,i],1)
-            fit_inv[cpt]=ea.energy[j,i]/1e6
-            cpt=cpt+1
+
+nparam=len(np.unique(model))
+model_inv=np.zeros((popsize*max_iter,nparam))
+fit_inv=np.zeros(popsize*max_iter)
+cpt=0
+for i in range(max_iter):
+    for j in range(popsize):
+        model_inv[cpt,:]=np.around(ea.models[j,:,i],1)
+        fit_inv[cpt]=ea.energy[j,i]/1e6
+        cpt=cpt+1
     
-    #   print ea.models.shape, ea.energy.shape
-    #   print ea.models
-    #   print ea.energy
-    #   print model_inv, fit_inv
-    JPPD=np.exp(-fit_inv/2)/sum(np.exp(-fit_inv/2))
-    #   print JPPD
-    PMM=np.zeros(nparam)
-    for i in range(nparam):
-        PMM[i]=sum(model_inv[:,i]*JPPD[:])
+#   print ea.models.shape, ea.energy.shape
+#   print ea.models
+#   print ea.energy
+#   print model_inv, fit_inv
+JPPD=np.exp(-fit_inv/2)/sum(np.exp(-fit_inv/2))
+#   print JPPD
+PMM=np.zeros(nparam)
+for i in range(nparam):
+    PMM[i]=sum(model_inv[:,i]*JPPD[:])
     
-    Cm=np.zeros((nparam,nparam))
-    Mm=PMM
-    Mm.shape=(nparam,1)
-    Mm_t=np.transpose(Mm)
-    for i in range(popsize*max_iter):
-        m=model_inv[i,:]
-        m.shape=(nparam,1)
-        m_t=np.transpose(m)
-        ma=(m-Mm)
-        mb=np.transpose(ma)
-        #Cm=Cm+np.dot(m,m_t)*JPPD[i]-np.dot(Mm,Mm_t)*JPPD[i]
-        Cm=Cm+np.dot(ma,mb)*JPPD[i]
+Cm=np.zeros((nparam,nparam))
+Mm=PMM
+Mm.shape=(nparam,1)
+Mm_t=np.transpose(Mm)
+for i in range(popsize*max_iter):
+    m=model_inv[i,:]
+    m.shape=(nparam,1)
+    m_t=np.transpose(m)
+    ma=(m-Mm)
+    mb=np.transpose(ma)
+    #Cm=Cm+np.dot(m,m_t)*JPPD[i]-np.dot(Mm,Mm_t)*JPPD[i]
+    Cm=Cm+np.dot(ma,mb)*JPPD[i]
     
-    StD=np.zeros(nparam)
-    for i in range(nparam):
-        StD[i]=np.sqrt(Cm[i,i])
+StD=np.zeros(nparam)
+for i in range(nparam):
+    StD[i]=np.sqrt(Cm[i,i])
     
-    print StD
+print StD
 
 
 #-----------------------------------#
@@ -489,49 +489,49 @@ if rank==0:
 #  WRITING BEST RESISTIVITY MODEL   #
 #                                   #
 #-----------------------------------#
-if rank==0:
-    xopt=np.around(xopt,1)          
-    Xd=10**xopt[model-1]
-    model_i=np.zeros((nx,ny,nz))
-    cpt=1
-    for k in np.arange(nz):
-        for j in np.arange(ny):
-            for i in np.arange(nx):
-                model_i[i,j,k]=cpt
-                cpt=cpt+1
-    
-    
-    filefmt=open('3DRHO_BEST.rslt',"w")
-    filefmt.write(str(nx)+'     '+str(ny)+'     '+str(nz))
-    filefmt.write('\n')
-    for i in np.arange(nx):
-        filefmt.write(str(hx[i])+'      ')
-    
+
+xopt=np.around(xopt,1)          
+Xd=10**xopt[model-1]
+model_i=np.zeros((nx,ny,nz))
+cpt=1
+for k in np.arange(nz):
+    for j in np.arange(ny):
+        for i in np.arange(nx):
+            model_i[i,j,k]=cpt
+            cpt=cpt+1
+
+
+filefmt=open('3DRHO_BEST.rslt',"w")
+filefmt.write(str(nx)+'     '+str(ny)+'     '+str(nz))
+filefmt.write('\n')
+for i in np.arange(nx):
+    filefmt.write(str(hx[i])+'      ')
+
+filefmt.write('\n')
+for j in np.arange(ny):
+    filefmt.write(str(hy[j])+'      ')
+
+filefmt.write('\n')
+for k in np.arange(nz):
+    filefmt.write(str(hz[k])+'      ')
+
+filefmt.write('\n')
+for k in np.arange(nz):
+    filefmt.write(str(k+1))
     filefmt.write('\n')
     for j in np.arange(ny):
-        filefmt.write(str(hy[j])+'      ')
-    
-    filefmt.write('\n')
-    for k in np.arange(nz):
-        filefmt.write(str(hz[k])+'      ')
-    
-    filefmt.write('\n')
-    for k in np.arange(nz):
-        filefmt.write(str(k+1))
+        for i in np.arange(nx):
+            filefmt.write(str(int(model_i[i,j,k]))+'       ')
+
         filefmt.write('\n')
-        for j in np.arange(ny):
-            for i in np.arange(nx):
-                filefmt.write(str(int(model_i[i,j,k]))+'       ')
-    
-            filefmt.write('\n')
-    
-    
-    filefmt.write('0.00000000000      ')
-    for i in np.arange(nx*ny*nz):
-        filefmt.write(str(float(Xd[i]))+'     ')
-    
-    filefmt.write('\n')
-    filefmt.close()
+
+
+filefmt.write('0.00000000000      ')
+for i in np.arange(nx*ny*nz):
+    filefmt.write(str(float(Xd[i]))+'     ')
+
+filefmt.write('\n')
+filefmt.close()
 
 
 #-----------------------------------#
