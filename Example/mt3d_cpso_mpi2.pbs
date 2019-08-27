@@ -1,0 +1,24 @@
+#!/bin/csh
+#PBS -q mpi_2
+#PBS -l walltime=24:00:00
+
+source /usr/share/Modules/3.2.10/init/csh
+
+# get the path for python
+module purge
+module load vacumm/3.3.0
+
+setenv mpiproc `cat $PBS_NODEFILE  |wc -l`
+echo "job running with  $mpiproc mpi process "
+echo "workdir:  $PBS_O_WORKDIR  "
+# cd to the directory you submitted your job
+cd $PBS_O_WORKDIR
+
+conda activate conda_env2.7
+env | grep TMP
+
+date
+time mpiexec -np $mpiproc python MT3D_CPSO_datar.py < input > & output   
+mv $TMPDIR/*.resp $TMPDIR/*.rslt .
+date
+
