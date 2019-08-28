@@ -16,9 +16,6 @@ comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
 rank = comm.Get_rank()
 
-if rank==0:
-    tmpDir = os.environ.get('TMPDIR') + '/'
-
 
 # Initialize TIME
 starttime = time()
@@ -55,6 +52,12 @@ popsize=None
 max_iter=None
 model=None
 Xi=None
+tmpDir=None
+
+
+
+if rank==0:
+    tmpDir = os.environ.get('TMPDIR') + '/'
 
 
 
@@ -226,6 +229,7 @@ popsize=comm.bcast(popsize, root=0)
 max_iter=comm.bcast(max_iter, root=0)
 model=comm.bcast(model, root=0)
 Xi=comm.bcast(Xi, root=0)
+tmpDir=comm.bcast(tmpDir, root=0)
 
 #---------------------------------#
 #                                 #
@@ -403,25 +407,27 @@ def XHI2(X):
         zyxc=zyx
         # WRITE RESP+DATA file (Rhoa et Phase)
         #-------------------------------------
-        nm=lab[n]
-        if nm<10.:
-                idd='00'+str(int(nm))
-        if nm>99.:
-                idd=str(int(nm))
-        if (10<=nm and nm<=90):
-                idd='0'+str(int(nm))
-                
-        resp_f=open(tmpDir+'RhoPhi_'+idd+'.resp',"w")
-        resp_f.write('per  Rhoxxd  Err_Rhoxxd  Rhoxxc   Phixxd  Err_Phixxd  Phixxc ... same for xy, yx, yy')
-        resp_f.write('\n')
-        for i in range(len(ii)):
-             resp_f.write(str(perd[i])+'     '+str(rhoxx_d[i])+'        '+str(Erhoxx_d[i])+'        '+str(rhoxx_ci[i])+'        '+str(phixx_d[i])+'        '+str(Ephixx_d[i])+'        '+str(phixx_ci[  i])+'        ')
-             resp_f.write(str(rhoxy_d[i])+'        '+str(Erhoxy_d[i])+'        '+str(rhoxy_ci[i])+'        '+str(phixy_d[i])+'        '+str(Ephixy_d[i])+'        '+str(phixy_ci[i])+'        ')
-             resp_f.write(str(rhoyx_d[i])+'        '+str(Erhoyx_d[i])+'        '+str(rhoyx_ci[i])+'        '+str(phiyx_d[i])+'        '+str(Ephiyx_d[i])+'        '+str(phiyx_ci[i])+'        ')
-             resp_f.write(str(rhoyy_d[i])+'        '+str(Erhoyy_d[i])+'        '+str(rhoyy_ci[i])+'        '+str(phiyy_d[i])+'        '+str(Ephiyy_d[i])+'        '+str(phiyy_ci[i])+'        ')
-             resp_f.write('\n')
-    
-        resp_f.close()
+        if rank==0:
+            nm=lab[n]
+            if nm<10.:
+                    idd='00'+str(int(nm))
+            if nm>99.:
+                    idd=str(int(nm))
+            if (10<=nm and nm<=90):
+                    idd='0'+str(int(nm))
+                    
+            resp_f=open(tmpDir+'RhoPhi_'+idd+'.resp',"w")
+            resp_f.write('per  Rhoxxd  Err_Rhoxxd  Rhoxxc   Phixxd  Err_Phixxd  Phixxc ... same for xy, yx, yy')
+            resp_f.write('\n')
+            for i in range(len(ii)):
+                 resp_f.write(str(perd[i])+'     '+str(rhoxx_d[i])+'        '+str(Erhoxx_d[i])+'        '+str(rhoxx_ci[i])+'        '+str(phixx_d[i])+'        '+str(Ephixx_d[i])+'        '+str(phixx_ci[  i])+'        ')
+                 resp_f.write(str(rhoxy_d[i])+'        '+str(Erhoxy_d[i])+'        '+str(rhoxy_ci[i])+'        '+str(phixy_d[i])+'        '+str(Ephixy_d[i])+'        '+str(phixy_ci[i])+'        ')
+                 resp_f.write(str(rhoyx_d[i])+'        '+str(Erhoyx_d[i])+'        '+str(rhoyx_ci[i])+'        '+str(phiyx_d[i])+'        '+str(Ephiyx_d[i])+'        '+str(phiyx_ci[i])+'        ')
+                 resp_f.write(str(rhoyy_d[i])+'        '+str(Erhoyy_d[i])+'        '+str(rhoyy_ci[i])+'        '+str(phiyy_d[i])+'        '+str(Ephiyy_d[i])+'        '+str(phiyy_ci[i])+'        ')
+                 resp_f.write('\n')
+        
+            resp_f.close()
+            
         #-----------------------------------
         #COMPUTE RMS USING Roa & PHASE
         #-----------------------------------
