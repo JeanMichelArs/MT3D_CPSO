@@ -16,7 +16,8 @@ comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
 rank = comm.Get_rank()
 
-tmpDir = os.environ.get('TMPDIR') + '/'
+if rank==0:
+    tmpDir = os.environ.get('TMPDIR') + '/'
 
 
 # Initialize TIME
