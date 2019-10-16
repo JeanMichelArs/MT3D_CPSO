@@ -56,8 +56,8 @@ tmpDir=None
 
 
 
-if rank==0:
-    tmpDir = os.environ.get('TMPDIR') + '/'
+#if rank==0:
+#    tmpDir = os.environ.get('TMPDIR') + '/'
 
 
 
@@ -239,9 +239,11 @@ tmpDir=comm.bcast(tmpDir, root=0)
 
 #COST FUNCTION
 def F(X):
-    X=np.around(X,1) # Arrondie au dixieme pour discretiser l'espace des parametres 
+    starttime = time()
+    #X=np.around(X,1) # Arrondie au dixieme pour discretiser l'espace des parametres 
     rest=10**X[model-1]
     cost=XHI2(rest)
+    print("Elapsed time: %.2f seconds" % (time() - starttime))
     return cost
 
 
@@ -407,26 +409,26 @@ def XHI2(X):
         zyxc=zyx
         # WRITE RESP+DATA file (Rhoa et Phase)
         #-------------------------------------
-        if rank==0:
-            nm=lab[n]
-            if nm<10.:
-                    idd='00'+str(int(nm))
-            if nm>99.:
-                    idd=str(int(nm))
-            if (10<=nm and nm<=90):
-                    idd='0'+str(int(nm))
-                    
-            resp_f=open(tmpDir+'RhoPhi_'+idd+'.resp',"w")
-            resp_f.write('per  Rhoxxd  Err_Rhoxxd  Rhoxxc   Phixxd  Err_Phixxd  Phixxc ... same for xy, yx, yy')
-            resp_f.write('\n')
-            for i in range(len(ii)):
-                 resp_f.write(str(perd[i])+'     '+str(rhoxx_d[i])+'        '+str(Erhoxx_d[i])+'        '+str(rhoxx_ci[i])+'        '+str(phixx_d[i])+'        '+str(Ephixx_d[i])+'        '+str(phixx_ci[  i])+'        ')
-                 resp_f.write(str(rhoxy_d[i])+'        '+str(Erhoxy_d[i])+'        '+str(rhoxy_ci[i])+'        '+str(phixy_d[i])+'        '+str(Ephixy_d[i])+'        '+str(phixy_ci[i])+'        ')
-                 resp_f.write(str(rhoyx_d[i])+'        '+str(Erhoyx_d[i])+'        '+str(rhoyx_ci[i])+'        '+str(phiyx_d[i])+'        '+str(Ephiyx_d[i])+'        '+str(phiyx_ci[i])+'        ')
-                 resp_f.write(str(rhoyy_d[i])+'        '+str(Erhoyy_d[i])+'        '+str(rhoyy_ci[i])+'        '+str(phiyy_d[i])+'        '+str(Ephiyy_d[i])+'        '+str(phiyy_ci[i])+'        ')
-                 resp_f.write('\n')
-        
-            resp_f.close()
+        #if rank==0:
+        #    nm=lab[n]
+        #    if nm<10.:
+        #            idd='00'+str(int(nm))
+        #    if nm>99.:
+        #            idd=str(int(nm))
+        #    if (10<=nm and nm<=90):
+        #            idd='0'+str(int(nm))
+        #            
+        #    resp_f=open(tmpDir+'RhoPhi_'+idd+'.resp',"w")
+        #    resp_f.write('per  Rhoxxd  Err_Rhoxxd  Rhoxxc   Phixxd  Err_Phixxd  Phixxc ... same for xy, yx, yy')
+        #    resp_f.write('\n')
+        #    for i in range(len(ii)):
+        #         resp_f.write(str(perd[i])+'     '+str(rhoxx_d[i])+'        '+str(Erhoxx_d[i])+'        '+str(rhoxx_ci[i])+'        '+str(phixx_d[i])+'        '+str(Ephixx_d[i])+'        '+str(phixx_ci[  i])+'        ')
+        #         resp_f.write(str(rhoxy_d[i])+'        '+str(Erhoxy_d[i])+'        '+str(rhoxy_ci[i])+'        '+str(phixy_d[i])+'        '+str(Ephixy_d[i])+'        '+str(phixy_ci[i])+'        ')
+        #         resp_f.write(str(rhoyx_d[i])+'        '+str(Erhoyx_d[i])+'        '+str(rhoyx_ci[i])+'        '+str(phiyx_d[i])+'        '+str(Ephiyx_d[i])+'        '+str(phiyx_ci[i])+'        ')
+        #         resp_f.write(str(rhoyy_d[i])+'        '+str(Erhoyy_d[i])+'        '+str(rhoyy_ci[i])+'        '+str(phiyy_d[i])+'        '+str(Ephiyy_d[i])+'        '+str(phiyy_ci[i])+'        ')
+        #         resp_f.write('\n')
+        #
+        #    resp_f.close()
             
         #-----------------------------------
         #COMPUTE RMS USING Roa & PHASE
@@ -466,14 +468,6 @@ def XHI2(X):
 
 
 
-
-#MT REGULARISATION
-def REG(X):
-    regul=np.var(X)
-    
-    return regul
-
-
 #-----------------------------------#
 #                                   #
 # MINIMISATION OF THE COST FUNCTION #
@@ -483,9 +477,26 @@ def REG(X):
 
 n_dim = len(np.unique(model))
 
-Xi=np.log10(rho)
-lower=np.ones(n_dim)*0.5  #Xi-np.ones(n_dim)*2
-upper=np.ones(n_dim)*2.5  #Xi+np.ones(n_dim)*2
+print 'n_dim',n_dim
+print 'len(Xi)', len(Xi)
+
+Xstart=np.zeros((popsize,len(Xi)))
+div=popsize/np.float(n_dim)
+for i in range(popsize):
+    noise=np.zeros(n_dim)
+    if i%2==0:
+        flg=1
+    else:
+        flg=-1
+
+    idn=int(round(i/(div+0.01),0))
+    noise[idn]=flg*0.5
+    Xstart[i,:]=Xi+noise
+
+
+lower=Xi-np.ones(n_dim)*0.5
+upper=Xi+np.ones(n_dim)*0.5
+#print lower,upper
 ### lower=Xi
 ### upper=Xi
 
@@ -493,8 +504,8 @@ upper=np.ones(n_dim)*2.5  #Xi+np.ones(n_dim)*2
 ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter = max_iter, mpi = True, snap = True)
 
 # SOLVE
-xopt,gfit=ea.optimize(solver = "cpso", sync = True)
-
+xopt,gfit=ea.optimize(solver = "cpso", xstart=Xstart , sync = True)
+# Jc write ea.model ea.energy xopt
 
 
 #-----------------------------------------------#
@@ -548,6 +559,8 @@ if rank==0:
 #  WRITING BEST RESISTIVITY MODEL   #
 #                                   #
 #-----------------------------------#
+# JC Keep this to write XOPT
+#
 if rank==0:
     xopt=np.around(xopt,1)          
     Xd=10**xopt[model-1]
