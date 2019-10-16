@@ -5,3 +5,4 @@ N_jobs automatically generated .pbs and .py files
 each Job writes results xopt, (also position vector) ea.model, ea.energy 
 Next job reads xopt and positions
 
+Generated scripts are made in Auto folder
