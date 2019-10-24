@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#PBS -q sequentiel
+#PBS -l walltime=00:05:00
+#PBS -l mem=500mb
+#PBS -o gen_run.log
+#PBS -e gen_run.err
+
+cd $PBS_O_WORKDIR
+qstat -f $PBS_JOBID
+
+source /usr/share/Modules/3.2.10/init/bash
+
+echo "shell variable in which qsub was executed"
+echo $PBS_O_SHELL
+#module load anaconda-py2.7/4.3.13
+
+#cd /appli/anaconda/2.7/bin
+#source activate /home2/datahome/jcollin/conda-env/my_conda
+
+cd $PBS_O_WORKDIR
+
+date
+
+./gen_script
+
+
+## submit next Job if runs successfully
+if [[ $? == 0 ]]; then
+    qsub gen_run_next.pbs
+fi

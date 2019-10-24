@@ -1,0 +1,43 @@
+#/bin/bash
+
+# load bash 
+bash
+
+# -------------------------------------------------------------
+# USER PARAMETERS
+#
+N_jobs=5
+
+MT3D.py=../MT3D_CPSO_datar_chained.py
+
+gen_run=../mt3d_cpso_mpi2.pbs
+gen_script=gen_script
+
+# --------------------------------------------------------------
+cp -f ${MT3D.py} ${gen_script}
+# ---------------------------------------------------------------
+echo $N_jobs
+echo $gen_run
+echo $gen_script
+
+# -------------------------------------------------------------
+
+# Building sources from gen_script and gen_run 
+i_job=1
+while [ $i_job -le $N_jobs ]
+do
+  echo $i_job
+  # copy from gen_files
+  cp ${gen_run}.pbs run_${i_job}.pbs
+  cp $gen_script script_${i_job}
+  # change in run: script to be executed, next qsub, log and err files
+  # in script just index to be printed
+  sed -i "s/${gen_script}/script_${i_job}/g" run_${i_job}.pbs
+  sed -i "s/gen_run_next/run_$(($i_job+1))/g" run_${i_job}.pbs
+  sed -i "s/gen_run/run_${i_job}/g" run_${i_job}.pbs
+  sed -i "s/1/${i_job}/g" script_${i_job} 
+  ((i_job++))
+done
+# modify last run_N_jobs.pbs in ordrer not to submit non existing job
+sed -i "s/qsub\ run_$((N_jobs+1)).pbs/echo\ 'End of Run'/g" run_${N_jobs}.pbs
+

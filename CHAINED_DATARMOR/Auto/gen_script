@@ -1,0 +1,4 @@
+#/bin/bash
+
+echo "this is script 1" 
+

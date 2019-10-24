@@ -1,0 +1,15 @@
+JCollin 10-2019
+
+Aim is to create Njobs chained Jobs to increase wall-time
+Automatically generated pbs script usigin a generic pbs script
+
+To generate files EDIT mk_files
+
+> ./mk_files
+> exit #? not sure why but does not run otherwise 
+
+
+
+To clean Directory type make clean
+
+
