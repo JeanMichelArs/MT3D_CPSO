@@ -1,0 +1,43 @@
+- Project :
+Use CPSO algorithm with hihg number of parameters and even higher number of 
+models for fast convergence
+
+A: TEST convergence using a basic cost function 
+   Move Run into scratchdir for faster computation
+
+B: I/O   
+   Modify MT3D_XXX_.py I/O to write outputs in netcdf file
+   Keep a Reference Run for TESTS
+
+C: Chained Jobs
+   Modify MT3D_XXX_.py to read/write in appropriate netcdf file
+   
+   inputs : n_iter_prec (total iteration since beginning of simulation)
+            X_opt_prec(n_model), Gfit_prec(n_model) : previous best models 
+            and misfits
+   outputs: n_it (total number of iteration at the end)
+            X_opt, Gfit
+	    E(n_it - n_it_prec, n_model) : historic of misfits values
+            X(n_it - n_it_prec, n_model) : historic of models 
+   
+   TEST : against REFERENCE 1 Job run
+
+   ! It is a matter of conception to choose rather to write everything into
+   the same file or to write in separate files and to concatenate results into
+   One big file ?
+
+D: Mackie
+   Add Mackie to get the real coast function
+   Test that 1 Job 33 param we obtain similar results 
+   Test N Jobs 
+
+E: REAL_CONFIG
+   Set up and RUN realistic configuration with high number of parameters 
+
+
+CHAINED_DATARMOR : 
+	Automatic generation of pbs scripts and maybe python to break walltime
+	Still in devloppement
+
+
+
