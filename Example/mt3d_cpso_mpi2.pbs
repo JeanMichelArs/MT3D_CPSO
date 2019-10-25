@@ -1,12 +1,39 @@
 #!/bin/csh
 #PBS -q mpi_2
-#PBS -l walltime=24:00:00
+#PBS -l walltime=00:30:00
 
+# C SHELL
 source /usr/share/Modules/3.2.10/init/csh
 
 # get the path for python
 module purge
 module load vacumm/3.3.0
+###############################
+# Conda
+module load anaconda-py2.7/4.3.13
+################################
+#  ENV MTD3
+# Need to it twice with csh
+source /appli/anaconda/2.7/etc/profile.d/conda.csh activate /home2/datahome/jcollin/.conda/envs/mt3d_py2.7
+source /appli/anaconda/2.7/etc/profile.d/conda.csh activate /home2/datahome/jcollin/.conda/envs/mt3d_py2.7
+
+echo "------- Python version: ---------- ",
+python --version
+
+echo
+echo "------- conda envs --------"
+conda info --envs
+echo
+ 
+###############################
+# POUR ACTIVER ENVIRRONEMENT CONDA
+#source /appli/anaconda/3.6/etc/profile.d/conda.csh
+###############################
+
+# get the path for python
+#module purge
+#module load vacumm/3.3.0
+#module load mpt
 
 setenv mpiproc `cat $PBS_NODEFILE  |wc -l`
 echo "job running with  $mpiproc mpi process "
@@ -14,11 +41,11 @@ echo "workdir:  $PBS_O_WORKDIR  "
 # cd to the directory you submitted your job
 cd $PBS_O_WORKDIR
 
-conda activate conda_env2.7
-env | grep TMP
+echo "Copying MT3d from Chained_dir"
+cp -f ../CHAINED_DATARMOR/MT3D_CPSO_datar_chained.py .
+echo
 
 date
-time mpiexec -np $mpiproc python MT3D_CPSO_datar.py < input > & output   
-mv $TMPDIR/*.resp $TMPDIR/*.rslt .
+time mpiexec -np $mpiproc python MT3D_CPSO_datar_chained.py < input > & output   
 date
 
