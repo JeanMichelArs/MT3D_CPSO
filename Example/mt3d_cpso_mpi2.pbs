@@ -12,6 +12,9 @@ module load vacumm/3.3.0
 # Conda
 module load anaconda-py2.7/4.3.13
 ################################
+# NETCDF 
+module load NETCDF/4.3.3.1-mpt-intel2016
+################################
 #  ENV MTD3
 # Need to do it twice with csh
 source /appli/anaconda/2.7/etc/profile.d/conda.csh activate /home2/datahome/jcollin/.conda/envs/mt3d_py2.7

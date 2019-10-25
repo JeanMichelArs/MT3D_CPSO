@@ -9,6 +9,7 @@ from stochopy import MonteCarlo, Evolutionary
 from time import time
 from mpi4py import MPI
 import os
+from netCDF4 import Dataset
 #import seaborn as sns
 
 comm = MPI.COMM_WORLD
@@ -558,6 +559,33 @@ xopt,gfit=ea.optimize(solver = "cpso", xstart=Xstart , sync = True)
 #
 
 print model.shape
+
+#----------------- RESTART netcdf IO ------------------
+if rank==0:
+    nc = Dataset('cpso_basic_fun.nc', "w", format='NETCDF4')
+    # dimensions: name, size
+    nc.createDimension('time', max_iter) 
+    nc.createDimension('nx', nx)
+    nc.createDimension('ny', ny)
+    nc.createDimension('nz', nz)
+    nc.createDimension('swarm_size', len(xopt))
+    # Variables: name, format, shape
+    nc.createVariable('hx', 'f4', ('nx'))
+    nc.createVariable('hy', 'f4', ('ny'))
+    nc.createVariable('hz', 'f4', ('nz'))
+    nc.createVariable('model_i', 'f4', ('nx','ny','nz')) 
+    nc.createVariable('xopt', 'f4', ('swarm_size'))
+    nc.createVariable('log_xopt', 'f4', ('swarm_size'))
+    # FILLING VALUES
+    nc.variables['hx'][:] = hx
+    nc.variables['hy'][:] = hy
+    nc.variables['hz'][:] = hz
+    nc.variables['model_i'][:,:,:] = model_i
+    nc.variables['xopt'][:] = 10**xopt
+    nc.variables['log_xopt'][:] = xopt
+    nc.close()
+
+
 
 if rank==0:
     #xopt=np.around(xopt,1)          
