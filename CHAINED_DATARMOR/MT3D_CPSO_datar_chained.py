@@ -23,8 +23,8 @@ starttime = time()
 if rank==0:
     mysfit = 'norme'
     config = '4_param'
-    mehtod = 'cpso'
-    outfile = method + '_' + mysifit + '_' + conf + '.nc'
+    method = 'cpso'
+    outfile = method + '_' + mysfit + '_' + config + '.nc'
     print "Output file : ", outfile  
     print 'job running on ',nproc,' processors'
 
@@ -567,31 +567,39 @@ print model.shape
 
 #----------------- RESTART netcdf IO ------------------
 if rank==0:
-    nc = Dataset(outfile, "w", format='NETCDF4')
-    # dimensions: name, size
-    nc.createDimension('time', max_iter) 
-    nc.createDimension('nx', nx)
-    nc.createDimension('ny', ny)
-    nc.createDimension('nz', nz)
-    nc.createDimension('swarm_size', len(xopt))
-    # Variables: name, format, shape
-    nc.createVariable('hx', 'f4', ('nx'))
-    nc.createVariable('hy', 'f4', ('ny'))
-    nc.createVariable('hz', 'f4', ('nz'))
-    nc.createVariable('model_i', 'f4', ('nx','ny','nz')) 
-    nc.createVariable('xopt', 'f4', ('swarm_size'))
-    nc.createVariable('log_xopt', 'f4', ('swarm_size'))
+    if not os.path.isfile(outfile):
+        nc = Dataset(outfile, "w", format='NETCDF4')
+        # dimensions: name, size
+        nc.createDimension('iter', max_iter) 
+        nc.createDimension('nx', nx)
+        nc.createDimension('ny', ny)
+        nc.createDimension('nz', nz)
+        nc.createDimension('swarm_size', len(xopt))
+        nc.createDimension('nparam', np.shape(ea.model)[0])
+        # Variables: name, format, shape
+        nc.createVariable('hx', 'f8', ('nx'))
+        nc.createVariable('hy', 'f8', ('ny'))
+        nc.createVariable('hz', 'f8', ('nz'))
+        nc.createVariable('model_i', 'f8', ('nx','ny','nz')) 
+        nc.createVariable('xopt', 'f8', ('swarm_size'))
+        nc.createVariable('log_xopt', 'f8', ('swarm_size'))
+        nc.createVariable('model', 'f8', ('nparam', 'swarm_size', 'iter'))
+        nc.createVariable('energy', 'f8', ('swarm_size', 'iter'))    
+    else:
+        nc = Dataset(outfile, 'a')
     # FILLING VALUES
+    # need after to add traibutes like niter=nc.niter...
     nc.variables['hx'][:] = hx
     nc.variables['hy'][:] = hy
     nc.variables['hz'][:] = hz
     nc.variables['model_i'][:,:,:] = model_i
     nc.variables['xopt'][:] = 10**xopt
     nc.variables['log_xopt'][:] = xopt
+    nc.variables['model'][:,:,:] = ea.model
+    nc.variables['energy'][:,:] = ea.energy
     nc.close()
 
-
-
+# ----------------- END OF IO ---------------------------
 if rank==0:
     #xopt=np.around(xopt,1)          
     filefmt=open('3DRHO_BEST.rslt',"w")
