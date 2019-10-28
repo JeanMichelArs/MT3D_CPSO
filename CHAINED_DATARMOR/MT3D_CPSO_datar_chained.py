@@ -506,6 +506,7 @@ ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter =
 
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart=Xstart , sync = True)
+
 # Jc write ea.model ea.energy xopt
 
 
@@ -567,6 +568,9 @@ print model.shape
 
 #----------------- RESTART netcdf IO ------------------
 if rank==0:
+    print "Writting in ", outfile
+    print "models shape:", np.shape(ea.models)
+    print "" 
     if not os.path.isfile(outfile):
         nc = Dataset(outfile, "w", format='NETCDF4')
         # dimensions: name, size
@@ -574,16 +578,16 @@ if rank==0:
         nc.createDimension('nx', nx)
         nc.createDimension('ny', ny)
         nc.createDimension('nz', nz)
-        nc.createDimension('swarm_size', len(xopt))
-        nc.createDimension('nparam', np.shape(ea.model)[0])
+        nc.createDimension('nparam', len(xopt))
+        nc.createDimension('swarm_size', np.shape(ea.models)[0])
         # Variables: name, format, shape
         nc.createVariable('hx', 'f8', ('nx'))
         nc.createVariable('hy', 'f8', ('ny'))
         nc.createVariable('hz', 'f8', ('nz'))
         nc.createVariable('model_i', 'f8', ('nx','ny','nz')) 
-        nc.createVariable('xopt', 'f8', ('swarm_size'))
-        nc.createVariable('log_xopt', 'f8', ('swarm_size'))
-        nc.createVariable('model', 'f8', ('nparam', 'swarm_size', 'iter'))
+        nc.createVariable('xopt', 'f8', ('nparam'))
+        nc.createVariable('log_xopt', 'f8', ('nparam'))
+        nc.createVariable('models', 'f8', ('nparam', 'swarm_size', 'iter'))
         nc.createVariable('energy', 'f8', ('swarm_size', 'iter'))    
     else:
         nc = Dataset(outfile, 'a')
@@ -595,7 +599,7 @@ if rank==0:
     nc.variables['model_i'][:,:,:] = model_i
     nc.variables['xopt'][:] = 10**xopt
     nc.variables['log_xopt'][:] = xopt
-    nc.variables['model'][:,:,:] = ea.model
+    nc.variables['models'][:,:,:] = ea.models
     nc.variables['energy'][:,:] = ea.energy
     nc.close()
 
