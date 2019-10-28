@@ -3,4 +3,4 @@ Example/3DRHO_BEST.rslt
 Example/MT3D_CPSO_datar_chained.py
 Example/output
 
-*.pbs.o
+*.pbs.o*
