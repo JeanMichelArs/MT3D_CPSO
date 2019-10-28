@@ -21,6 +21,11 @@ rank = comm.Get_rank()
 starttime = time()
 
 if rank==0:
+    mysfit = 'norme'
+    config = '4_param'
+    mehtod = 'cpso'
+    outfile = method + '_' + mysifit + '_' + conf + '.nc'
+    print "Output file : ", outfile  
     print 'job running on ',nproc,' processors'
 
 # DECLARE VARIABLE FOR MPI
@@ -562,7 +567,7 @@ print model.shape
 
 #----------------- RESTART netcdf IO ------------------
 if rank==0:
-    nc = Dataset('cpso_basic_fun.nc', "w", format='NETCDF4')
+    nc = Dataset(outfile, "w", format='NETCDF4')
     # dimensions: name, size
     nc.createDimension('time', max_iter) 
     nc.createDimension('nx', nx)
