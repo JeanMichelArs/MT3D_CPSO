@@ -8,6 +8,7 @@ A: TEST convergence using a basic cost function
 B: I/O   
    Modify MT3D_XXX_.py I/O to write outputs in netcdf file
    Keep a Reference Run for TESTS
+   !!! Add a TEST to Check Whether out_file already exists
 
 C: Chained Jobs
    Modify MT3D_XXX_.py to read/write in appropriate netcdf file
