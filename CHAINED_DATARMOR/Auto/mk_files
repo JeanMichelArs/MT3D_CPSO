@@ -6,20 +6,20 @@ bash
 # -------------------------------------------------------------
 # USER PARAMETERS
 #
-N_jobs=5
+n_jobs=2
+n_iter_tot=1000
 
 MT3D.py=../MT3D_CPSO_datar_chained.py
 
-gen_run=../mt3d_cpso_mpi2.pbs
-gen_script=gen_script
+gen_pbs=../mt3d_cpso_mpi2.pbs
+gen_mt3d=gen_mt3d.py
 
 # --------------------------------------------------------------
-cp -f ${MT3D.py} ${gen_script}
+cp -f ${MT3D.py} ${gen_mt3d.py}
 # ---------------------------------------------------------------
-echo $N_jobs
-echo $gen_run
-echo $gen_script
-
+echo "Total number of chained jobs:", $N_jobs
+echo "Generic PBS script", $gen_pbs
+echo "Generic mt3d python script:", $gen_script
 # -------------------------------------------------------------
 
 # Building sources from gen_script and gen_run 
@@ -28,11 +28,11 @@ while [ $i_job -le $N_jobs ]
 do
   echo $i_job
   # copy from gen_files
-  cp ${gen_run}.pbs run_${i_job}.pbs
-  cp $gen_script script_${i_job}
+  cp ${gen_pbs}.pbs run_${i_job}.pbs
+  cp $gen_mt3d mt3d_${i_job}.py
   # change in run: script to be executed, next qsub, log and err files
   # in script just index to be printed
-  sed -i "s/${gen_script}/script_${i_job}/g" run_${i_job}.pbs
+  sed -i "s/${gen_mt3d}/mt3d_${i_job}.py/g" run_${i_job}.pbs
   sed -i "s/gen_run_next/run_$(($i_job+1))/g" run_${i_job}.pbs
   sed -i "s/gen_run/run_${i_job}/g" run_${i_job}.pbs
   sed -i "s/1/${i_job}/g" script_${i_job} 

@@ -28,6 +28,17 @@ if rank==0:
     print "Output file : ", outfile  
     print 'job running on ',nproc,' processors'
 
+#------------------------
+# Chained Variables n_jobs and n_iter_tot have to be edited in mk_files
+# Automaically replaced via mk_files 
+# index of current job, total number of jobs and total/local maximum iteration 
+idx_job = idx_job_replace
+n_jobs = n_jobs_replace
+n_iter_tot = n_iter_tot_replace
+n_iter_job = n_iter_job_replace
+
+
+
 # DECLARE VARIABLE FOR MPI
 #-------------------------
 rho=None
