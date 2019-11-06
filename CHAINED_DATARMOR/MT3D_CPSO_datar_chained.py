@@ -636,7 +636,7 @@ if rank==0:
         nc.createDimension('ny', ny)
         nc.createDimension('nz', nz)
         nc.createDimension('nparam', len(xopt))
-        nc.createDimension('swarm_size', np.shape(ea.models)[0])
+        nc.createDimension('popsize', np.shape(ea.models)[0])
         # Variables: name, format, shape
         nc.createVariable('hx', 'f8', ('nx'))
         nc.createVariable('hy', 'f8', ('ny'))
@@ -644,8 +644,8 @@ if rank==0:
         nc.createVariable('model_i', 'f8', ('nx','ny','nz')) 
         nc.createVariable('xopt', 'f8', ('nparam'))
         nc.createVariable('log_xopt', 'f8', ('nparam'))
-        nc.createVariable('models', 'f8', ('nparam', 'swarm_size', 'iter'))
-        nc.createVariable('energy', 'f8', ('swarm_size', 'iter'))    
+        nc.createVariable('models', 'f8', ('popsize', 'nparam', 'iter'))
+        nc.createVariable('energy', 'f8', ('popsize', 'iter'))    
     else:
         nc = Dataset(outfile, 'a')
     
