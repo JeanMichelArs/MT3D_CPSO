@@ -40,7 +40,7 @@ if rank==0:
 # Chained Variables n_jobs and max_iter have to be edited in mk_files
 # Automaically replaced via mk_files 
 # index of current job, total number of jobs and total/local maximum iteration 
-i_job = 1 
+i_job = 1
 n_jobs = 2
 max_iter = 50
 n_iter_job = 25
@@ -537,17 +537,17 @@ if rank==0:
         # finding best models 
         idx = np.argmin(nc.variables['energy'][:, :it_start-1], axis=1)
         nparam = len(nc.dimensions['nparam'])
-        mod_best = np.array(nparam, popsize)
+        mod_best = np.zeros([popsize, nparam])
         # ---> might be a long loop...
-        for bee in popsize:
-            mod_best[:, bee] = nc.variables['models'][:, bee, idx[bee]]
+        for bee in range(popsize):
+            mod_best[bee, :] = nc.variables['models'][:, bee, idx[bee]]
         gmod_best = np.array(nc.variables['xopt'][:])
         nc.close
 
 # Communication
 Xtstart = comm.bcast(Xstart, root=0)
 gmod_best = comm.bcast(gmod_best, root=0)
-mod_best = com.bcast(mod_best, root=0)
+mod_best = comm.bcast(mod_best, root=0)
 
 # RESTART
 # ---> lower and upper should remain the exact same regardless of jobs
