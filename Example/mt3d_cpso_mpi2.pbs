@@ -38,7 +38,7 @@ echo "workdir:  $PBS_O_WORKDIR  "
 cd $PBS_O_WORKDIR
 
 echo "Copying MT3d from Chained_dir"
-cp -f ../CHAINED_DATARMOR/MT3D_CPSO_datar_chained.py .
+cp -f ../CHAINED_DATARMOR/MT3D_CPSO_datar_1job.py .
 echo
 
 cp -Rf * $RUN_DIR

@@ -1,4 +1,12 @@
 #!/usr/bin/python2.7
+'''
+- max_iter is no longer found in input file but is defined in this script
+- I/O modification using netcdf file instead
+
+
+'''
+
+
 import numpy as np
 import linecache
 import matplotlib.pyplot as plt
@@ -29,14 +37,15 @@ if rank==0:
     print 'job running on ',nproc,' processors'
 
 #------------------------
-# Chained Variables n_jobs and n_iter_tot have to be edited in mk_files
+# Chained Variables n_jobs and max_iter have to be edited in mk_files
 # Automaically replaced via mk_files 
 # index of current job, total number of jobs and total/local maximum iteration 
-idx_job = idx_job_replace
-n_jobs = n_jobs_replace
-n_iter_tot = n_iter_tot_replace
-n_iter_job = n_iter_job_replace
-
+i_job = 1 
+n_jobs = 2
+max_iter = 50
+n_iter_job = 25
+it_start = (i_job - 1) * n_iter_job
+it_end = np.min([i_job*n_iter_job, max_iter])
 
 
 # DECLARE VARIABLE FOR MPI
@@ -65,7 +74,7 @@ site_id=None
 ImpT_data=None
 RoPh_data=None
 popsize=None
-max_iter=None
+#max_iter=None
 model=None
 Xi=None
 tmpDir=None
@@ -216,7 +225,7 @@ if rank==0:
                      Roayx,ErRoayx,Phiyx,ErPhiyx,Roayy,ErRoayy,Phiyy,ErPhiyy)
     
     popsize=input("Size of model SWARM:")
-    max_iter=input("Number of iteration:")
+    #max_iter=input("Number of iteration:")
     
 #Share variable with all MPI node
 #---------------------------------
@@ -495,30 +504,65 @@ def XHI2(X):
 #                                   #
 #-----------------------------------#
 
-n_dim = len(np.unique(model))
+# ----- Inialization of cpso ------
+# Xstart: 
+# - initial model at first job
+# - last model from previous job afterwards
 
-print 'n_dim',n_dim
-print 'len(Xi)', len(Xi)
+# ---> stochopy interface modification for restart
+# - mod_best : None or ndarray, optionnal default None
+# Individual best position of the population Used for restart simulation
+# - gmod_best : None or ndarray Gobal best position of swarm
+# Both mod_best and gmod_best are non_standardized
 
-Xstart=np.zeros((popsize,len(Xi)))
-div=popsize/np.float(n_dim)
-for i in range(popsize):
-    Xstart[i,:]=Xi
+n_dim = None
+Xstart = None
+gmod_best = None
+mod_best = None
 
+if rank==0:
+    n_dim = len(np.unique(model))
+    Xstart=np.zeros((popsize,len(Xi)))
+    
+    if i_job==1:
+        # First job
+        for i in range(popsize):
+            Xstart[i, :] = Xi
+            gmod_best = None
+            mod_best = None
+    else:
+	# from restart
+        nc = Dataset(outfile, "r", format="NETCDF4")  
+        Xstart = nc.variables['models'][:, :, it_start-1]
+        # finding best models 
+        idx = np.argmin(nc.variables['energy'][:, :it_start-1], axis=1)
+        nparam = len(nc.dimensions['nparam'])
+        mod_best = np.array(nparam, popsize)
+        # ---> might be a long loop...
+        for bee in popsize:
+            mod_best[:, bee] = nc.variables['models'][:, bee, idx[bee]]
+        gmod_best = np.array(nc.variables['xopt'][:])
+        nc.close
 
+# Communication
+Xtstart = comm.bcast(Xstart, root=0)
+gmod_best = comm.bcast(gmod_best, root=0)
+mod_best = com.bcast(mod_best, root=0)
+
+# RESTART
+# ---> lower and upper should remain the exact same regardless of jobs
+# ---> may be better to keep them in netcdf file or a coefficient
+# ---> in netcdf file
 lower=Xi-np.ones(n_dim)*2
 upper=Xi+np.ones(n_dim)*2
-#print lower,upper
-### lower=Xi
-### upper=Xi
 
 # Initialize SOLVER
-ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter = max_iter, mpi = True, snap = True)
+ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize,
+                  max_iter = n_iter_job, mpi = True, snap = True)
 
 # SOLVE
-xopt,gfit=ea.optimize(solver = "cpso", xstart=Xstart , sync = True)
-
-# Jc write ea.model ea.energy xopt
+xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
+                      mod_best = mod_best, gmod_best = gmod_best)
 
 
   ### #-----------------------------------------------#
@@ -581,7 +625,9 @@ print model.shape
 if rank==0:
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
-    print "" 
+    print ""
+    print "hx:", hx 
+    # ---> maybe a check dimension and return 0 or 1 
     if not os.path.isfile(outfile):
         nc = Dataset(outfile, "w", format='NETCDF4')
         # dimensions: name, size
@@ -602,19 +648,25 @@ if rank==0:
         nc.createVariable('energy', 'f8', ('swarm_size', 'iter'))    
     else:
         nc = Dataset(outfile, 'a')
+    
     # FILLING VALUES
-    # need after to add traibutes like niter=nc.niter...
-    nc.variables['hx'][:] = hx
-    nc.variables['hy'][:] = hy
-    nc.variables['hz'][:] = hz
-    nc.variables['model_i'][:,:,:] = model_i
+    # ---> Only if i_job == 1
+    if i_job==1:
+        nc.variables['hx'][:] = hx
+        nc.variables['hy'][:] = hy
+        nc.variables['hz'][:] = hz
+        nc.variables['model_i'][:,:,:] = model_i
+
+    # ----> modify [it_start:it_end]
+    # ----> xopt and log_xopt are erased after each job
     nc.variables['xopt'][:] = 10**xopt
     nc.variables['log_xopt'][:] = xopt
-    nc.variables['models'][:,:,:] = ea.models
-    nc.variables['energy'][:,:] = ea.energy
+    nc.variables['models'][:, :, it_start:it_end] = ea.models
+    nc.variables['energy'][:, it_start:it_end] = ea.energy
     nc.close()
 
 # ----------------- END OF IO ---------------------------
+'''
 if rank==0:
     #xopt=np.around(xopt,1)          
     filefmt=open('3DRHO_BEST.rslt',"w")
@@ -649,7 +701,7 @@ if rank==0:
     filefmt.write('\n')
     filefmt.close()
 
-
+'''
   ###  #-----------------------------------#
   ###  #                                   #
   ###  #  WRITING MEAN RESISTIVITY MODEL   #
