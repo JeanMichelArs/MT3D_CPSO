@@ -37,7 +37,7 @@ echo
 # Run Directory
 
 set AUTO_DIR=/home2/datahome/jcollin/MT3D_CPSO/CHAINED_DATARMOR/Auto/
-set RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_2_JOBS/
+set RUN_DIR=RUN_DIR_XXX
 
 setenv mpiproc `cat $PBS_NODEFILE  |wc -l`
 echo "job running with  $mpiproc mpi process "
@@ -45,23 +45,17 @@ echo "workdir:  $PBS_O_WORKDIR  "
 # cd to the directory you submitted your job
 cd $PBS_O_WORKDIR
 
-# ----> need to think of a better way to do this
-#
-#echo "Copying MT3d from Chained_dir"
-#cp -f $AUTO_DIR/MT3D_CPSO_datar_chained_1.py .
-#echo
-
+# ----> Copy chained SRC files from Auto
 cp -Rf * $RUN_DIR
 
 cd $RUN_DIR
-mkdir RUN 
 
 date
-time mpiexec -np $mpiproc python MT3D_CPSO_datar_chained_1.py < input > & output_1   
+time mpiexec -np $mpiproc python mt3d_xxx.py < input > & output_xxx   
 date
 
 ## submit next Job if runs successfully
 if ( $status == 0 ) then
-    qsub mt3d_cpso_chained_2.pbs
+    qsub mt3d_xxx.pbs
 end if
 
