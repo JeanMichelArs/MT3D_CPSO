@@ -3,4 +3,6 @@ Example/3DRHO_BEST.rslt
 Example/MT3D_CPSO_datar_chained.py
 Example/output
 
+CHAINED_DATARMOR/Auto/**
+
 *.pbs.o*
