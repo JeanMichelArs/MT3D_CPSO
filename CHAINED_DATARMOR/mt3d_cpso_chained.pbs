@@ -46,9 +46,8 @@ echo "workdir:  $PBS_O_WORKDIR  "
 cd $PBS_O_WORKDIR
 
 # ----> Copy chained SRC files from Auto
-cp -Rf * $RUN_DIR
-
-cd $RUN_DIR
+#cp -Rf * $RUN_DIR
+#cd $RUN_DIR
 
 date
 time mpiexec -np $mpiproc python mt3d_xxx.py < input > & output_xxx   
