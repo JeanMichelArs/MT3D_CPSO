@@ -40,10 +40,10 @@ if rank==0:
 # Chained Variables n_jobs and max_iter have to be edited in mk_files
 # Automaically replaced via mk_files 
 # index of current job, total number of jobs and total/local maximum iteration 
-i_job = 1
-n_jobs = 2
-max_iter = 50
-n_iter_job = 25
+i_job = i_job_xxx
+n_jobs = n_jobs_xxx
+max_iter = max_iter_xxx
+n_iter_job = max_iter / n_jobs
 it_start = (i_job - 1) * n_iter_job
 it_end = np.min([i_job*n_iter_job, max_iter])
 
@@ -540,9 +540,9 @@ if rank==0:
         mod_best = np.zeros([popsize, nparam])
         # ---> might be a long loop...
         for bee in range(popsize):
-            mod_best[bee, :] = nc.variables['models'][:, bee, idx[bee]]
+            mod_best[bee, :] = nc.variables['models'][bee, :, idx[bee]]
         gmod_best = np.array(nc.variables['xopt'][:])
-        nc.close
+        nc.close()
 
 # Communication
 Xtstart = comm.bcast(Xstart, root=0)
@@ -562,7 +562,8 @@ ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize,
 
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
-                      mod_best = mod_best, gmod_best = gmod_best)
+                      mod_best = mod_best, gmod_best = gmod_best, 
+                      it = it_start-1)
 
 
   ### #-----------------------------------------------#
@@ -626,7 +627,12 @@ if rank==0:
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
     print ""
-    print "hx:", hx 
+    print "hx:", hx
+    print "xopt", np.shape(xopt)
+    print "models", np.shape(ea.models)
+    print "energy", np.shape(ea.energy)
+    print "it_start, it_end", it_start, it_end
+ 
     # ---> maybe a check dimension and return 0 or 1 
     if not os.path.isfile(outfile):
         nc = Dataset(outfile, "w", format='NETCDF4')
@@ -641,7 +647,7 @@ if rank==0:
         nc.createVariable('hx', 'f8', ('nx'))
         nc.createVariable('hy', 'f8', ('ny'))
         nc.createVariable('hz', 'f8', ('nz'))
-        nc.createVariable('model_i', 'f8', ('nx','ny','nz')) 
+        nc.createVariable('distrib_3D_i', 'f8', ('nx','ny','nz')) 
         nc.createVariable('xopt', 'f8', ('nparam'))
         nc.createVariable('log_xopt', 'f8', ('nparam'))
         nc.createVariable('models', 'f8', ('popsize', 'nparam', 'iter'))
@@ -655,12 +661,14 @@ if rank==0:
         nc.variables['hx'][:] = hx
         nc.variables['hy'][:] = hy
         nc.variables['hz'][:] = hz
-        nc.variables['model_i'][:,:,:] = model_i
+    # ---> model_i useless
+    # ---> 10**Xi[model_i-1] distrib ini
+    # ---> 10**Xopt[model_i-1] !! distrib_3D_opt (n_job,nx,ny,nz)
+        nc.variables['distrib_3D_i'][:,:,:] = model_i
 
     # ----> modify [it_start:it_end]
     # ----> xopt and log_xopt are erased after each job
-    nc.variables['xopt'][:] = 10**xopt
-    nc.variables['log_xopt'][:] = xopt
+    nc.variables['xopt'][:] = xopt
     nc.variables['models'][:, :, it_start:it_end] = ea.models
     nc.variables['energy'][:, it_start:it_end] = ea.energy
     nc.close()
