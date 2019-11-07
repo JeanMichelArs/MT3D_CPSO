@@ -563,7 +563,7 @@ ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize,
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
                       mod_best = mod_best, gmod_best = gmod_best, 
-                      it = it_start-1)
+                      it_prev = it_start-1)
 
 
   ### #-----------------------------------------------#
