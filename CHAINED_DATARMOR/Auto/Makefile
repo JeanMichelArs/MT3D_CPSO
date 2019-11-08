@@ -1,4 +1,5 @@
 # To copy Auto and Conf files into Run_dir
+# To genrate Files : ./mk_files
 # > Make cp_file 
 
 SHELL := /bin/bash
