@@ -2,15 +2,34 @@
 Use CPSO algorithm with high number of parameters and even higher number of 
 models for fast convergence
 
-A: TEST convergence using a basic cost function 
+----------------------------------------------------------------------------
+
+To Edit Stochopy at developpment version:
+load your conda environment for MT3D_CPSO
+> cp -f evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
+> cd MT3D_CPSO/StochOPy/
+> python setup.py install
+
+Python script to run CPSO algorithm is:
+MT3D_CPSO/CHAINED_DATARMOR/MT3D_CPSO_datar_chained.py
+
+Script to automatically create, copy and make run ready are in 
+MT3D_CPSO/CHAINED_DATARMOR/Auto
+
+READMEs are found in the tree 
+
+----------------------------------------------------------------------------
+TODO:
+
+A(DONE): TEST convergence using a basic cost function 
    Move Run into scratchdir for faster computation
 
-B: I/O   
+B(DONE): I/O   
    Modify MT3D_XXX_.py I/O to write outputs in netcdf file
    Keep a Reference Run for TESTS
    !!! Add a TEST to Check Whether out_file already exists
 
-C: Chained Jobs
+C(DONE): Chained Jobs
    Modify MT3D_XXX_.py to read/write in appropriate netcdf file
    
    inputs : n_iter_prec (total iteration since beginning of simulation)
@@ -23,7 +42,9 @@ C: Chained Jobs
    
    TEST : against REFERENCE 1 Job run
 
-C_b: 
+C_b(DONE):
+    Use intertia velocity of CPSO
+    Keep the right criteria for competitive algorithm 
     Do not write twice model and energy at restart time
     Write some more outputs in netcdf files    
  
