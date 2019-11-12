@@ -1,8 +1,8 @@
-CHAINED_DATARMOR/output
-Example/3DRHO_BEST.rslt
-Example/MT3D_CPSO_datar_chained.py
-Example/output
+*.swp
 
-CHAINED_DATARMOR/Auto/**
+CHAINED_DATARMOR/AUTO/mt3d_[0-9]*.py
+CHAINED_DATARMOR/AUTO/mt3d_[0-9]*.pbs
 
-*.pbs.o*
+
+
+
