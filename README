@@ -1,5 +1,5 @@
 - Project :
-Use CPSO algorithm with hihg number of parameters and even higher number of 
+Use CPSO algorithm with high number of parameters and even higher number of 
 models for fast convergence
 
 A: TEST convergence using a basic cost function 
@@ -23,10 +23,10 @@ C: Chained Jobs
    
    TEST : against REFERENCE 1 Job run
 
-   ! It is a matter of conception to choose rather to write everything into
-   the same file or to write in separate files and to concatenate results into
-   One big file ?
-
+C_b: 
+    Do not write twice model and energy at restart time
+    Write some more outputs in netcdf files    
+ 
 D: Mackie
    Add Mackie to get the real coast function
    Test that 1 Job 33 param we obtain similar results 

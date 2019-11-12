@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_10_JOBS/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/NORME_10_JOBS/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 
 
@@ -18,7 +18,7 @@ cpfile:
 
 # Ensure there is no netcdf file in Run_dir
 .PHONY: rundirclean
-rundirclean:
+rundirclean:	
 	rm ${RUN_DIR}/*.nc
 
 # ----------------------------------------------------------------------------
