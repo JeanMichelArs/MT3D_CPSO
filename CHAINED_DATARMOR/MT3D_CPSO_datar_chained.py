@@ -18,6 +18,9 @@ it_prev is total number of previous iteration
 inertia time at restart. Velocoty may be recovered using 
 ea.models(it_prev) - ea.models(it_prev-1)
 stochopy interface has to be modified to take this new parameter into account
+DONE: V = X[k] - X[k-1] 
+X = ea.model.standardized 
+=> We retrieve V from previous models at restart
 
 - Also we should not rewrite the first models etc... after the first job
 This would alter statistics
