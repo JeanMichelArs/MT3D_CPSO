@@ -12,7 +12,6 @@ pbest is computed from best mysfit of each individual
 The Best model (of the best) gbest is retrieved from previous x_opt
 it_prev is total number of previous iteration
 
----- Errors:
 
 - disconitnuity at restart is observed this may be due to the loss of velocity
 inertia time at restart. Velocoty may be recovered using 
@@ -22,8 +21,10 @@ DONE: V = X[k] - X[k-1]
 X = ea.model.standardized 
 => We retrieve V from previous models at restart
 
-- Also we should not rewrite the first models etc... after the first job
-This would alter statistics
+- Before (initial) models and energy were wirtten at restart, resulting
+in doubling the information. This wouls have corrupt statistic analysis
+The trick is to had +1 to max_iter and only write outputs from the 
+second index 
 
 '''
 
