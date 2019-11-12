@@ -1,8 +1,26 @@
 #!/usr/bin/python2.7
 '''
-- max_iter is no longer found in input file but is defined in this script
-- I/O modification using netcdf file instead
+- stochopy I/O modified
 
+add check on outfile
+if outfile already exists mpi.abort()
+algorithm being based xopt if file already exists this may increase convergence speed
+a
+
+cpso algorithm needs history of best model for each individual in the swarm pbest
+pbest is computed from best mysfit of each individual
+The Best model (of the best) gbest is retrieved from previous x_opt
+it_prev is total number of previous iteration
+
+---- Errors:
+
+- disconitnuity at restart is observed this may be due to the loss of velocity
+inertia time at restart. Velocoty may be recovered using 
+ea.models(it_prev) - ea.models(it_prev-1)
+stochopy interface has to be modified to take this new parameter into account
+
+- Also we should not rewrite the first models etc... after the first job
+This would alter statistics
 
 '''
 
@@ -28,14 +46,6 @@ rank = comm.Get_rank()
 # Initialize TIME
 starttime = time()
 
-if rank==0:
-    mysfit = 'norme'
-    config = '4_param'
-    method = 'cpso'
-    outfile = method + '_' + mysfit + '_' + config + '.nc'
-    print "Output file : ", outfile  
-    print 'job running on ',nproc,' processors'
-
 #------------------------
 # Chained Variables n_jobs and max_iter have to be edited in mk_files
 # Automaically replaced via mk_files 
@@ -46,7 +56,19 @@ max_iter = max_iter_xxx
 n_iter_job = max_iter / n_jobs
 it_start = (i_job - 1) * n_iter_job
 it_end = np.min([i_job*n_iter_job, max_iter])
-
+# ----------------------------
+# Output file
+if rank==0:
+    mysfit = 'norme'
+    config = '4_param'
+    method = 'cpso'
+    outfile = method + '_' + mysfit + '_' + config + '.nc'
+    print "Output file : ", outfile  
+    print 'job running on ',nproc,' processors'
+    if (os.path.isfile(outfile) and i_job==1):
+        print 'Fatal Error ', outfile, " already exists"
+        print 'This may alter algorithm convergence as we use x_opt'
+        MPI.comm.abort() 
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
@@ -270,7 +292,7 @@ def F(X):
     #X=np.around(X,1) # Arrondie au dixieme pour discretiser l'espace des parametres 
     rest=10**X[model-1]
     cost=XHI2(rest) - 1
-    print("Elapsed time: %.2f seconds" % (time() - starttime))
+    #print("Elapsed time: %.2f seconds" % (time() - starttime))
     return cost
 
 
@@ -530,6 +552,7 @@ if rank==0:
             Xstart[i, :] = Xi
             gmod_best = None
             mod_best = None
+            # nc = Dataset(outfile, 
     else:
 	# from restart
         nc = Dataset(outfile, "r", format="NETCDF4")  
@@ -620,7 +643,6 @@ xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
 # JC Keep this to write XOPT
 #
 
-print model.shape
 
 #----------------- RESTART netcdf IO ------------------
 if rank==0:
