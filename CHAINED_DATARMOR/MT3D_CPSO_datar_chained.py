@@ -541,6 +541,7 @@ n_dim = None
 Xstart = None
 gmod_best = None
 mod_best = None
+V_prev = None
 
 if rank==0:
     n_dim = len(np.unique(model))
@@ -550,13 +551,11 @@ if rank==0:
         # First job
         for i in range(popsize):
             Xstart[i, :] = Xi
-            gmod_best = None
-            mod_best = None
-            # nc = Dataset(outfile, 
     else:
 	# from restart
         nc = Dataset(outfile, "r", format="NETCDF4")  
         Xstart = nc.variables['models'][:, :, it_start-1]
+        V_prev = Xstart - nc.variables['models'][:, :, it_start-2]
         # finding best models 
         idx = np.argmin(nc.variables['energy'][:, :it_start-1], axis=1)
         nparam = len(nc.dimensions['nparam'])
@@ -568,9 +567,10 @@ if rank==0:
         nc.close()
 
 # Communication
-Xtstart = comm.bcast(Xstart, root=0)
+Xstart = comm.bcast(Xstart, root=0)
 gmod_best = comm.bcast(gmod_best, root=0)
 mod_best = comm.bcast(mod_best, root=0)
+V_prev = comm.bcast(V_prev, root=0)
 
 # RESTART
 # ---> lower and upper should remain the exact same regardless of jobs
@@ -585,8 +585,9 @@ ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize,
 
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
-                      mod_best = mod_best, gmod_best = gmod_best, 
-                      it_prev = it_start-1)
+                      mod_best = mod_best, gmod_best = gmod_best,
+                      V_prev = V_prev, it_prev = it_start-1,
+                      max_iter_tot = max_iter)
 
 
   ### #-----------------------------------------------#
