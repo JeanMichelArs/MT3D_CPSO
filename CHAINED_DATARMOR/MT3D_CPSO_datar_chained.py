@@ -583,8 +583,9 @@ lower=Xi-np.ones(n_dim)*2
 upper=Xi+np.ones(n_dim)*2
 
 # Initialize SOLVER
+# Added + 1 to max_iter to have the desired number of iteration
 ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize,
-                  max_iter = n_iter_job, mpi = True, snap = True)
+                  max_iter = n_iter_job+1, mpi = True, snap = True)
 
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True,
@@ -669,15 +670,17 @@ if rank==0:
         nc.createDimension('nz', nz)
         nc.createDimension('nparam', len(xopt))
         nc.createDimension('popsize', np.shape(ea.models)[0])
+        nc.createDimension('n_jobs', n_jobs)
         # Variables: name, format, shape
         nc.createVariable('hx', 'f8', ('nx'))
         nc.createVariable('hy', 'f8', ('ny'))
         nc.createVariable('hz', 'f8', ('nz'))
-        nc.createVariable('distrib_3D_i', 'f8', ('nx','ny','nz')) 
+        nc.createVariable('rho_i', 'f8', ('nx','ny','nz')) 
         nc.createVariable('xopt', 'f8', ('nparam'))
         nc.createVariable('log_xopt', 'f8', ('nparam'))
         nc.createVariable('models', 'f8', ('popsize', 'nparam', 'iter'))
-        nc.createVariable('energy', 'f8', ('popsize', 'iter'))    
+        nc.createVariable('energy', 'f8', ('popsize', 'iter'))  
+        nc.createVariable('rho_opt', 'f8', ('nx', 'ny', 'nz', 'n_jobs')) 
     else:
         nc = Dataset(outfile, 'a')
     
@@ -690,13 +693,15 @@ if rank==0:
     # ---> model_i useless
     # ---> 10**Xi[model_i-1] distrib ini
     # ---> 10**Xopt[model_i-1] !! distrib_3D_opt (n_job,nx,ny,nz)
-        nc.variables['distrib_3D_i'][:,:,:] = model_i
-
+        nc.variables['rho_i'][:,:,:] = 10**Xi[model_i-1]
+        
     # ----> modify [it_start:it_end]
-    # ----> xopt and log_xopt are erased after each job
+    # ----> xopt and log_xopt are erased after each jobi
+    # ----> Removed last 
+    nc.variables['rho_opt'][:, :, :, i_job-1] = 10**xopt[model_i-1]
     nc.variables['xopt'][:] = xopt
-    nc.variables['models'][:, :, it_start:it_end] = ea.models
-    nc.variables['energy'][:, it_start:it_end] = ea.energy
+    nc.variables['models'][:, :, it_start:it_end] = ea.models[:, :, 1:]
+    nc.variables['energy'][:, it_start:it_end] = ea.energy[:, 1:]
     nc.close()
 
 # ----------------- END OF IO ---------------------------

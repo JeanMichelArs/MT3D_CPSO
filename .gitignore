@@ -1,8 +1,12 @@
 *.swp
+*.swo
+*.rslt
 
-CHAINED_DATARMOR/AUTO/mt3d_[0-9]*.py
-CHAINED_DATARMOR/AUTO/mt3d_[0-9]*.pbs
+CHAINED_DATARMOR/Auto/mt3d_[0-9]*.py
+CHAINED_DATARMOR/Auto/run_[0-9]*.pbs
+CHAINED_DATARMOR/Auto/gen_mt3d.pbs
+CHAINED_DATARMOR/Auto/gen_mt3d.py
 
-
-
+Example/*[0-9].pbs
+Example/*[0-9].py
 
