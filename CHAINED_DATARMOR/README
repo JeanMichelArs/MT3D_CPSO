@@ -6,3 +6,21 @@ each Job writes results xopt, (also position vector) ea.model, ea.energy
 Next job reads xopt and positions
 
 Generated scripts are made in Auto folder
+
+Files to be edited are MT3D_CPSO_datar_chained.py and mt3d_cpso_chained.pbs
+
+-------- MT3D_CPSO_datar_chained.py-------------
+- output from mt3d are written netcdf file 
+this file name has to be edited outfile = method + '_' + mysfit + '_' + config + '.nc'
+
+- stochopy I/O modified
+
+cpso algorithm needs history of best model for each individual in the swarm pbest
+pbest is computed from best mysfit of each individual
+
+The Best model (of the best) gbest is retrieved from previous x_opt
+
+it_prev is total number of previous iteration 
+
+
+
