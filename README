@@ -3,18 +3,42 @@ Use CPSO algorithm with high number of parameters and even higher number of
 models for fast convergence
 
 ----------------------------------------------------------------------------
+How to configure and run mt3d_cpso_chained:
 
 To Edit Stochopy at developpment version:
 load your conda environment for MT3D_CPSO
-> cp -f evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
+> cp -f MT3D_CPSO/evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
 > cd MT3D_CPSO/StochOPy/
 > python setup.py install
 
 Python script to run CPSO algorithm is:
 MT3D_CPSO/CHAINED_DATARMOR/MT3D_CPSO_datar_chained.py
+------>	parameters: outfile
+	depends on mysfit, config, method
+        choice of mysfit
+	evolutionnary options (some)
+	lower and upper(model domain constraint)
 
+PBS generic script is:
+MT3D_CPSO/CHAINED_DATARMOR/mt3d_cpso_chained.pbs
+-------> parameters: Every PBS parameters (cpu, queue, ...)
+	Conda environment for MT3D
+	
 Script to automatically create, copy and make run ready are in 
 MT3D_CPSO/CHAINED_DATARMOR/Auto
+	mk_files.sh:
+	------> parameters: RUN_DIR (Directory ti run mt3d)
+		n_jobs: number of chained jobs
+		max_iter: total number of oteration to reach convergence
+        ------> USE: 
+		> ./mk_files.sh
+	Makefile:
+	------> parameters: RUN_DIR, CONF_DIR (directory with inputs)
+	------> USE:
+		> make rundirclean
+		> make cpfile
+		> cp $RUN_DIR
+		> qsub run_1.pbs
 
 READMEs are found in the tree 
 

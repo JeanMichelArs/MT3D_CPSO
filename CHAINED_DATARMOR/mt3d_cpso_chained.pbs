@@ -36,7 +36,6 @@ echo
 ####################################
 # Run Directory
 
-set AUTO_DIR=/home2/datahome/jcollin/MT3D_CPSO/CHAINED_DATARMOR/Auto/
 set RUN_DIR=RUN_DIR_XXX
 
 setenv mpiproc `cat $PBS_NODEFILE  |wc -l`

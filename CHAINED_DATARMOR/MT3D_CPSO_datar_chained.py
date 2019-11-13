@@ -1,6 +1,12 @@
 #!/usr/bin/python2.7
 '''
-- stochopy I/O modified
+
+-------------- USER PARAMETERS -------------------
+- outfile
+- mysfit function
+- evolutionnary options 
+- lower and upper (model domain constraint)
+---------------------------------------------------
 
 add check on outfile
 if outfile already exists mpi.abort()
@@ -11,7 +17,6 @@ cpso algorithm needs history of best model for each individual in the swarm pbes
 pbest is computed from best mysfit of each individual
 The Best model (of the best) gbest is retrieved from previous x_opt
 it_prev is total number of previous iteration
-
 
 - disconitnuity at restart is observed this may be due to the loss of velocity
 inertia time at restart. Velocoty may be recovered using 
