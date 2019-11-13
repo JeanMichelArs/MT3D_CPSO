@@ -1,0 +1,34 @@
+JCollin 10-2019
+
+Aim is to create Njobs chained Jobs to increase wall-time
+Automatically generated pbs script usigin a generic pbs script
+
+Make sure you edited MT3D_CPSO_datar_chained.py and mt3d_cpso_chained.pbs
+See ../README for more information
+
+To generate files EDIT mk_files
+	Ex:
+	RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_2_JOBS/"
+	n_jobs=10
+	max_iter=50 (total number of iteration)
+	CONFDIR=... (were all the inputs are located)
+
+> ./mk_files
+
+Makefile will help
+
+To avoid premature convergence outfile.nc in RUN_DIR must be deleted
+> make rundirclean
+
+After files are produced to automatically copy DATA of configuration and chained files 
+into RUN_DIR 
+- EDIT Makefile 
+EX : RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_2_JOBS/
+     CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
+> make cp_file
+
+
+
+To clean Directory type make clean
+
+
