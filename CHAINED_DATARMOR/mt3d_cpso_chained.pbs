@@ -9,8 +9,6 @@ source /usr/share/Modules/3.2.10/init/csh
 # get the path for python
 echo "Purge modules"
 module purge
-echo "Load vacumm"
-module load vacumm/3.3.0
 ###############################
 # Conda
 echo "Load anaconda 2.7"
@@ -44,16 +42,32 @@ echo "workdir:  $PBS_O_WORKDIR  "
 # cd to the directory you submitted your job
 cd $PBS_O_WORKDIR
 
-# ----> Copy chained SRC files from Auto
-#cp -Rf * $RUN_DIR
-#cd $RUN_DIR
-
 date
 time mpiexec -np $mpiproc python mt3d_xxx.py < input > & output_xxx   
 date
 
-## submit next Job if runs successfully
-if ( $status == 0 ) then
+####################################################
+# Ensure mt3d ran properly before submitting next job
+
+rm tmp
+grep -i "error" output_xxx > tmp
+
+set nw = `wc -c tmp | cut -d' ' -f1`
+echo $nw
+@ nerrors = $nw
+echo $nerrors
+
+if ( `expr $nerrors` ==  0  ) then
+    echo "mt3d ran without erros"
+    echo "submitting next job"
     qsub mt3d_xxx.pbs
-end if
+else
+    echo "mt3d failed to run"
+    echo "Stop chainning jobs"
+endif
+
+## submit next Job if runs successfully
+#if ( $status == 0 ) then
+#    qsub mt3d_xxx.pbs
+#end if
 
