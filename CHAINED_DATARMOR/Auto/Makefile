@@ -5,7 +5,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/NORME_10_JOBS/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Norme_Safe_4_JOBS/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 
 
@@ -20,6 +20,11 @@ cpfile:
 .PHONY: rundirclean
 rundirclean:	
 	rm ${RUN_DIR}/*.nc
+
+.PHONY: run
+run:
+	cd ${RUN_DIR}; \
+	qsub run_1.pbs
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
