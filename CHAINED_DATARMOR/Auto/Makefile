@@ -25,6 +25,10 @@ rundirclean:
 run:
 	cd ${RUN_DIR}; \
 	qsub run_1.pbs
+.PHONY: watch
+watch:
+	qstat -u ${USER}
+	tail -f ${RUN_DIR}/output_1
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
