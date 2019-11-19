@@ -23,6 +23,7 @@ PBS generic script is:
 MT3D_CPSO/CHAINED_DATARMOR/mt3d_cpso_chained.pbs
 -------> parameters: Every PBS parameters (cpu, queue, ...)
 	Conda environment for MT3D
+	Add no warnings for better control of new submission
 	
 Script to automatically create, copy and make run ready are in 
 MT3D_CPSO/CHAINED_DATARMOR/Auto
@@ -30,15 +31,18 @@ MT3D_CPSO/CHAINED_DATARMOR/Auto
 	------> parameters: RUN_DIR (Directory ti run mt3d)
 		n_jobs: number of chained jobs
 		max_iter: total number of oteration to reach convergence
+		+ (all parameters previously found input)
+		model_rho, ref_East, ref_North, angle_grid,
+                MTsounds_positions, popsize=56
         ------> USE: 
 		> ./mk_files.sh
 	Makefile:
 	------> parameters: RUN_DIR, CONF_DIR (directory with inputs)
 	------> USE:
-		> make rundirclean
-		> make cpfile
-		> cp $RUN_DIR
-		> qsub run_1.pbs
+		> make rundirclean (remove netcdf file from RUN_DIR)
+		> make cpfile (copy auto files in RUN_DIR)  
+		> make run (submit first job)
+		> make watch (display outfile fail in real time)
 
 READMEs are found in the tree 
 
