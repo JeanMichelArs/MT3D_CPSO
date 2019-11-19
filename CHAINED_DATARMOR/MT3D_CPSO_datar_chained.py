@@ -77,7 +77,7 @@ if rank==0:
     if (os.path.isfile(outfile) and i_job==1):
         print 'Fatal Error ', outfile, " already exists"
         print 'This may alter algorithm convergence as we use x_opt'
-        MPI.comm.abort() 
+        MPI.COMM_WORLD.abort() 
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
@@ -122,11 +122,17 @@ if rank==0:
     #--------------------------------------------
     
     #Read 3D model
-    file=raw_input("Initial 3D MT model:")
-    ld=linecache.getline(file, 1)
-    lx=linecache.getline(file, 2)
-    ly=linecache.getline(file, 3)
-    lz=linecache.getline(file, 4)
+    #file = raw_input("Initial 3D MT model:")
+    file = model_rho_xxx
+    ld = linecache.getline(file, 1)
+    lx = linecache.getline(file, 2)
+    ly = linecache.getline(file, 3)
+    lz = linecache.getline(file, 4)
+
+    #ld=linecache.getline(file, 1)
+    #lx=linecache.getline(file, 2)
+    #ly=linecache.getline(file, 3)
+    #lz=linecache.getline(file, 4)
     dim=ld.split()
     nx=int(dim[0])
     ny=int(dim[1])
@@ -174,9 +180,11 @@ if rank==0:
     hz=np.asfortranarray(hz)
     
     
-    (refmty,refmtx)=input("UTM references of the MT model (lower left corner, east/north):")     #Model lower left corner, east/north
-    
-    angm=input("Rotation angle of the MT model (clockwise)")                #clockwise
+    #(refmty,refmtx)=input("UTM references of the MT model (lower left corner, east/north):")     #Model lower left corner, east/north
+    (refmty,refmtx) = (refmty_xxx, refmtx_xxx)
+
+    #angm=input("Rotation angle of the MT model (clockwise)")                #clockwise
+    angm = angm_xxx
     
     angm=angm*np.pi/180
     
@@ -203,7 +211,8 @@ if rank==0:
     
     
     # MT SOUNDING POSITION FILE
-    MTsoundingpos=str(raw_input("Magnetotelluric sounding position file (labm,xMT,yMT,zMT,rotMT) :"))
+    #MTsoundingpos=str(raw_input("Magnetotelluric sounding position file (labm,xMT,yMT,zMT,rotMT) :"))
+    MTsoundingpos = MTsoundingpos_xxx
     lab,ysound,xsound,alt_sound,rot=np.loadtxt(MTsoundingpos,unpack=True)
     nsound=len(lab)
     
@@ -255,7 +264,8 @@ if rank==0:
         RoPh_data[:,0:len(perd),n]=(perd,Roaxx,ErRoaxx,Phixx,ErPhixx,Roaxy,ErRoaxy,Phixy,ErPhixy,
                      Roayx,ErRoayx,Phiyx,ErPhiyx,Roayy,ErRoayy,Phiyy,ErPhiyy)
     
-    popsize=input("Size of model SWARM:")
+    #popsize=input("Size of model SWARM:")
+    popsize = popsize_xxx
     #max_iter=input("Number of iteration:")
     
 #Share variable with all MPI node
@@ -522,7 +532,7 @@ def XHI2(X):
     print 'RMS Resistivity apparent => RMS1r=',np.sqrt(RMS1r/len(lab)),'Ohm.m'
     print 'RMS Phase => RMS1p=',np.sqrt(RMS1p/len(lab)),' degree'
     print ''
-    '''
+    '''    
     XHI2 = np.linalg.norm(X)
     return XHI2
 

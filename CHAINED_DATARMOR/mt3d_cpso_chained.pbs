@@ -43,7 +43,7 @@ echo "workdir:  $PBS_O_WORKDIR  "
 cd $PBS_O_WORKDIR
 
 date
-time mpiexec -np $mpiproc python mt3d_xxx.py < input > & output_xxx   
+time mpiexec -np $mpiproc python -W ignore mt3d_xxx.py > & output_xxx   
 date
 
 ####################################################

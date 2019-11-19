@@ -14,10 +14,18 @@ source /usr/share/Modules/3.2.10/init/bash
 # - total number of iteration (sum of max_iter per job)
 # - max_iter must be a multiple of n_jobs
 
-RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/NORME_10_JOBS/"
+RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/Norme_Safe_4_JOBS/"
 
-n_jobs=10
+n_jobs=4
 max_iter=100
+
+# Former parameter found in input file
+model_rho="model_inv4.ini"
+ref_East=0.0
+ref_North=0.0
+angle_grid=0.0
+MTsounds_positions="synth10_mt.pos"
+popsize=56
 
 # Python and pbs scripts
 MT3D_py="../MT3D_CPSO_datar_chained.py"
@@ -56,10 +64,20 @@ do
   # copy from genereic files
   cp ${gen_pbs} run_${i_job}.pbs
   cp ${gen_py} mt3d_${i_job}.py
+
   # ---> modify i_job, n_jobs, max_iter in python
   sed -i "s/i_job_xxx/${i_job}/g" mt3d_${i_job}.py
   sed -i "s/n_jobs_xxx/${n_jobs}/g" mt3d_${i_job}.py
   sed -i "s/max_iter_xxx/${max_iter}/g" mt3d_${i_job}.py
+
+  #----> input file parameters
+  sed -i "s/model_rho_xxx/'${model_rho}'/g" mt3d_${i_job}.py
+  sed -i "s/refmty_xxx/${ref_East}/g" mt3d_${i_job}.py
+  sed -i "s/refmtx_xxx/${ref_North}/g" mt3d_${i_job}.py
+  sed -i "s/angm_xxx/${angle_grid}/g" mt3d_${i_job}.py
+  sed -i "s/MTsoundingpos_xxx/'${MTsounds_positions}'/g" mt3d_${i_job}.py
+  sed -i "s/popsize_xxx/${popsize}/g" mt3d_${i_job}.py
+
   # ---> modify rundir, i_jobs 
   sed -i "s:RUN_DIR_XXX:${RUN_DIR}:g" run_${i_job}.pbs
   sed -i "s/mt3d_xxx.py/mt3d_${i_job}.py/g" run_${i_job}.pbs
