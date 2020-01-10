@@ -4,16 +4,16 @@
 ## #PBS -l select=1:ncpus=28:mem=30g
 
 # C SHELL
-echo "source C shell"
-source /usr/share/Modules/3.2.10/init/csh
+echo "source Bash"
+source /usr/share/Modules/3.2.10/init/bash
 
 # get the path for python
 echo "Purge modules"
 module purge
 ###############################
 # Conda
-echo "Load anaconda 3.6"
-module load anaconda-py3.6/4.7.12 
+echo "Load anaconda"
+module load conda/latest 
 ################################
 # NETCDF 
 echo "load netcdf"
@@ -22,8 +22,7 @@ module load NETCDF/4.3.3.1-mpt-intel2016
 #  ENV MTD3
 # Need to do it twice with csh
 echo "load conda environement"
-source /appli/anaconda/3.6/etc/profile.d/conda.csh activate /home2/datahome/jcollin/.conda/envs/mt3d_stochopy
-source /appli/anaconda/3.6/etc/profile.d/conda.csh activate /home2/datahome/jcollin/.conda/envs/mt3d_stochopy
+source activate mackie_conda
 
 echo "------- Python version: ---------- ",
 python --version
