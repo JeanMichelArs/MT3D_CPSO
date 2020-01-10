@@ -48,7 +48,8 @@ date
 
 ####################################################
 # Ensure mt3d ran properly before submitting next job
-
+# need to adapt in bash... 
+# this is CSH below
 rm tmp
 grep -i "error" output_xxx > tmp
 
