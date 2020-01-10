@@ -34,16 +34,16 @@ echo
 ####################################
 # Run Directory
 
-set RUN_DIR=RUN_DIR_XXX
+RUN_DIR=RUN_DIR_XXX
 
-setenv mpiproc `cat $PBS_NODEFILE  |wc -l`
+export mpiproc=`cat $PBS_NODEFILE  |wc -l`
 echo "job running with  $mpiproc mpi process "
 echo "workdir:  $PBS_O_WORKDIR  "
 # cd to the directory you submitted your job
 cd $PBS_O_WORKDIR
 
 date
-time mpiexec -np $mpiproc python -W ignore mt3d_xxx.py > & output_xxx   
+time mpiexec -np $mpiproc python -W ignore mt3d_xxx.py > output_xxx   
 date
 
 ####################################################
@@ -53,19 +53,22 @@ date
 rm tmp
 grep -i "error" output_xxx > tmp
 
-set nw = `wc -c tmp | cut -d' ' -f1`
-echo $nw
-@ nerrors = $nw
-echo $nerrors
+#let nw=`wc -c tmp | cut -d' ' -f1`
+#echo $nw
+#nerrors = $nw
+#echo $nerrors
 
-if ( `expr $nerrors` ==  0  ) then
-    echo "mt3d ran without erros"
-    echo "submitting next job"
-    qsub mt3d_xxx.pbs
-else
-    echo "mt3d failed to run"
-    echo "Stop chainning jobs"
-endif
+#if ( `expr $nerrors` ==  0  ) then
+#    echo "mt3d ran without erros"
+#    echo "submitting next job"
+#    qsub mt3d_xxx.pbs
+#else
+#    echo "mt3d failed to run"
+#    echo "Stop chainning jobs"
+#endif
+
+# --- > temporary
+qsub mt3d_xxx.pbs
 
 ## submit next Job if runs successfully
 #if ( $status == 0 ) then

@@ -11,7 +11,7 @@ SHELL := /bin/bash
 # RUN_DIR as to be the same than in mk_files.sh
 RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Mackie_4_JOBS/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
-
+MACKIE=/home2/datahome/jcollin/MT3D_CPSO/Example/mackie3d.so
 # ---------------------------------------------------------------------
 .PHONY: cpfile mkfile rundirclean run watch all
 
@@ -23,8 +23,10 @@ mkfile:
 # copy automatically generated files into RUN_DIR
 cpfile:
 	@echo "copy auto files in ${RUN_DIR}"
-	cp -f -t ${RUN_DIR} run_[0-9]*.pbs mt3d_[0-9]*.py
+	cp -f -t ${RUN_DIR} run_[0-9]*.pbs mt3d_[0-9]*.py 
 	cp -Rf ${CONF_DIR}/* ${RUN_DIR}
+	@echo "copy mackie3d in ${RUN_DIR}"
+	cp -f ${MACKIE} ${RUN_DIR}/ 
 	@echo ""
 
 # Ensure there is no netcdf file in Run_dir
