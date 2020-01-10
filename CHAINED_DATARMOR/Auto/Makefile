@@ -9,7 +9,7 @@ SHELL := /bin/bash
 
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Norme_Safe_4_JOBS/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Mackie_4_JOBS/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 
 # ---------------------------------------------------------------------
@@ -18,24 +18,33 @@ CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 # create automatic scripts .pbs and .py for chained jobs
 mkfile: 
 	./mk_files.sh
+	@echo ""
 
 # copy automatically generated files into RUN_DIR
 cpfile:
+	@echo "copy auto files in ${RUN_DIR}"
 	cp -f -t ${RUN_DIR} run_[0-9]*.pbs mt3d_[0-9]*.py
 	cp -Rf ${CONF_DIR}/* ${RUN_DIR}
+	@echo ""
 
 # Ensure there is no netcdf file in Run_dir
-rundirclean:	
-	rm ${RUN_DIR}/*.nc
+rundirclean:
+	@echo "Removing netcdf file in ${RUN_DIR}"	
+	@if [ -f ${RUN_DIR}/*.nc ]; then rm ${RUN_DIR}/*.nc; fi
+	@echo ""
 
 # Submitt First job
 run:
+	@echo "Submitting first job"
 	cd ${RUN_DIR}; \
 	qsub run_1.pbs
+	@echo ""
 
 # check whether jobs are running and display output
 watch:
 	qstat -u ${USER}
+	@if [ -f ${RUN_DIR}/output_1 ]; then rm ${RUN_DIR}/output_1; fi
+	@touch ${RUN_DIR}/output_1
 	tail -f ${RUN_DIR}/output_1
 
 # ----------------------------------------------------------------------------
@@ -46,5 +55,6 @@ all : mkfile cpfile rundirclean run watch
 # ----------------------------------------------------------------------------
 .PHONY: clean
 clean:
-	rm -f *.out *.o[0-9]* *.log *.err run_[0-9]*.pbs mt3d_[0-9]*.py
+	rm -f *.out *.o[0-9]* *.log *.err run_[0-9]*.pbs mt3d_[0-9]*.py \
+	rm gen_mt3d.pbs gen_mt3d.py
  

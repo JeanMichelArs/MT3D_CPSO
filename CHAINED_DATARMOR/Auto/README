@@ -6,12 +6,26 @@ Automatically generated pbs script usigin a generic pbs script
 Make sure you edited MT3D_CPSO_datar_chained.py and mt3d_cpso_chained.pbs
 See ../README for more information
 
-To generate files EDIT mk_files
+To generate files EDIT mk_files.sh
+------> parameters:
+	RUN_DIR (Directory ti run mt3d)
+	n_jobs: number of chained jobs
+	max_iter: total number of oteration to reach convergence
+	+ (all parameters previously found input)
+	model_rho, ref_East, ref_North, angle_grid,
+	MTsounds_positions, popsize=56
+	
+
 	Ex:
 	RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_2_JOBS/"
 	n_jobs=10
 	max_iter=50 (total number of iteration)
-	CONFDIR=... (were all the inputs are located)
+	model_rho="model_inv4.ini"
+	ref_East=0.0
+	ref_North=0.0
+	angle_grid=0.0
+	MTsounds_positions="synth10_mt.pos"
+	popsize=56
 
 > ./mk_files
 
@@ -27,8 +41,8 @@ EX : RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/BASIC_FUN_2_JOBS/
      CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 > make cp_file
 
-
-
 To clean Directory type make clean
 
+-----------------------------------------------------------------------------
+To run all commands type make all
 

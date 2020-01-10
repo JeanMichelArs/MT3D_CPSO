@@ -37,7 +37,7 @@ second index
 import numpy as np
 import linecache
 import matplotlib.pyplot as plt
-#import mackie3d
+import mackie3d
 from scipy.interpolate import griddata,interp1d,Rbf
 #import utm
 from stochopy import MonteCarlo, Evolutionary
@@ -68,7 +68,7 @@ it_end = np.min([i_job*n_iter_job, max_iter])
 # ----------------------------
 # Output file
 if rank==0:
-    mysfit = 'norme'
+    mysfit = 'mackie'
     config = '4_param'
     method = 'cpso'
     outfile = method + '_' + mysfit + '_' + config + '.nc'
@@ -328,7 +328,7 @@ def XHI2(X):
         print ' ----------------'
         print ' ################'
         print ' '
-    '''
+    
     #print mod1D.shape, perpy.shape, X.shape, hx.shape,hy.shape,hz.shape
     hxsurf,hysurf,hzsurf,exsurf,eysurf=mackie3d.mtd3(mod1D,perpy,X,hx,hy,hz)
     ###########################
@@ -532,8 +532,8 @@ def XHI2(X):
     print 'RMS Resistivity apparent => RMS1r=',np.sqrt(RMS1r/len(lab)),'Ohm.m'
     print 'RMS Phase => RMS1p=',np.sqrt(RMS1p/len(lab)),' degree'
     print ''
-    '''    
-    XHI2 = np.linalg.norm(X)
+        
+    #XHI2 = np.linalg.norm(X)
     return XHI2
 
 
