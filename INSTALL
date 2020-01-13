@@ -9,7 +9,7 @@ anaconda modules loaded.
 Create anaconda environment with appropriate numpy version
 -- from install file:
 
-  conda create --name <env> --file intall_mtd3.txt
+  > conda create --name <env> --file intall_mtd3.txt
 
 -- manually:
   > conda create -n mackie_conda python=2.7 'numpy<=1.12' scipy matplotlib scipy mpi4py netcdf4

@@ -78,8 +78,14 @@ C_b(DONE):
  
 D: Mackie
    Add Mackie to get the real coast function
-   Test that 1 Job 33 param we obtain similar results 
+   Test that 1 Job 4 param we obtain similar results 
    Test N Jobs 
+
+D(++): 
+   Makefile (mackie): search for optimization flags
+   Write outputs: modify Fortran sources to remove useless logs 
+   Check for fort.13 file
+   pbs file: adapt bash script to controll chained submission
 
 E: REAL_CONFIG
    Set up and RUN realistic configuration with high number of parameters 
