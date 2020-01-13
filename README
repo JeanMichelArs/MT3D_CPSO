@@ -2,6 +2,9 @@
 Use CPSO algorithm with high number of parameters and even higher number of 
 models for fast convergence
 
+! EDIT
+	put your compiled version of mackie using f2py at project's root
+	or change mackie path in CHAINED_DATARMOR/AUTO/Makefile
 ----------------------------------------------------------------------------
 How to configure and run mt3d_cpso_chained:
 
@@ -38,6 +41,7 @@ MT3D_CPSO/CHAINED_DATARMOR/Auto
 		> ./mk_files.sh
 	Makefile:
 	------> parameters: RUN_DIR, CONF_DIR (directory with inputs)
+			    MACKIE (path to mackie3d.so)
 	------> USE:
 		> make rundirclean (remove netcdf file from RUN_DIR)
 		> make cpfile (copy auto files in RUN_DIR)  
@@ -77,14 +81,16 @@ C_b(DONE):
     Write some more outputs in netcdf files    
  
 D: Mackie
-   Add Mackie to get the real coast function
-   Test that 1 Job 4 param we obtain similar results 
-   Test N Jobs 
+   Add Mackie to get the real coast function (DONE)
+   Test that 1 Job 4 param we obtain similar results (DONE) 
+   Test N Jobs (IN PROCESS)
+   !!! Difference between 1 and 4 jobs optimum in 1 jobs is ok
+   but we observe strange values with 4 jobs...
 
 D(++): 
-   Makefile (mackie): search for optimization flags
-   Write outputs: modify Fortran sources to remove useless logs 
-   Check for fort.13 file
+   Makefile (mackie): search for optimization flags (DONE)
+   Write outputs: modify Fortran sources to remove useless logs (DONE) 
+   Check for fort.13 file (DONE)
    pbs file: adapt bash script to controll chained submission
 
 E: REAL_CONFIG
