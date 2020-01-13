@@ -14,9 +14,9 @@ source /usr/share/Modules/3.2.10/init/bash
 # - total number of iteration (sum of max_iter per job)
 # - max_iter must be a multiple of n_jobs
 
-RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/Mackie_4_JOBS/"
+RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/Opti_Mackie_1_JOBS/"
 
-n_jobs=4
+n_jobs=1
 max_iter=100
 
 # Former parameter found in input file
