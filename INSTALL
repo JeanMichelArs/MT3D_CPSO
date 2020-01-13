@@ -7,17 +7,22 @@ anaconda modules loaded.
 > module load conda/latest
 
 Create anaconda environment with appropriate numpy version
-> conda create -n mackie_conda python=2.7 'numpy<=1.12' scipy matplotlib scipy mpi4py netcdf4
-# -- bash
-> source activate mackie_conda 
-# -- csh
-> conda activate mackie_conda
+-- from install file:
+
+  conda create --name <env> --file intall_mtd3.txt
+
+-- manually:
+  > conda create -n mackie_conda python=2.7 'numpy<=1.12' scipy matplotlib scipy mpi4py netcdf4
+  # -- bash
+  > source activate mackie_conda 
+  # -- csh
+  > conda activate mackie_conda
 
 ---- Install stochopy
-To Edit Stochopy at developpment version:
-load your conda environment for MT3D_CPSO
-> cp -f MT3D_CPSO/evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
-> cd MT3D_CPSO/StochOPy/
-> python setup.py install
+  To Edit Stochopy at developpment version:
+  load your conda environment for MT3D_CPSO
+  > cp -f MT3D_CPSO/evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
+  > cd MT3D_CPSO/StochOPy/
+  > python setup.py install
 
 
