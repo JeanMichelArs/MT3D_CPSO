@@ -9,9 +9,9 @@ SHELL := /bin/bash
 
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Mackie_4_JOBS/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Opti_Mackie_1_JOBS/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
-MACKIE=/home2/datahome/jcollin/MT3D_CPSO/Example/mackie3d.so
+MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
 # ---------------------------------------------------------------------
 .PHONY: cpfile mkfile rundirclean run watch all
 
