@@ -1,0 +1,34 @@
+Chained project objective is to break both wall-time limit and memory
+
+Wall-time limit:
+N_jobs automatically generated .pbs and .py files 
+each Job writes results xopt, (also position vector) ea.model, ea.energy 
+Next job reads xopt and positions
+
+Generated scripts are made in Auto folder
+
+Files to be edited are MT3D_CPSO_datar_chained.py and mt3d_cpso_chained.pbs
+
+-------- MT3D_CPSO_datar_chained.py-------------
+- output from mt3d are written netcdf file 
+this file name has to be edited outfile = method + '_' + mysfit + '_' + config + '.nc'
+
+------------- stochopy I/O modified -------------------
+
+cpso algorithm needs history of best model for each individual in the swarm pbest
+pbest is computed from best mysfit of each individual
+
+The Best model (of the best) gbest is retrieved from previous x_opt
+
+it_prev: is total number of previous iteration 
+max_iter_tot: CPSO also needs the total number of iteration 
+
+CPSO also uses Velocity inertia, V_prev is retreved  from
+previous models. 
+V[k] = X[k] - X[k-1], k: iteration
+X[k] = (ea.model[k] - ea.model.mean) / ea.model.std
+Therefore at restart
+V[it] = (ea.model[it_prev] - ea.model[it_prev-1]) / ea.model.std
+
+----------------------------------------------------------
+

@@ -1,0 +1,105 @@
+- Project :
+Use CPSO algorithm with high number of parameters and even higher number of 
+models for fast convergence
+
+! EDIT
+	put your compiled version of mackie using f2py at project's root
+	or change mackie path in CHAINED_DATARMOR/AUTO/Makefile
+----------------------------------------------------------------------------
+How to configure and run mt3d_cpso_chained:
+
+To Edit Stochopy at developpment version:
+load your conda environment for MT3D_CPSO
+> cp -f MT3D_CPSO/evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
+> cd MT3D_CPSO/StochOPy/
+> python setup.py install
+
+Python script to run CPSO algorithm is:
+MT3D_CPSO/CHAINED_DATARMOR/MT3D_CPSO_datar_chained.py
+------>	parameters: outfile
+	depends on mysfit, config, method
+        choice of mysfit
+	evolutionnary options (some)
+	lower and upper(model domain constraint)
+
+PBS generic script is:
+MT3D_CPSO/CHAINED_DATARMOR/mt3d_cpso_chained.pbs
+-------> parameters: Every PBS parameters (cpu, queue, ...)
+	Conda environment for MT3D
+	Add no warnings for better control of new submission
+	
+Script to automatically create, copy and make run ready are in 
+MT3D_CPSO/CHAINED_DATARMOR/Auto
+	mk_files.sh:
+	------> parameters: RUN_DIR (Directory ti run mt3d)
+		n_jobs: number of chained jobs
+		max_iter: total number of oteration to reach convergence
+		+ (all parameters previously found input)
+		model_rho, ref_East, ref_North, angle_grid,
+                MTsounds_positions, popsize=56
+        ------> USE: 
+		> ./mk_files.sh
+	Makefile:
+	------> parameters: RUN_DIR, CONF_DIR (directory with inputs)
+			    MACKIE (path to mackie3d.so)
+	------> USE:
+		> make rundirclean (remove netcdf file from RUN_DIR)
+		> make cpfile (copy auto files in RUN_DIR)  
+		> make run (submit first job)
+		> make watch (display outfile fail in real time)
+
+READMEs are found in the tree 
+
+----------------------------------------------------------------------------
+TODO:
+
+A(DONE): TEST convergence using a basic cost function 
+   Move Run into scratchdir for faster computation
+
+B(DONE): I/O   
+   Modify MT3D_XXX_.py I/O to write outputs in netcdf file
+   Keep a Reference Run for TESTS
+   !!! Add a TEST to Check Whether out_file already exists
+
+C(DONE): Chained Jobs
+   Modify MT3D_XXX_.py to read/write in appropriate netcdf file
+   
+   inputs : n_iter_prec (total iteration since beginning of simulation)
+            X_opt_prec(n_model), Gfit_prec(n_model) : previous best models 
+            and misfits
+   outputs: n_it (total number of iteration at the end)
+            X_opt, Gfit
+	    E(n_it - n_it_prec, n_model) : historic of misfits values
+            X(n_it - n_it_prec, n_model) : historic of models 
+   
+   TEST : against REFERENCE 1 Job run
+
+C_b(DONE):
+    Use intertia velocity of CPSO
+    Keep the right criteria for competitive algorithm 
+    Do not write twice model and energy at restart time
+    Write some more outputs in netcdf files    
+ 
+D: Mackie
+   Add Mackie to get the real coast function (DONE)
+   Test that 1 Job 4 param we obtain similar results (DONE) 
+   Test N Jobs (IN PROCESS)
+   !!! Difference between 1 and 4 jobs optimum in 1 jobs is ok
+   but we observe strange values with 4 jobs...
+
+D(++): 
+   Makefile (mackie): search for optimization flags (DONE)
+   Write outputs: modify Fortran sources to remove useless logs (DONE) 
+   Check for fort.13 file (DONE)
+   pbs file: adapt bash script to controll chained submission
+
+E: REAL_CONFIG
+   Set up and RUN realistic configuration with high number of parameters 
+
+
+CHAINED_DATARMOR : 
+	Automatic generation of pbs scripts and maybe python to break walltime
+	Still in devloppement
+
+
+
