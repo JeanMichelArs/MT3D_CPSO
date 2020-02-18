@@ -7,6 +7,9 @@
 - evolutionnary options 
 - lower and upper (model domain constraint)
 ---------------------------------------------------
+add init_xstart parameter: 
+allows user to initialize the sarm using different techniques either XI
+a random uniform law or Xi + a random uniform law 
 
 add check on outfile
 if outfile already exists mpi.abort()
@@ -17,14 +20,6 @@ cpso algorithm needs history of best model for each individual in the swarm pbes
 pbest is computed from best mysfit of each individual
 The Best model (of the best) gbest is retrieved from previous x_opt
 it_prev is total number of previous iteration
-
-- disconitnuity at restart is observed this may be due to the loss of velocity
-inertia time at restart. Velocoty may be recovered using 
-ea.models(it_prev) - ea.models(it_prev-1)
-stochopy interface has to be modified to take this new parameter into account
-DONE: V = X[k] - X[k-1] 
-X = ea.model.standardized 
-=> We retrieve V from previous models at restart
 
 - Before (initial) models and energy were wirtten at restart, resulting
 in doubling the information. This wouls have corrupt statistic analysis
@@ -66,12 +61,27 @@ n_iter_job = max_iter / n_jobs
 it_start = (i_job - 1) * n_iter_job
 it_end = np.min([i_job*n_iter_job, max_iter])
 # ----------------------------
+# Xi initialization type:
+# - init_xstart value, must be "xi", "rand_uniform" or "xi_rand_unifrom"
+# - cst_lower/cst_upper are used to define xi and the model parameter space
+# ** init_xstart = "xi" every bee of the swarm is initialized to Xi
+# Probably not the right way to do it
+# ** init_xstart = "rand_uniform " each bee being a diffenrent random uniform between
+# cst_lower/2 and cst_upper/2
+# ** init_xstart = "xi_rand_unifrom" each bee initialized around around xi + a 
+# random uniform betweend cst_lower/2 and cst_upper/2
+
+init_xstart="xi"
+cst_lower = 2 
+cst_upper = 2
+# ----------------------------
 # Output file
 if rank==0:
     mysfit = 'mackie'
-    config = '4_param'
+    config = '33_param'
     method = 'cpso'
     outfile = method + '_' + mysfit + '_' + config + '.nc'
+    xi_init = 'xi_random'
     print "Output file : ", outfile  
     print 'job running on ',nproc,' processors'
     if (os.path.isfile(outfile) and i_job==1):
@@ -568,8 +578,22 @@ if rank==0:
     
     if i_job==1:
         # First job
+	# -------> every bee of the swarm is initialized to Xi
+	# Probably not the right way to do it
         for i in range(popsize):
-            Xstart[i, :] = Xi
+            if init_xstart is 'xi':
+	        # -------> every bee of the swarm is initialized to Xi
+	        # Probably not the right way to do it
+                Xstart[i, :] = Xi
+            elif init_xstart is 'rand_uniform':
+                # -------> each bee being a diffenrent random uniform between lower and upper 
+		Xstat[i, :] = np.random.uniform(low=cst_lower, high=cst_upper, size=Xi.shape)
+            elif init_xstart is 'xi_rand_unifrom'
+	        #--------> each bee initialized around a uniform around Xi
+                Xstat[i, :] = Xi + np.random.uniform(low=cst_lower/2, high=cst_upper/2, size=Xi.shape)
+	    else:
+                print('wrong init_xstart value, must be "xi", "rand_uniform" or "xi_rand_unifrom"')
+                raise('ValueError')		
     else:
 	# from restart
         nc = Dataset(outfile, "r", format="NETCDF4")  
@@ -595,8 +619,8 @@ V_prev = comm.bcast(V_prev, root=0)
 # ---> lower and upper should remain the exact same regardless of jobs
 # ---> may be better to keep them in netcdf file or a coefficient
 # ---> in netcdf file
-lower=Xi-np.ones(n_dim)*2
-upper=Xi+np.ones(n_dim)*2
+lower = Xi - np.ones(n_dim) * cst_upper
+upper = Xi + np.ones(n_dim) * cst_lower
 
 # Initialize SOLVER
 # Added + 1 to max_iter to have the desired number of iteration
