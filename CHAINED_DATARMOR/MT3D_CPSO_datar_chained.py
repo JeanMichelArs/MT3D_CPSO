@@ -68,10 +68,10 @@ it_end = np.min([i_job*n_iter_job, max_iter])
 # Probably not the right way to do it
 # ** init_xstart = "rand_uniform " each bee being a diffenrent random uniform between
 # cst_lower/2 and cst_upper/2
-# ** init_xstart = "xi_rand_unifrom" each bee initialized around around xi + a 
+# ** init_xstart = "xi_rand_uniform" each bee initialized around around xi + a 
 # random uniform betweend cst_lower/2 and cst_upper/2
 
-init_xstart="xi"
+init_xstart="xi_rand_uniform"
 cst_lower = 2 
 cst_upper = 2
 # ----------------------------
@@ -139,10 +139,6 @@ if rank==0:
     ly = linecache.getline(file, 3)
     lz = linecache.getline(file, 4)
 
-    #ld=linecache.getline(file, 1)
-    #lx=linecache.getline(file, 2)
-    #ly=linecache.getline(file, 3)
-    #lz=linecache.getline(file, 4)
     dim=ld.split()
     nx=int(dim[0])
     ny=int(dim[1])
@@ -587,12 +583,12 @@ if rank==0:
                 Xstart[i, :] = Xi
             elif init_xstart is 'rand_uniform':
                 # -------> each bee being a diffenrent random uniform between lower and upper 
-		Xstat[i, :] = np.random.uniform(low=cst_lower, high=cst_upper, size=Xi.shape)
-            elif init_xstart is 'xi_rand_unifrom'
+		Xstart[i, :] = np.random.uniform(low=-cst_lower, high=cst_upper, size=Xi.shape)
+            elif init_xstart is 'xi_rand_uniform':
 	        #--------> each bee initialized around a uniform around Xi
-                Xstat[i, :] = Xi + np.random.uniform(low=cst_lower/2, high=cst_upper/2, size=Xi.shape)
+                Xstart[i, :] = Xi + np.random.uniform(low=-cst_lower/2, high=cst_upper/2, size=Xi.shape)
 	    else:
-                print('wrong init_xstart value, must be "xi", "rand_uniform" or "xi_rand_unifrom"')
+                print('wrong init_xstart value, must be "xi", "rand_uniform" or "xi_rand_uniform"')
                 raise('ValueError')		
     else:
 	# from restart

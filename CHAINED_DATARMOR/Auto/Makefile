@@ -9,7 +9,7 @@ SHELL := /bin/bash
 
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/Opti_Mackie_1_JOBS/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/xstart_rand_Mackie_33param/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
 # ---------------------------------------------------------------------
@@ -53,6 +53,11 @@ watch:
 # make files, copy files in run_dir, remove all netcdf files in rundir
 # submit first job, watch output 
 all : mkfile cpfile rundirclean run watch
+
+# ----------------------------------------------------------------------------
+# Runs multiple times the same problem with a different initial model
+# Need to change python script to initiate with random values in [-0.5, 3]
+# Meaning there is no pre-assumption on models
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
