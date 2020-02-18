@@ -93,6 +93,17 @@ D(++):
    Check for fort.13 file (DONE)
    pbs file: adapt bash script to controll chained submission
 
+! New: 
+	- CPSO and CPSO are known for premature convergence
+	  A way to prevent premature converge is to run many different runs 
+	  with different initial models
+	  Initial models may be random uniform in the range [-0.5, 3]
+	  To perform this we have to modify python script at first job
+	  and to add a Makefile directive to generate multiple runs at onc
+   DONE : added new_feature: init_start in python main script
+          swarm can be initialized with all same values Xi
+          and random uniform value for each bee or Xi + random uniform
+
 E: REAL_CONFIG
    Set up and RUN realistic configuration with high number of parameters 
 

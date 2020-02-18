@@ -12,6 +12,7 @@ Files to be edited are MT3D_CPSO_datar_chained.py and mt3d_cpso_chained.pbs
 -------- MT3D_CPSO_datar_chained.py-------------
 - output from mt3d are written netcdf file 
 this file name has to be edited outfile = method + '_' + mysfit + '_' + config + '.nc'
+- init_start : define how swarm is initialized
 
 ------------- stochopy I/O modified -------------------
 
