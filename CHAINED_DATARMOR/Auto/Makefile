@@ -1,3 +1,11 @@
+# JCollin 2020
+#----> MULTIPLE CPSO RUN
+# To clean run directory : > make multi_clean 
+# To generate cpso chained files : > make multi_mkfile
+# To duplicate data for multiple runs : > make multi_cpfile
+# To submit every first job : > make multi_run 
+
+# ---> SINGLE CPSO RUN
 # To generate Files : > make mkfile
 # To export files (Conf and auto) in rundir > Make cpfile 
 # To remove netcdf files from rundir : > make rundirclean
@@ -9,9 +17,10 @@ SHELL := /bin/bash
 
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/xstart_rand_Mackie_33param/
+RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
+n_runs=2
 # ---------------------------------------------------------------------
 # Single run of cpso
 # Ideal for tests or estimating number of iteration for convergence
@@ -61,17 +70,44 @@ all : mkfile cpfile rundirclean run watch
 
 # ----------------------------------------------------------------------------
 # Runs multiple times the same problem with a different initial model
-# Need to change python script to initiate with random values in [-0.5, 3]
-# Meaning there is no pre-assumption on models
+# 
 
-.PHONY: multi_mkfile multi_cpfile
+.PHONY: multi_mkfile multi_cpfile multi_clean multi_run multi_all multi_watch
 
+# creates cpso files for chained jobs
 multi_mkfile:
 	./mk_files.sh
 	@echo ""
 
+# duplicates run in separate folders
 multi_cpfile:
+	cp -f multi_cp_files_gen.sh multi_cp_files.sh
+	sed -i "s:n_runs_xxx:${n_runs}:g" multi_cp_files.sh
+	sed -i "s:RUN_DIR_XXX:${RUN_DIR}:g" multi_cp_files.sh
+	sed -i "s:CONF_DIR_XXX:${CONF_DIR}:g" multi_cp_files.sh
+	sed -i "s:MACKIE_XXX:${MACKIE}:g" multi_cp_files.sh
+	./multi_cp_files.sh
 
+# submit all run
+multi_run:
+	cd ${RUN_DIR}; \
+	for i in $(shell seq 1 ${n_runs}); do \
+            cd run_$$i; qsub run_1.pbs ;\
+        done
+
+# watch fist job
+multi_watch:
+	qstat -u ${USER}
+	@if [ -f ${RUN_DIR}/run_1/output_1 ]; then rm ${RUN_DIR}/run_1/output_1; fi
+	@touch ${RUN_DIR}/run_1/output_1
+	tail -f ${RUN_DIR}/run_1/output_1
+
+# clean directories
+multi_clean:
+	rm -rf ${RUN_DIR}/*
+
+## Full 
+multi_all : multi_clean multi_mkfile multi_cpfile multi_run
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
