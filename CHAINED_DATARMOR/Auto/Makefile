@@ -13,6 +13,11 @@ RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/xstart_rand_Mackie_33param/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
 # ---------------------------------------------------------------------
+# Single run of cpso
+# Ideal for tests or estimating number of iteration for convergence
+# However there is a risk of premature convergence in local minima
+# for multiple runs of cpso see below
+
 .PHONY: cpfile mkfile rundirclean run watch all
 
 # create automatic scripts .pbs and .py for chained jobs
@@ -58,6 +63,15 @@ all : mkfile cpfile rundirclean run watch
 # Runs multiple times the same problem with a different initial model
 # Need to change python script to initiate with random values in [-0.5, 3]
 # Meaning there is no pre-assumption on models
+
+.PHONY: multi_mkfile multi_cpfile
+
+multi_mkfile:
+	./mk_files.sh
+	@echo ""
+
+multi_cpfile:
+
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
