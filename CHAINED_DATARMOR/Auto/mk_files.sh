@@ -17,7 +17,7 @@ source /usr/share/Modules/3.2.10/init/bash
 RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso/"
 
 n_jobs=5
-max_iter=100
+max_iter=1000
 
 # Former parameter found in input file
 model_rho="model_inv33.ini"

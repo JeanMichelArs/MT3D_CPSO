@@ -20,7 +20,7 @@ SHELL := /bin/bash
 RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso/
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
-n_runs=2
+n_runs=20
 # ---------------------------------------------------------------------
 # Single run of cpso
 # Ideal for tests or estimating number of iteration for convergence
@@ -90,9 +90,8 @@ multi_cpfile:
 
 # submit all run
 multi_run:
-	cd ${RUN_DIR}; \
 	for i in $(shell seq 1 ${n_runs}); do \
-            cd run_$$i; qsub run_1.pbs ;\
+            cd ${RUN_DIR}/run_$$i; qsub run_1.pbs ;\
         done
 
 # watch fist job
@@ -106,8 +105,14 @@ multi_watch:
 multi_clean:
 	rm -rf ${RUN_DIR}/*
 
+mutli_qdel:
+	id=7690005; \ 
+	for i in $(shell seq 1 ${n_runs}); do \
+	  qdel ;\
+        done
+
 ## Full 
-multi_all : multi_clean multi_mkfile multi_cpfile multi_run
+multi_all : multi_clean multi_mkfile multi_cpfile multi_run multi_clean
 
 # ----------------------------------------------------------------------------
 .PHONY: clean
