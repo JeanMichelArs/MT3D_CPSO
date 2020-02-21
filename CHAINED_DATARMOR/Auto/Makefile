@@ -13,11 +13,14 @@
 # To watch output : make watch
 #
 # To make all of this : > make all
+# --------------------------------------------------------------------
 SHELL := /bin/bash
 
-
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR=/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso/
+SIMU=multiple_cpso
+RUN_DIR=${SCRATCH}/MT3D_CPSO/${SIMU}
+DATA=${DATAWORK}/MT3D_CPSO
+SAVE_DIR=${DATA}/${SIMU}
 CONF_DIR=/home2/datahome/jcollin/MT3D_CPSO/Config/
 MACKIE=/home2/datahome/jcollin/MT3D_CPSO/mackie3d.so
 n_runs=20
@@ -37,8 +40,8 @@ mkfile:
 # copy automatically generated files into RUN_DIR
 cpfile:
 	@echo "copy auto files in ${RUN_DIR}"
-	cp -f -t ${RUN_DIR} run_[0-9]*.pbs mt3d_[0-9]*.py 
-	cp -Rf ${CONF_DIR}/* ${RUN_DIR}
+	cp -f -t ${RUN_DIR}/ run_[0-9]*.pbs mt3d_[0-9]*.py 
+	cp -Rf ${CONF_DIR}/* ${RUN_DIR}/
 	@echo "copy mackie3d in ${RUN_DIR}"
 	cp -f ${MACKIE} ${RUN_DIR}/ 
 	@echo ""
@@ -105,6 +108,8 @@ multi_watch:
 multi_clean:
 	rm -rf ${RUN_DIR}/*
 
+# TODO: find a way to del all processes 
+# - temporary solution is : > make multi_clean
 mutli_qdel:
 	id=7690005; \ 
 	for i in $(shell seq 1 ${n_runs}); do \
@@ -114,8 +119,18 @@ mutli_qdel:
 ## Full 
 multi_all : multi_clean multi_mkfile multi_cpfile multi_run multi_clean
 
+# Save data to $DATAWORK
+multi_save:
+	if [ ! -d ${SAVE_DIR} ]; then mkdir ${SAVE_DIR}; fi
+	for i in $(shell seq 1 ${n_runs}); do \
+	  cp ${RUN_DIR}/run_$$i/*.nc ${SAVE_DIR}/cpso_$$i.nc; \
+	done
+	cd ${RUN_DIR}/run_1; \
+	cp -r data *.ini per ini1d input ${SAVE_DIR}  	
 # ----------------------------------------------------------------------------
 .PHONY: clean
+
+# clean local Auto directory
 clean:
 	rm -f *.out *.o[0-9]* *.log *.err run_[0-9]*.pbs mt3d_[0-9]*.py \
 	rm gen_mt3d.pbs gen_mt3d.py

@@ -14,7 +14,7 @@ source /usr/share/Modules/3.2.10/init/bash
 # - total number of iteration (sum of max_iter per job)
 # - max_iter must be a multiple of n_jobs
 
-RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso/"
+RUN_DIR="/home2/scratch/jcollin/MT3D_CPSO/multiple_cpso"
 
 n_jobs=5
 max_iter=1000
@@ -79,7 +79,7 @@ do
   sed -i "s/popsize_xxx/${popsize}/g" mt3d_${i_job}.py
 
   # ---> modify rundir, i_jobs 
-  sed -i "s:RUN_DIR_XXX:${RUN_DIR}:g" run_${i_job}.pbs
+#  sed -i "s:RUN_DIR_XXX:${RUN_DIR}:g" run_${i_job}.pbs
   sed -i "s/mt3d_xxx.py/mt3d_${i_job}.py/g" run_${i_job}.pbs
   sed -i "s/output_xxx/output_${i_job}/g" run_${i_job}.pbs
   sed -i "s/mt3d_xxx.pbs/run_$(($i_job+1)).pbs/g" run_${i_job}.pbs

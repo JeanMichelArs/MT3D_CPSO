@@ -34,8 +34,6 @@ echo
 ####################################
 # Run Directory
 
-RUN_DIR=RUN_DIR_XXX
-
 export mpiproc=`cat $PBS_NODEFILE  |wc -l`
 echo "job running with  $mpiproc mpi process "
 echo "workdir:  $PBS_O_WORKDIR  "
