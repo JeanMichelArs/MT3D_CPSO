@@ -14,6 +14,7 @@
 #
 # To make all of this : > make all
 # --------------------------------------------------------------------
+
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
@@ -126,7 +127,13 @@ multi_save:
 	  cp ${RUN_DIR}/run_$$i/*.nc ${SAVE_DIR}/cpso_$$i.nc; \
 	done
 	cd ${RUN_DIR}/run_1; \
-	cp -r data *.ini per ini1d input ${SAVE_DIR}  	
+	cp -r data *.ini per ini1d input ${SAVE_DIR}
+
+merge:
+	cd ${SAVE_DIR}; \
+	source /usr/share/Modules/3.2.10/init/bash; \
+	module load nco/4.7.1_conda; \
+	ncecat *nc -O merged.nc  	
 # ----------------------------------------------------------------------------
 .PHONY: clean
 
