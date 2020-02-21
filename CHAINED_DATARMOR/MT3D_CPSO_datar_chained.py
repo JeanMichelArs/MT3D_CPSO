@@ -72,8 +72,8 @@ it_end = np.min([i_job*n_iter_job, max_iter])
 # random uniform betweend cst_lower/2 and cst_upper/2
 
 init_xstart="xi_rand_uniform"
-cst_lower = 2 
-cst_upper = 2
+cst_lower = 1 
+cst_upper = 1
 # ----------------------------
 # Output file
 if rank==0:
@@ -586,7 +586,7 @@ if rank==0:
 		Xstart[i, :] = np.random.uniform(low=-cst_lower, high=cst_upper, size=Xi.shape)
             elif init_xstart is 'xi_rand_uniform':
 	        #--------> each bee initialized around a uniform around Xi
-                Xstart[i, :] = Xi + np.random.uniform(low=-cst_lower/2, high=cst_upper/2, size=Xi.shape)
+                Xstart[i, :] = Xi + np.random.uniform(low=-cst_lower, high=cst_upper, size=Xi.shape)
 	    else:
                 print('wrong init_xstart value, must be "xi", "rand_uniform" or "xi_rand_uniform"')
                 raise('ValueError')		
