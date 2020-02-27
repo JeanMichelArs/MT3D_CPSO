@@ -118,8 +118,11 @@ RoPh_data=None
 popsize=None
 #max_iter=None
 model=None
-Xi=None
+Xo=None
+modelp=None
+Xip=None
 tmpDir=None
+nsound=None
 
 
 
@@ -151,7 +154,7 @@ if rank==0:
     #valeur modele
     ind=4+(nz)+(nz-1)*ny+(ny)
     l=linecache.getline(file, ind+1)
-    Xi=np.log10(np.hstack(float(l.split()[i+1]) for i in np.arange(len(l.split())-1) ))
+    Xo=np.log10(np.hstack(float(l.split()[i+1]) for i in np.arange(len(l.split())-1) ))
     ### print 'Xi',Xi.shape,Xi
     #Indice
     ind=5
@@ -168,7 +171,47 @@ if rank==0:
             model_i[:,i,k]=L
     
     ### print 'model:',model.shape,model,'unique',np.unique(model)
-    rho=10**Xi[model-1]
+    rhoini=10**Xo[model-1]
+
+    # INITIALIZE PARAMETER MODEL 
+    #---------------------------
+    
+    #Read 3D parameter model
+    file = 'parameter_model.ini'
+    ld = linecache.getline(file, 1)
+    lx = linecache.getline(file, 2)
+    ly = linecache.getline(file, 3)
+    lz = linecache.getline(file, 4)
+
+    dim=ld.split()
+    nx=int(dim[0])
+    ny=int(dim[1])
+    nz=int(dim[2])
+    #vecteur de taille de maille
+    hx=np.hstack(float(lx.split()[i]) for i in np.arange(nx) )
+    hy=np.hstack(float(ly.split()[i]) for i in np.arange(ny) )
+    hz=np.hstack(float(lz.split()[i]) for i in np.arange(nz) )
+    #valeur modele
+    ind=4+(nz)+(nz-1)*ny+(ny)
+    l=linecache.getline(file, ind+1)
+    Xip=np.log10(np.hstack(float(l.split()[i+1]) for i in np.arange(len(l.split())-1) ))
+    ### print 'Xi',Xi.shape,Xi
+    #Indice
+    ind=5
+    modelp=np.zeros((nx*ny*nz),dtype=int)
+    model_ip=np.zeros((nx,ny,nz),dtype=int)
+    for k in np.arange(nz):
+        ind=ind+1
+        for i in np.arange(ny):
+            ind=4+(k+1)+(k)*ny+(i+1)
+            l=linecache.getline(file, ind)
+            L=np.vstack(float(l.split()[i]) for i in np.arange(nx) )
+            L.shape=(nx,)
+            modelp[k*nx*ny+i*nx:k*nx*ny+i*nx+nx]=L
+            model_ip[:,i,k]=L
+    
+    ### print 'model:',model.shape,model,'unique',np.unique(model)
+    rhoparam=10**Xip[modelp-1]
     
     #Periods
     perpy=np.loadtxt('per',skiprows=1)
@@ -304,7 +347,10 @@ RoPh_data=comm.bcast(RoPh_data, root=0)
 popsize=comm.bcast(popsize, root=0)
 max_iter=comm.bcast(max_iter, root=0)
 model=comm.bcast(model, root=0)
-Xi=comm.bcast(Xi, root=0)
+Xo=comm.bcast(Xo, root=0)
+modelp=comm.bcast(modelp, root=0)
+Xip=comm.bcast(Xip, root=0)
+nsound=comm.bcast(nsound, root=0)
 tmpDir=comm.bcast(tmpDir, root=0)
 
 #---------------------------------#
@@ -317,7 +363,7 @@ tmpDir=comm.bcast(tmpDir, root=0)
 def F(X):
     starttime = time()
     #X=np.around(X,1) # Arrondie au dixieme pour discretiser l'espace des parametres 
-    rest=10**X[model-1]
+    rest=10**(Xo[model-1]+X[modelp-1])
     cost=XHI2(rest) 
     #print("Elapsed time: %.2f seconds" % (time() - starttime))
     return cost
@@ -516,8 +562,7 @@ def XHI2(X):
         #         resp_f.write(str(rhoyy_d[i])+'        '+str(Erhoyy_d[i])+'        '+str(rhoyy_ci[i])+'        '+str(phiyy_d[i])+'        '+str(Ephiyy_d[i])+'        '+str(phiyy_ci[i])+'        ')
         #         resp_f.write('\n')
         #
-        #    resp_f.close()
-            
+        #    resp_f.close()    
         #-----------------------------------
         #COMPUTE RMS USING Roa & PHASE
         #-----------------------------------
@@ -551,6 +596,7 @@ def XHI2(X):
     print 'RMS Phase => RMS1p=',RMSpp,' degree'
     print ''
         
+    #XHI2 = np.linalg.norm(X)
     return XHI2
 
 
@@ -580,8 +626,8 @@ mod_best = None
 V_prev = None
 
 if rank==0:
-    n_dim = len(np.unique(model))
-    Xstart=np.zeros((popsize,len(Xi)))
+    n_dim = len(Xip)
+    Xstart=np.zeros((popsize,len(Xip)))
     
     if i_job==1:
         # First job
@@ -591,13 +637,13 @@ if rank==0:
             if init_xstart is 'xi':
 	        # -------> every bee of the swarm is initialized to Xi
 	        # Probably not the right way to do it
-                Xstart[i, :] = Xi
+                Xstart[i, :] = Xip
             elif init_xstart is 'rand_uniform':
                 # -------> each bee being a diffenrent random uniform between lower and upper 
-		Xstart[i, :] = np.random.uniform(low=-cst_lower, high=cst_upper, size=Xi.shape)
+		Xstart[i, :] = np.random.uniform(low=-cst_lower, high=cst_upper, size=Xip.shape)
             elif init_xstart is 'xi_rand_uniform':
 	        #--------> each bee initialized around a uniform around Xi
-                Xstart[i, :] = Xi + np.random.uniform(low=-cst_lower, high=cst_upper, size=Xi.shape)
+                Xstart[i, :] = Xip + np.random.uniform(low=-cst_lower, high=cst_upper, size=Xip.shape)
 	    else:
                 print('wrong init_xstart value, must be "xi", "rand_uniform" or "xi_rand_uniform"')
                 raise('ValueError')		
@@ -626,8 +672,8 @@ V_prev = comm.bcast(V_prev, root=0)
 # ---> lower and upper should remain the exact same regardless of jobs
 # ---> may be better to keep them in netcdf file or a coefficient
 # ---> in netcdf file
-lower = Xi - np.ones(n_dim) * cst_upper
-upper = Xi + np.ones(n_dim) * cst_lower
+lower = Xip - np.ones(n_dim) * cst_upper
+upper = Xip + np.ones(n_dim) * cst_lower
 
 # Initialize SOLVER
 # Added + 1 to max_iter to have the desired number of iteration
@@ -723,11 +769,13 @@ if rank==0:
         nc.createVariable('hy', 'f8', ('ny'))
         nc.createVariable('hz', 'f8', ('nz'))
         nc.createVariable('rho_i', 'f8', ('nx','ny','nz')) 
+        nc.createVariable('rho_iparam', 'f8', ('nx','ny','nz')) 
         nc.createVariable('xopt', 'f8', ('nparam'))
         nc.createVariable('log_xopt', 'f8', ('nparam'))
         nc.createVariable('models', 'f8', ('popsize', 'nparam', 'iter'))
         nc.createVariable('energy', 'f8', ('popsize', 'iter'))  
         nc.createVariable('rho_opt', 'f8', ('nx', 'ny', 'nz', 'n_jobs')) 
+        nc.createVariable('rho_optparam', 'f8', ('nx', 'ny', 'nz', 'n_jobs')) 
     else:
         nc = Dataset(outfile, 'a')
     
@@ -740,12 +788,14 @@ if rank==0:
     # ---> model_i useless
     # ---> 10**Xi[model_i-1] distrib ini
     # ---> 10**Xopt[model_i-1] !! distrib_3D_opt (n_job,nx,ny,nz)
-        nc.variables['rho_i'][:,:,:] = 10**Xi[model_i-1]
+        nc.variables['rho_i'][:,:,:] = 10**Xo[model_i-1]
+        nc.variables['rho_iparam'][:,:,:] = 10**Xip[model_ip-1]
         
     # ----> modify [it_start:it_end]
     # ----> xopt and log_xopt are erased after each jobi
     # ----> Removed last 
-    nc.variables['rho_opt'][:, :, :, i_job-1] = 10**xopt[model_i-1]
+    nc.variables['rho_opt'][:, :, :, i_job-1] =10**(Xo[model_ip-1]+xopt[model_ip-1])
+    nc.variables['rho_optparam'][:, :, :, i_job-1] =10**xopt[model_ip-1]
     nc.variables['xopt'][:] = xopt
     nc.variables['models'][:, :, it_start:it_end] = ea.models[:, :, 1:]
     nc.variables['energy'][:, it_start:it_end] = ea.energy[:, 1:]

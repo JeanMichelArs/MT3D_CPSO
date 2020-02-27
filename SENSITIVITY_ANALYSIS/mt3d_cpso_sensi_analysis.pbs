@@ -1,0 +1,75 @@
+#!/bin/bash
+#PBS -q mpi
+#PBS -l walltime=03:00:00
+## #PBS -l select=1:ncpus=28:mem=30g
+
+# C SHELL
+echo "source Bash"
+source /usr/share/Modules/3.2.10/init/bash
+
+# get the path for python
+echo "Purge modules"
+module purge
+###############################
+# Conda
+echo "Load anaconda"
+module load conda/latest 
+################################
+# NETCDF 
+echo "load netcdf"
+module load NETCDF/4.3.3.1-mpt-intel2016
+################################
+#  ENV MTD3
+# Need to do it twice with csh
+echo "load conda environement"
+source activate mackie_conda
+
+echo "------- Python version: ---------- ",
+python --version
+
+echo
+echo "------- conda envs --------"
+conda info --envs
+echo
+####################################
+# Run Directory
+
+export mpiproc=`cat $PBS_NODEFILE  |wc -l`
+echo "job running with  $mpiproc mpi process "
+echo "workdir:  $PBS_O_WORKDIR  "
+# cd to the directory you submitted your job
+cd $PBS_O_WORKDIR
+
+date
+time mpiexec -np $mpiproc python -W ignore mt3d_xxx.py > output_xxx   
+date
+
+####################################################
+# Ensure mt3d ran properly before submitting next job
+# need to adapt in bash... 
+# this is CSH below
+rm tmp
+grep -i "error" output_xxx > tmp
+
+#let nw=`wc -c tmp | cut -d' ' -f1`
+#echo $nw
+#nerrors = $nw
+#echo $nerrors
+
+#if ( `expr $nerrors` ==  0  ) then
+#    echo "mt3d ran without erros"
+#    echo "submitting next job"
+#    qsub mt3d_xxx.pbs
+#else
+#    echo "mt3d failed to run"
+#    echo "Stop chainning jobs"
+#endif
+
+# --- > temporary
+qsub mt3d_xxx.pbs
+
+## submit next Job if runs successfully
+#if ( $status == 0 ) then
+#    qsub mt3d_xxx.pbs
+#end if
+
