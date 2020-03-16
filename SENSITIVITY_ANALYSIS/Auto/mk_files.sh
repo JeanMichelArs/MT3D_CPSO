@@ -14,19 +14,19 @@ source /usr/share/Modules/3.2.10/init/bash
 # - total number of iteration (sum of max_iter per job)
 # - max_iter must be a multiple of n_jobs
 
-RUN_DIR="${SCRATCH}/MT3D_CPSO/multiple_cpso"
+RUN_DIR="${SCRATCH}/MT3D_CPSO/bolivia_24param"
 
-n_jobs=10
-max_iter=2000
+n_jobs=2
+max_iter=4
 
 # Former parameter found in input file
 # ** JARS add new model 
-model_rho="model_3Dcross_56.ini"
+model_rho="parameter_model.ini"
 ref_East=0.0
 ref_North=0.0
 angle_grid=0.0
-MTsounds_positions="mt_sounding.pos"
-popsize=112
+MTsounds_positions="MTcolorada_sounding.pos"
+popsize=56
 
 # Python and pbs scripts
 # ** JARS Change files 

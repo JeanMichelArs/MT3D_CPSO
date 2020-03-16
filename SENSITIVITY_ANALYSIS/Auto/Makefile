@@ -18,13 +18,13 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-SIMU=multiple_3Dcross_56
+SIMU=bolivia_24param
 RUN_DIR=${SCRATCH}/MT3D_CPSO/${SIMU}
 DATA=${DATAWORK}/MT3D_CPSO
 SAVE_DIR=${DATA}/${SIMU}
-CONF_DIR=${HOME}/CODE_TEST/MT3D_CPSO/chained_datar/3D_cross/56param
-MACKIE=${HOME}/CODE_DEV/Mackie_F2PY_silent/mackie3d.so
-n_runs=20
+CONF_DIR=${HOME}/MT3D_CPSO/Config/bolivia_24param
+MACKIE=${HOME}/MT3D_CPSO/mackie3d.so
+n_runs=5
 # ---------------------------------------------------------------------
 # Single run of cpso
 # Ideal for tests or estimating number of iteration for convergence
