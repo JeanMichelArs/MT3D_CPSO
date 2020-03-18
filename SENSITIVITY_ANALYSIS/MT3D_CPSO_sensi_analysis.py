@@ -71,9 +71,9 @@ it_end = np.min([i_job*n_iter_job, max_iter])
 # ** init_xstart = "xi_rand_uniform" each bee initialized around around xi + a 
 # random uniform betweend cst_lower/2 and cst_upper/2
 
-init_xstart="xi_rand_uniform"
-cst_lower = 1 
-cst_upper = 1
+init_xstart= init_xstart_xxx
+cst_lower = cst_lower_xxx  
+cst_upper = cst_upper_xxx
 # ----------------------------
 # Output file
 if rank==0:
@@ -81,13 +81,11 @@ if rank==0:
     config = '33_param'
     method = 'cpso'
     outfile = method + '_' + mysfit + '_' + config + '.nc'
-    xi_init = 'xi_random'
     print "Output file : ", outfile  
     print 'job running on ',nproc,' processors'
     if (os.path.isfile(outfile) and i_job==1):
-        print 'Fatal Error ', outfile, " already exists"
-        print 'This may alter algorithm convergence as we use x_opt'
-        MPI.COMM_WORLD.abort() 
+        os.remove(outfile)
+        print "outfile was deleted"
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
@@ -177,7 +175,7 @@ if rank==0:
     #---------------------------
     
     #Read 3D parameter model
-    file = 'parameter_model.ini'
+    file = parameter_model.ini_xxx
     ld = linecache.getline(file, 1)
     lx = linecache.getline(file, 2)
     ly = linecache.getline(file, 3)

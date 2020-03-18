@@ -25,7 +25,7 @@ from netCDF4 import Dataset
 RUNDIR = "RUN_DIR_XXX"
 nc_file = "nc_file_xxx"
 out_file = RUNDIR + '/' + "p_best.nc"
-niter_zoom = 100
+niter_zoom = 0
 debug = False
 threshold = 40
 # ----------------------------------------------------------------------------

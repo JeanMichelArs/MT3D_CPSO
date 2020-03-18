@@ -18,13 +18,13 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-SIMU=bolivia_24param
+SIMU=bolivia_24param_mbest_zoom
 RUN_DIR=${SCRATCH}/MT3D_CPSO/${SIMU}
 DATA=${DATAWORK}/MT3D_CPSO
 SAVE_DIR=${DATA}/${SIMU}
 CONF_DIR=${HOME}/MT3D_CPSO/Config/bolivia_24param
 MACKIE=${HOME}/MT3D_CPSO/mackie3d.so
-n_runs=5
+n_runs=20
 # ---------------------------------------------------------------------
 # Single run of cpso
 # Ideal for tests or estimating number of iteration for convergence
@@ -136,7 +136,11 @@ merge:
 	cd ${SAVE_DIR}; \
 	source /usr/share/Modules/3.2.10/init/bash; \
 	module load nco/4.7.1_conda; \
-	ncecat *nc -O merged.nc  	
+	ncecat *nc -O merged.nc  
+
+multi_debug:
+	cd ${RUN_DIR}/run_1; qsub -I python -i  ;\
+	qsub -I 
 # ----------------------------------------------------------------------------
 .PHONY: clean
 

@@ -14,19 +14,32 @@ source /usr/share/Modules/3.2.10/init/bash
 # - total number of iteration (sum of max_iter per job)
 # - max_iter must be a multiple of n_jobs
 
-RUN_DIR="${SCRATCH}/MT3D_CPSO/bolivia_24param"
+RUN_DIR="${SCRATCH}/MT3D_CPSO/bolivia_24param_mbest_zoom"
 
-n_jobs=2
-max_iter=4
+n_jobs=20
+max_iter=1000
 
 # Former parameter found in input file
-# ** JARS add new model 
-model_rho="parameter_model.ini"
-ref_East=0.0
-ref_North=0.0
+# ** JARS add new model
+# - parameter_model: model structure to represent geophysical structure
+# this technique allows to minimize the total number of parameter
+# - model_rho: center of parameter space to be explored
+# may be solution from deterministic method or another cpso run...
+parameter_model="parameter_model.ini"
+model_rho="update_model.ini"
+ref_North=7513822.0
+ref_East=622901.875
 angle_grid=0.0
 MTsounds_positions="MTcolorada_sounding.pos"
 popsize=56
+# ----> added method and window for parameter research space
+# - init_xstart: a priori law on parameters 
+# - cst_upper, cst_lower window param \in [-lower, upper]^nparam
+init_xstart="xi_rand_uniform"
+cst_lower=0.3
+cst_upper=0.3
+
+
 
 # Python and pbs scripts
 # ** JARS Change files 
@@ -76,12 +89,17 @@ do
   #----> input file parameters
   # ** JARS could add something here but easier to write
   # in MT3D_CPSO_sensi_analysis.py equivalent
+  sed -i "s/parameter_model.ini_xxx/'${parameter_model}'/g" mt3d_${i_job}.py
   sed -i "s/model_rho_xxx/'${model_rho}'/g" mt3d_${i_job}.py
   sed -i "s/refmty_xxx/${ref_East}/g" mt3d_${i_job}.py
   sed -i "s/refmtx_xxx/${ref_North}/g" mt3d_${i_job}.py
   sed -i "s/angm_xxx/${angle_grid}/g" mt3d_${i_job}.py
   sed -i "s/MTsoundingpos_xxx/'${MTsounds_positions}'/g" mt3d_${i_job}.py
   sed -i "s/popsize_xxx/${popsize}/g" mt3d_${i_job}.py
+  
+  sed -i "s/init_xstart_xxx/'${init_xstart}'/g" mt3d_${i_job}.py
+  sed -i "s/cst_lower_xxx/${cst_lower}/g" mt3d_${i_job}.py
+  sed -i "s/cst_upper_xxx/${cst_upper}/g" mt3d_${i_job}.py
 
   # ---> modify rundir, i_jobs 
 #  sed -i "s:RUN_DIR_XXX:${RUN_DIR}:g" run_${i_job}.pbs

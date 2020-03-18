@@ -14,8 +14,17 @@ SHELL := /bin/bash
 
 .PHONY: p_best clean
 
-RUN_DIR=${DATAWORK}/MT3D_CPSO/multiple_cpso
+
+# ---> p_best
+# create a netcdf file with pbest(it) best mysift
+# niter_zoom = allows to compute mysfit over niter_zoom last iteration
+# also provides the total number of particles statistically relevant
+# for marginal pdf, best likehood <m>... 
+
+RUN_DIR=${DATAWORK}/MT3D_CPSO/bolivia_24param
+#RUN_DIR=${SCRATCH}/MT3D_CPSO/bolivia_24param
 nc_file=${RUN_DIR}/merged.nc
+#nc_file=${RUN_DIR}/run_1/cpso_mackie_33_param.nc
 
 p_best:  
 	cp -f pbest_gen.py pbest.py 
