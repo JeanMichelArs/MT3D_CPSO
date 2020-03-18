@@ -8,6 +8,10 @@ CHAINED_DATARMOR/Auto/run_[0-9]*.pbs
 PSO_data
 CHAINED_DATARMOR/Auto/gen_mt3d.py
 
+SENSITIVITY_ANALYSIS/Auto/mt3d_[0-9]*.py
+SENSITIVITY_ANALYSIS/Auto/run_[0-9]*.pbs
+SENSITIVITY_ANALYSIS/Auto/gen_mt3d*
+
 Example/*[0-9].pbs
 Example/*[0-9].py
 
