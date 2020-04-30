@@ -13,13 +13,13 @@ sns.set_style("dark")
 sns.set_context("talk")
 
 # ----------------------------------------------------------------------------
-refN= "refN_xxx"
-refE= "refE_xxx"
-ang= "ang_xxx"
-RUNDIR = "RUN_DIR_XXX"
-nc_file = "nc_file_xxx"
-mod_rho= "mod_rho_xxx"
-mod_param= "mod_param_xxx"
+refN= "622901.875"
+refE= "7513822.0"
+ang= "0.0"
+RUNDIR = "/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/Bolivia_115param_015"
+nc_file = "/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/Bolivia_115param_015/merged.nc"
+mod_rho= "/home2/datahome/sflora/MT3D_CPSO_TEST/sensi_analysis/Bolivia_115param_015/MT3D_BOLIVIA_IMAGIRb.fmt"
+mod_param= "/home2/datahome/sflora/MT3D_CPSO_TEST/sensi_analysis/Bolivia_115param_015/parameter_model.ini"
 out_fig1 = RUNDIR + '/' + "JointPlot_Xopt_Std.png"
 out_fig2 = RUNDIR + '/' + "Parameter_Variation_Map.png"
 # ----------------------------------------------------------------------------
