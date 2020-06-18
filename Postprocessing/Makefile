@@ -21,10 +21,10 @@ SHELL := /bin/bash
 # also provides the total number of particles statistically relevant
 # for marginal pdf, best likehood <m>... 
 
-RUN_DIR=${DATAWORK}/MT3D_CPSO/bolivia_24param
-#RUN_DIR=${SCRATCH}/MT3D_CPSO/bolivia_24param
+RUN_DIR=${DATAWORK}/MT3D_CPSO/bolivia_24param_mbest_zoom
+#RUN_DIR=${SCRATCH}/MT3D_CPSO/bolivia_24param_mbest_zoom
 nc_file=${RUN_DIR}/merged.nc
-#nc_file=${RUN_DIR}/run_1/cpso_mackie_33_param.nc
+#nc_file=${RUN_DIR}/run_11/cpso_mackie_33_param.nc
 
 p_best:  
 	cp -f pbest_gen.py pbest.py 
@@ -35,4 +35,4 @@ p_best:
 # ----------------------------------------------------------------------------
 
 clean:
-	rm *.log *.py
+	rm *.log *.pbs.o* 
