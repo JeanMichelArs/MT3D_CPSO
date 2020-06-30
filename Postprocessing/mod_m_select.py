@@ -33,8 +33,7 @@ save_netcdf = False
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
-
-    os.makedirs(folder_save)
+	os.makedirs(folder_save)
 
 # --- load data
 t0 = time.clock()
@@ -77,7 +76,12 @@ print "Error in energy minimum after subgrid :", np.min(f_grid) - f_gbest
 # ---> Xi2 weighted mean model, in log and physical space
 m_weight = pp.weighted_mean(m_grid, f_grid, kappa=1, log=True)
 mpow_weight = np.log10(pp.weighted_mean(m_grid, f_grid, kappa=1, log=False))
-print "difference between log and physical space :", np.max(np.abs(mpow_weight - m_weight))
+print "Mean-difference between log and physical space :", np.max(np.abs(mpow_weight - m_weight))
+
+# ---> Xi2 weighted STD model, in log and physical space
+std_weight = pp.weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True)
+stdpow_weight = np.log10(pp.weighted_std(mpow_weight,m_grid, f_grid, kappa=1, log=False))
+print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 
 # ---- marginal laws using kappa damping coefficient
 n_inter = 20
@@ -106,6 +110,8 @@ if save_netcdf:
     nc.createVariable('m_gbest', 'f8', ('nparam'))
     nc.createVariable('m_weight', 'f8', ('nparam'))
     nc.createVariable('mpow_weight', 'f8', ('nparam'))
+    nc.createVariable('std_weight', 'f8', ('nparam'))
+    nc.createVariable('stdpow_weight', 'f8', ('nparam'))
     nc.createVariable('pdf_m', 'f8', ('nparam', 'n_inter'))
     nc.createVariable('n_bin', 'f8', ('nparam', 'n_inter'))
     nc.createVariable('x_bin', 'f8', ('nparam', 'n_inter'))
@@ -115,6 +121,8 @@ if save_netcdf:
     nc.variables['m_gbest'][:] = m_gbest
     nc.variables['m_weight'][:] = m_weight
     nc.variables['mpow_weight'][:] = mpow_weight
+    nc.variables['std_weight'][:] = std_weight
+    nc.variables['stdpow_weight'][:] = stdpow_weight
     nc.variables['pdf_m'][:, :] = pdf_m
     nc.variables['x_bin'][:, :] = x_bin
     nc.variables['n_bin'][:, :] = n_bin

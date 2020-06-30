@@ -97,6 +97,40 @@ def weighted_mean(m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
     return m_weight
 
 # ----------------------------------------------------------------------------
+def weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
+    """ mean models weighted by energy and kappa 
+    if log = True : stats are performed on models (log10 of real models)
+    else : stats are performed on 10**models
+    """
+    if timing:
+        t0 = time.clock()
+    m_weight_T=np.transpose(m_weight)
+    nparam = m_grid.shape[1]
+    nmodel=m_grid.shape[0]
+    f_best = np.min(f_grid)
+    cov = np.empty(shape=(nparam,nparam))
+    S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
+    JPPD=np.exp((f_best - f_grid) / 2 / kappa)*S
+    if log:
+        for imod in range(nmodel):
+            m=m_grid[imod, :]
+            m.shape=(nparam,1)
+            m_T=np.transpose(m)
+            cov=cov+np.dot(m,m_T)*JPPD[i]-np.dot(m_weight,m_weight_T)*JPPD[i]
+    else: 
+        for imod in range(nmodel):
+            m=10**m_grid[imod, :]
+            m.shape=(nparam,1)
+            m_T=np.transpose(m)
+            cov=cov+np.dot(m,m_T)*JPPD[i]-np.dot(m_weight,m_weight_T)*JPPD[i]
+
+    std_weight=np.sqrt(np.diag(cov))
+
+    if timing:
+        print "ellapsed time in weighted_mean", time.clock() - t0
+    return std_weight
+
+# ----------------------------------------------------------------------------
 def marginal_law(m_grid, f_grid, m_best, n_inter=30, lower=-1, upper=1, 
                  kappa=100, timing=True, **kwargs):
     """ parameter marginal laws around m_best (is m_best, m_weighted ?)
