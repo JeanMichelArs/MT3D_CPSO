@@ -60,7 +60,7 @@ del models, energy
 
 # --->  Prefilter models according to parameter space regular subgriding
 # !!! Care must be taken that we do this parameter log 
-nruns, popsize, nparam, niter = pp.filt_models.shape
+nruns, popsize, nparam, niter = filt_models.shape
 print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
 
 threshold = np.median(filt_energy)
@@ -80,7 +80,7 @@ print "Mean-difference between log and physical space :", np.max(np.abs(mpow_wei
 
 # ---> Xi2 weighted STD model, in log and physical space
 std_weight = pp.weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True)
-stdpow_weight = np.log10(pp.weighted_std(mpow_weight,m_grid, f_grid, kappa=1, log=False))
+stdpow_weight = pp.weighted_std(10**mpow_weight,m_grid, f_grid, kappa=1, log=False)
 print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 
 # ---- marginal laws using kappa damping coefficient
@@ -89,7 +89,7 @@ lower = -1.
 upper = 1. 
 kappa = np.abs(rgrid_error) 
 
-pdf_m, n_bin, x_bin = marginal_law(m_grid, f_grid, m_gbest, n_inter=n_inter,
+pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, m_gbest, n_inter=n_inter,
                                    lower=lower, upper=upper, kappa=kappa)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 

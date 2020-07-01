@@ -98,36 +98,28 @@ def weighted_mean(m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
 
 # ----------------------------------------------------------------------------
 def weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
-    """ mean models weighted by energy and kappa 
+    """ std models weighted by energy and kappa 
     if log = True : stats are performed on models (log10 of real models)
     else : stats are performed on 10**models
+    Formulation from Luu et al. 2019
     """
     if timing:
         t0 = time.clock()
-    m_weight_T=np.transpose(m_weight)
+
     nparam = m_grid.shape[1]
     nmodel=m_grid.shape[0]
     f_best = np.min(f_grid)
-    cov = np.empty(shape=(nparam,nparam))
+    std_weight = np.empty(shape=(nparam,))
     S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
-    JPPD=np.exp((f_best - f_grid) / 2 / kappa)*S
     if log:
-        for imod in range(nmodel):
-            m=m_grid[imod, :]
-            m.shape=(nparam,1)
-            m_T=np.transpose(m)
-            cov=cov+np.dot(m,m_T)*JPPD[i]-np.dot(m_weight,m_weight_T)*JPPD[i]
+        for iparam in range(nparam):
+            std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (m_grid[:, iparam]-m_weight[iparam])**2)*S)
     else: 
-        for imod in range(nmodel):
-            m=10**m_grid[imod, :]
-            m.shape=(nparam,1)
-            m_T=np.transpose(m)
-            cov=cov+np.dot(m,m_T)*JPPD[i]-np.dot(m_weight,m_weight_T)*JPPD[i]
-
-    std_weight=np.sqrt(np.diag(cov))
+        for iparam in range(nparam):
+            std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)
 
     if timing:
-        print "ellapsed time in weighted_mean", time.clock() - t0
+        print "ellapsed time in weighted_std", time.clock() - t0
     return std_weight
 
 # ----------------------------------------------------------------------------
