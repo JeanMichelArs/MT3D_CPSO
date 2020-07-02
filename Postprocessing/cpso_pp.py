@@ -175,13 +175,12 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
             n_bin[iparam, i_inter] = np.sum(i_mod)
             if  np.sum(i_mod) >= 1:
                 if rms==True:
+                    pdf_m[iparam, i_inter] = np.sum(np.exp( - f_grid[i_mod] /2)) / \
+                                             np.sum(np.exp(- f_grid /2))
+                else:
                     pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
                                              * lmbda)) / \
                                              np.sum(np.exp((f_best - f_grid) * lmbda))
-                else:
-                    pdf_m[iparam, i_inter] = np.sum(np.exp( - f_grid[i_mod] \
-                                             * lmbda)) / \
-                                             np.sum(np.exp(- f_grid * lmbda))
             else:
                 pdf_m[iparam, i_inter] = 0
     if timing:
