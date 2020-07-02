@@ -167,7 +167,7 @@ lower=nc.lower
 upper=nc.upper
 nparam=len(m_weight)
 
-"""
+
 #PLOT 3D PARAM
 #-------------
 #color
@@ -217,9 +217,8 @@ for ipar in np.arange(nparam):
     ax2.legend(loc=0,fontsize=10)
     plt.suptitle('Parameter '+str(ipar+1)+' <Rho>:'+str(meanpar)+'$\Omega.m$ (log scale), STD:'+str(round(std_weight[ipar],2)),fontsize=12)
     plt.savefig(folder_save + '/' + 'Parameter '+str(ipar+1)+'.png')
-    #plt.show()
 
-"""
+
 # JOINTPLOT
 #----------
 
@@ -252,7 +251,7 @@ g = g.map_diag(plt.hist, edgecolor="w")
 g = g.map_offdiag(plt.scatter, edgecolor="w", s=40)
 g.axes[3,0].set_yticklabels(ylabels)
 plt.savefig(folder_save + '/' +'Pairplot_Size_Mean_Best_Std.png', format='png',dpi=300)
-plt.show()
+
 
 
 
