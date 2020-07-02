@@ -83,22 +83,22 @@ print "number of particles in subgrid", "{:e}".format(m_grid.shape[0])
 print "Error in energy minimum after subgrid :", np.min(f_grid) - f_gbest
 
 # ---> Xi2 weighted mean model, in log and physical space
-m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=1, rms=False, log=True)
-mpow_weight = np.log10(pp.weighted_mean(m_grid, ndata, f_grid, kappa=1, rms=False, log=False))
+m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
+mpow_weight = np.log10(pp.weighted_mean(m_grid, ndata, f_grid, kappa=1, rms=True, log=False))
 print "Mean-difference between log and physical space :", np.max(np.abs(mpow_weight - m_weight))
 
 # ---> Xi2 weighted STD model, in log and physical space
-std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=False, log=True)
-stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=1, rms=False, log=False)
+std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
+stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=1, rms=True, log=False)
 print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 
 # ---- marginal laws using kappa damping coefficient
 n_inter = 20
 lower = -1.  
 upper = 1. 
-kappa = ndata
+kappa = np.abs(rgrid_error) 
 
-pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, m_gbest, ndata, n_inter=n_inter,lower=lower, upper=upper, kappa=kappa, rms=False)
+pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, m_gbest, ndata, n_inter=n_inter,lower=lower, upper=upper, kappa=kappa, rms=True)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 
 #      f_best, delta_m , xbin, n_bin, pdf_m, m_weight, m_pow

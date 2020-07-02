@@ -26,12 +26,12 @@ sns.set_style("dark")
 sns.set_context("talk")
 
 # be careful if save_netcdf: outfile is removed before creating a new one
-run = 'Bolivia_115param_015' ### run = 'Bolivia_115param_015'
-NCPATH = '/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/' + run
+run = 'bolivia_24param' ### run = 'Bolivia_115param_015'
+NCPATH = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/sensi_analysis/' + run
 model_ini=NCPATH+'/MT3D_BOLIVIA_IMAGIRb.fmt'
 model_par=NCPATH+'/parameter_model.ini'
-folder_save = NCPATH + '/Postprocessing'
-ncfile=NCPATH+'/Postprocessing/mselect_mod.nc'
+folder_save = NCPATH + '/Postprocessing_rms'
+ncfile=NCPATH+'/Postprocessing_rms/mselect_mod.nc'
 
 refN=622901.875
 refE=7513822.0
@@ -249,7 +249,7 @@ sns.set_context("paper")
 g = sns.PairGrid(data)
 g = g.map_diag(plt.hist, edgecolor="w")
 g = g.map_offdiag(plt.scatter, edgecolor="w", s=40)
-g.axes[3,0].set_yticklabels(ylabels)
+#g.axes[3,0].set_yticklabels(ylabels)
 plt.savefig(folder_save + '/' +'Pairplot_Size_Mean_Best_Std.png', format='png',dpi=300)
 
 

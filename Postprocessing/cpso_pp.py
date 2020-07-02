@@ -8,6 +8,7 @@ CPSO postprocessing module
 import os
 import time
 import numpy as np
+
 # ----------------------------------------------------------------------------
 
 def NaN_filter(models, energy, timing=True, **kwargs):
@@ -73,8 +74,9 @@ def regrid(m_near, f_near, delta_m, center=True, timing=True, **kwargs):
     return m_grid, f_grid, rgrid_error
 
 # ----------------------------------------------------------------------------
-def weighted_mean(m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
+def weighted_mean(m_grid, f_grid,ndata, kappa=1,rms=False, log=True, timing=True, **kwargs):
     """ mean models weighted by energy and kappa 
+    if rms = True : stat are performed on rms instead of Xhi, ndata required!
     if log = True : stats are performed on models (log10 of real models)
     else : stats are performed on 10**models
     """
@@ -83,22 +85,35 @@ def weighted_mean(m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
     nparam = m_grid.shape[1]
     f_best = np.min(f_grid)
     m_weight = np.empty(shape=(nparam,))
-    S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
-    if log:
-        for iparam in range(nparam):
-            m_weight[iparam] = np.sum(np.exp((f_best - f_grid) / 2 / kappa) * \
-                               m_grid[:, iparam]) * S
-    else: 
-        for iparam in range(nparam):
-            m_weight[iparam] = np.sum(np.exp((f_best - f_grid) / 2 / kappa) * \
-                              10**m_grid[:, iparam]) * S
-    if timing:
-        print "ellapsed time in weighted_mean", time.clock() - t0
+    if rms==True:
+        f_grid=np.sqrt(f_grid/ndata)
+        S = 1 / np.sum(np.exp(- f_grid / 2 ))
+        if log:
+            for iparam in range(nparam):
+                m_weight[iparam] = np.sum(np.exp(- f_grid / 2 ) * \
+                                    m_grid[:, iparam]) * S
+        else: 
+            for iparam in range(nparam):
+                m_weight[iparam] = np.sum(np.exp( - f_grid / 2 ) * \
+                                    10**m_grid[:, iparam]) * S
+    else:    
+        S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
+        if log:
+            for iparam in range(nparam):
+                m_weight[iparam] = np.sum(np.exp((f_best - f_grid) / 2 / kappa) * \
+                                   m_grid[:, iparam]) * S
+        else: 
+            for iparam in range(nparam):
+                m_weight[iparam] = np.sum(np.exp((f_best - f_grid) / 2 / kappa) * \
+                                  10**m_grid[:, iparam]) * S
+        if timing:
+            print "ellapsed time in weighted_mean", time.clock() - t0
     return m_weight
 
 # ----------------------------------------------------------------------------
-def weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True, timing=True, **kwargs):
+def weighted_std(m_weight,m_grid, f_grid, ndata, kappa=1, rms=False, log=True, timing=True, **kwargs):
     """ std models weighted by energy and kappa 
+    if rms = True : stat are performed on rms instead of Xhi, ndata required!
     if log = True : stats are performed on models (log10 of real models)
     else : stats are performed on 10**models
     Formulation from Luu et al. 2019
@@ -110,22 +125,33 @@ def weighted_std(m_weight,m_grid, f_grid, kappa=1, log=True, timing=True, **kwar
     nmodel=m_grid.shape[0]
     f_best = np.min(f_grid)
     std_weight = np.empty(shape=(nparam,))
-    S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
-    if log:
-        for iparam in range(nparam):
-            std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (m_grid[:, iparam]-m_weight[iparam])**2)*S)
-    else: 
-        for iparam in range(nparam):
-            std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)
+    if rms==True:
+        f_grid=np.sqrt(f_grid/ndata)
+        S = 1 / np.sum(np.exp(- f_grid / 2 ))
+        if log:
+            for iparam in range(nparam):
+                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp(- f_grid / 2 )* (m_grid[:, iparam]-m_weight[iparam])**2)*S)
+        else: 
+            for iparam in range(nparam):
+                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp(- f_grid / 2 )* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)
+    else:
+        S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
+        if log:
+            for iparam in range(nparam):
+                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (m_grid[:, iparam]-m_weight[iparam])**2)*S)
+        else: 
+            for iparam in range(nparam):
+                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp((f_best - f_grid) / 2 / kappa)* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)
 
     if timing:
         print "ellapsed time in weighted_std", time.clock() - t0
     return std_weight
 
 # ----------------------------------------------------------------------------
-def marginal_law(m_grid, f_grid, m_best, n_inter=30, lower=-1, upper=1, 
-                 kappa=100, timing=True, **kwargs):
+def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1, 
+                 kappa=100, rms=False, timing=True, **kwargs):
     """ parameter marginal laws around m_best (is m_best, m_weighted ?)
+    if rms = True : stat are performed on rms instead of Xhi, ndata required!
     for high energy values kappa must be applied
     a good approximation is based on regridding error
     """
@@ -138,6 +164,8 @@ def marginal_law(m_grid, f_grid, m_best, n_inter=30, lower=-1, upper=1,
     f_best = np.min(f_grid)
     lmbda = 0.5 / kappa
     eps = 5 * 1e-3
+    if rms==True:
+        f_grid=np.sqrt(f_grid/ndata)
     for iparam in range(nparam):
        for i_inter in range(n_inter):
             p_inter = lower + i_inter * (upper-lower) / n_inter + m_best[iparam]
@@ -146,9 +174,14 @@ def marginal_law(m_grid, f_grid, m_best, n_inter=30, lower=-1, upper=1,
                     / n_inter * 0.5
             n_bin[iparam, i_inter] = np.sum(i_mod)
             if  np.sum(i_mod) >= 1:
-                pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
-                                         * lmbda)) / \
-                                         np.sum(np.exp((f_best - f_grid) * lmbda))
+                if rms==True:
+                    pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
+                                             * lmbda)) / \
+                                             np.sum(np.exp((f_best - f_grid) * lmbda))
+                else:
+                    pdf_m[iparam, i_inter] = np.sum(np.exp( - f_grid[i_mod] \
+                                             * lmbda)) / \
+                                             np.sum(np.exp(- f_grid * lmbda))
             else:
                 pdf_m[iparam, i_inter] = 0
     if timing:
