@@ -31,7 +31,7 @@ NCPATH = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/sensi_analysis/' + run
 model_ini=NCPATH+'/MT3D_BOLIVIA_IMAGIRb.fmt'
 model_par=NCPATH+'/parameter_model.ini'
 folder_save = NCPATH + '/Postprocessing_rms'
-ncfile=NCPATH+'/Postprocessing_rms/mselect_mod.nc'
+ncfile=NCPATH+'/Postprocessing_rms/mselect_mod_rms.nc'
 
 refN=622901.875
 refE=7513822.0
@@ -171,9 +171,9 @@ nparam=len(m_weight)
 #PLOT 3D PARAM
 #-------------
 #color
-values = range(nparam)
+values = np.linspace(min(Xo),max(Xo),nparam)
 jet_r = cm = plt.get_cmap('jet_r') 
-cNorm  = colors.Normalize(vmin=0, vmax=values[-1])
+cNorm  = colors.Normalize(vmin=values[0], vmax=values[-1])
 scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=jet_r)
 
 modelpp=np.reshape(modelp,(nx,ny,nz))
@@ -181,8 +181,9 @@ modelpp=np.reshape(modelp,(nx,ny,nz))
 vy, vx, vz = np.meshgrid(dy,dx,dz)
 
 for ipar in np.arange(nparam):
-    colorVal = scalarMap.to_rgba(values[ipar]) # color param
     valpar=np.mean(Xo[modelp==ipar+1])  # initial value param
+    idc=max(values[(values-valpar)<=0])
+    colorVal = scalarMap.to_rgba(idc) # color param    
     meanpar=round(m_weight[ipar]+valpar,2)
     Sbin=sum(n_bin[ipar, :])
     hist=np.empty(int(Sbin))
