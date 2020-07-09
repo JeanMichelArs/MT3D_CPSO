@@ -15,7 +15,7 @@ import cpso_pp as pp
 
 data_dir = "/postproc/COLLIN/MTD3/Bolivia_115param_015"
 runs = [1, 5, 10, 20]
-napram = 115
+nparam = 115
 
 # ---- getting data
 m_weight = np.empty((len(runs), nparam))
@@ -30,12 +30,19 @@ for irun in runs:
     icount = icount + 1
     
 # ---- plot <m> and <std>
-plt.figure(figsize(6, 14))
+plt.figure(figsize=(10, 8))
 for irun in range(len(runs)):
     plt.subplot(2, 1, 1)
-    plt.plot(m_weight[irun, :])
+    plt.plot(m_weight[irun, :], label=str(runs[irun]))
+    plt.ylabel('<m>')
     plt.subplot(2, 1, 2)
-    plt.plot(std_weight[irun, :])
-    
+    plt.plot(std_weight[irun, :],label=str(runs[irun]))
+    plt.xlabel('iparam') 
+    plt.ylabel('<std>')
+
+plt.legend()
 plt.show()
-                       
+
+# ---- norme 2 
+
+
