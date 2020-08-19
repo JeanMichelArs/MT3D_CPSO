@@ -1,0 +1,19 @@
+
+Computing stat for 85 percent of total iteration of 100 runs merged
+--------------------------------------------------------------------------------------------------
+Ellapsed time reading netcdf file: 381.686041
+run stopped at it  8713  /  15000
+ellapsed time in NaN_filter 0.75901
+number of models to filter:  9.563389e+07
+number of value filtered models : 9.563389e+07 / 9.563389e+07
+ellapsed time in value_filter 109.207742
+regrid error :  87.6050911287457
+ellapsed time in regrid 2602.308813
+number of particles in subgrid 1.662933e+07
+Error in energy minimum after subgrid : 249.46181272957256
+Mean-difference between log and physical space : 0.5760718426792231
+ellapsed time in weighted_std 147.271289
+ellapsed time in weighted_std 675.180607
+STD-difference between log and physical space : 9.069793582119045e+40
+ellapsed time in marginal_law 2871.119638
+/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/Bolivia_115param_015/convergence_rms/100runs_merged/mselect_mod_nruns100_iterpercent85.nc saved sucessfully

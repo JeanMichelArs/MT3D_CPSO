@@ -1,0 +1,16 @@
+Ellapsed time reading netcdf file: 365.302099
+run stopped at it  2562  /  15000
+ellapsed time in NaN_filter 0.600742
+number of models to filter:  2.812051e+07
+number of value filtered models : 2.812051e+07 / 2.812051e+07
+ellapsed time in value_filter 27.444058
+regrid error :  3.190528212009667
+ellapsed time in regrid 356.346847
+number of particles in subgrid 2.169384e+06
+Error in energy minimum after subgrid : 4501.448071418592
+Mean-difference between log and physical space : 0.33944836071946966
+ellapsed time in weighted_std 4.272361
+ellapsed time in weighted_std 24.264255
+STD-difference between log and physical space : 309622995.9229094
+ellapsed time in marginal_law 86.896761
+/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/Bolivia_115param_015/convergence_rms/total_merged/mselect_mod_nruns100_iterpercent25.nc saved sucessfully

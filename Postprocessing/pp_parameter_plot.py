@@ -26,12 +26,13 @@ sns.set_style("dark")
 sns.set_context("talk")
 
 # be careful if save_netcdf: outfile is removed before creating a new one
-run = 'bolivia_24param' ### run = 'Bolivia_115param_015'
-NCPATH = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/sensi_analysis/' + run
+run = 'Bolivia_115param_015'
+NCPATH = '/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/' + run
 model_ini=NCPATH+'/MT3D_BOLIVIA_IMAGIRb.fmt'
 model_par=NCPATH+'/parameter_model.ini'
 folder_save = NCPATH + '/Postprocessing_rms'
-ncfile=NCPATH+'/Postprocessing_rms/mselect_mod_rms.nc'
+ncfile=NCPATH+'/Postprocessing_rms/mselect_mod_bis.nc'
+mbest_centered=False
 
 refN=622901.875
 refE=7513822.0
@@ -181,9 +182,12 @@ modelpp=np.reshape(modelp,(nx,ny,nz))
 vy, vx, vz = np.meshgrid(dy,dx,dz)
 
 for ipar in np.arange(nparam):
-    valpar=np.mean(Xo[modelp==ipar+1])  # initial value param
+    valpar=np.mean(Xo[model-1][modelp==ipar+1])  # initial value param
+    print 'param',ipar,' valini',valpar
+    print ' xbin:',x_bin[ipar,:]
+    print''
     idc=max(values[(values-valpar)<=0])
-    colorVal = scalarMap.to_rgba(idc) # color param    
+    colorVal = scalarMap.to_rgba(idc) # color param 
     meanpar=round(m_weight[ipar]+valpar,2)
     Sbin=sum(n_bin[ipar, :])
     hist=np.empty(int(Sbin))
@@ -209,11 +213,13 @@ for ipar in np.arange(nparam):
     ax1.tick_params(axis='y', labelcolor='b',labelsize=8)
     ax1.tick_params(axis='x',labelsize=8)
     ax2 = ax1.twinx()
+    ax2.axvline(x=valpar, color='purple',label='ini')
     ax2.axvline(x=m_gbest[ipar]+valpar, color='yellow',label='best')
     ax2.axvline(x=meanpar, color='g',label='mean')
     ax2.plot(x_bin[ipar, :]+valpar, pdf_m[ipar, :], 'r')
     ax2.set_ylabel('Probability', color='r',fontsize=10)
     ax2.tick_params(axis='y', labelcolor='r',labelsize=8)
+    #ax2.set_xlim(valpar-1,valpar+1)
     align_yaxis(ax1, 0, ax2, 0)
     ax2.legend(loc=0,fontsize=10)
     plt.suptitle('Parameter '+str(ipar+1)+' <Rho>:'+str(meanpar)+'$\Omega.m$ (log scale), STD:'+str(round(std_weight[ipar],2)),fontsize=12)
