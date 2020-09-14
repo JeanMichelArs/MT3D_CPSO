@@ -33,19 +33,6 @@ for irun in runs:
     nc.close()
     icount = icount + 1
 
-# -> global run
-# !!! Care must be take as mselect is an old run and stats computation may 
-# differ from multi runs
-fname = data_dir + '/mselect.nc'
-m_gbest = np.empty((nparam,))
-m_gweight = np.empty((nparam,))
-
-nc = Dataset(fname, 'r')
-m_gbest[:] = nc.variables['m_gbest'][:]
-m_gweight[:] = nc.variables['m_weight'][:]
-nc.close()
-
-# ---- plot <m> and <std>
 plt.figure(figsize=(10, 8))
 for irun in range(len(runs)):
     plt.subplot(2, 1, 1)
