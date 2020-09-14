@@ -132,27 +132,27 @@ if exists:
 
 os.mkdir(path+'marginal_prob/')
 
-Iparam=2  # Interval param en log Rho
-Lower=Xi-Iparam
-Upper=Xi+Iparam
-Ninter=20
-Interv=np.linspace(Lower,Upper,Ninter)
+Iparam = 2  # Interval param en log Rho
+Lower = Xi - Iparam
+Upper = Xi + Iparam
+Ninter = 20
+Interv = np.linspace(Lower, Upper, Ninter)
 
 for k in range(nparam):
-    mrgl=np.zeros((Ninter-1,2))
+    mrgl = np.zeros((Ninter-1, 2))
     for nn in range(Ninter-1):
-        cI=(Interv[nn,k]+Interv[nn+1,k])/2
-        dI=cI-Interv[nn,k]
-        dist=np.abs(models[:,k,:]-cI)
-        ii=np.where(dist<=dI)
-        lsample=len(ii[0])
-        if lsample>0:
-            prob=sum(np.exp(-energy[ii[0],ii[1]]*FF/2))/sum(np.exp(-fit_inv/2))
+        cI = (Interv[nn, k] + Interv[nn+1, k]) / 2
+        dI = cI - Interv[nn, k]
+        dist = np.abs(models[:, k, :] - cI)
+        ii = np.where( dist <= dI)
+        lsample = len(ii[0])
+        if lsample > 0:
+            prob = sum(np.exp(-energy[ii[0], ii[1]]*FF/2)) / sum(np.exp(-fit_inv/2))
         else:
             prob='nan'
 
-        mrgl[nn,:]=np.array([cI,prob])
-        plt.scatter(cI,prob)
+        mrgl[nn, :] = np.array([cI, prob])
+        plt.scatter(cI, prob)
         
     plt.plot(mrgl[:,0],mrgl[:,1],'--r')
     """
