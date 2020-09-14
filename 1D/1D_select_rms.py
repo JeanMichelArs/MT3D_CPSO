@@ -4,6 +4,7 @@
 '''
 
 #-----------------------------------------------------------------------------
+import sys
 import os
 import time
 import numpy as np
@@ -13,7 +14,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import glob
 
+sys.path.append('../Postprocessing/')
 import cpso_pp as pp
+
+# ----------------------------------------------------------------------------
+
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -25,9 +30,14 @@ def align_yaxis(ax1, v1, ax2, v2):
     ax2.set_ylim(miny+dy, maxy+dy)
 # ----------------------------------------------------------------------------
 # be careful if save_netcdf: outfile is removed before creating a new one
-run = ''
-NCPATH = '/home/jeremy/Bureau/Project/MT3D_CPSO/MT3D_CPSO/Data/1D/Test'
-folder_save = NCPATH + run
+# cpso_path : cpso output
+# conf_dir : configuration files
+# folder_save : parameter uncertainty estimates
+
+run = 'mod1D_Bolivia_001'
+cpso_path = '/home/j/jcollin/MT3D_CPSO/RUN/' + run
+conf_dir = '/home/j/jcollin/MT3D_CPSO/Config/1D'
+folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/mod1D_MargLaw_test.nc"
 save_netcdf = True
@@ -38,7 +48,7 @@ if not os.path.exists(folder_save):
 
 # --- load data
 t0 = time.clock()
-nc = Dataset(NCPATH + '/mod1D_Bolivia_001.nc')
+nc = Dataset(cpso_path + '/mod1D_Bolivia_001.nc')
 energy = np.array(nc.variables['energy'][:])
 models =  np.array(nc.variables['models'][:])
 logrhosynth =  np.log10(np.array(nc.variables['rho_i'][:])[0,0,:])
@@ -47,7 +57,7 @@ print "Ellapsed time reading netcdf file:", time.clock() - t0
 print''
 #---------------------------------------------------------------------------
 # MT data counting (needed for rms option)
-os.chdir(NCPATH+'/data/')
+os.chdir(conf_dir)
 ndata = 0
 for fn in glob.glob('*.ro*'):
 	with open(fn) as f:
@@ -154,11 +164,11 @@ if save_netcdf:
 if save_plot:
     print "plot results"
     for ipar in range(nparam):
-        fig=plt.figure()
-        valpar=round(logrhosynth[ipar],2)
-        meanpar=round(m_weight[ipar],2)
-        Sbin=sum(n_bin[ipar, :])
-        hist=np.empty(int(Sbin))
+        fig = plt.figure()
+        valpar = round(logrhosynth[ipar], 2)
+        meanpar = round(m_weight[ipar], 2)
+        Sbin = sum(n_bin[ipar, :])
+        hist = np.empty(int(Sbin))
         for j in range(len(n_bin[ipar, :])):
             hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]-np.diff(x_bin[ipar, :])[0]/2
         ax1 = fig.add_subplot(111)

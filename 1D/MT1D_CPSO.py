@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------------
 
 import sys
-sys.path.append('/home/jeremy/Bureau/Project/MT3D_CPSO/MT3D_CPSO/Analyse/')
+sys.path.append('/data/users/j/jcollin/MT3D_CPSO/Analyse/')
 import numpy as np
 import linecache
 import matplotlib.pyplot as plt
@@ -53,7 +53,7 @@ if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
     #--------------------------------------------
     #Read 1D model
-    conf_path = '/home/jeremy/Bureau/Project/MT3D_CPSO/MT3D_CPSO/Config/1D'
+    conf_path = '../Config/1D'
     filed = conf_path + '/mod1D_Bolivia_001'#raw_input("Initial 1D MT model:")
     hz,rhosynth = np.loadtxt(filed,unpack=True)
     nz = len(hz)
@@ -62,8 +62,8 @@ if rank==0:
     nx = 1
     ny = 1
     # CPSO parameter
-    popsize = 60#input("Size of model SWARM:")
-    max_iter = 500*nz#input("Number of iteration:")
+    popsize = 18 #input("Size of model SWARM:")
+    max_iter = 100 *nz #input("Number of iteration:")
     #Periods
     perpy = np.loadtxt(conf_path + '/per',skiprows=1)
     nper = len(perpy)
