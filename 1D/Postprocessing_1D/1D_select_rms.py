@@ -14,7 +14,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import glob
 
-sys.path.append('../Postprocessing/')
+sys.path.append('../../Postprocessing/')
 import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
