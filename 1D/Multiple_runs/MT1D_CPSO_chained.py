@@ -27,7 +27,6 @@ from netCDF4 import Dataset
 # ----------------------------------------------------------------------------
 outdir = '/postproc/COLLIN/MTD3/Bolivia_1D_8param/test'
 irun = sys.argv[1]
-
 # ----------------------------------------------------------------------------
 comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
@@ -195,13 +194,13 @@ def F(X):
 def XHI2(X):
     # FORTRAN FORMAT ARRAYS
     X = np.asfortranarray(X)
-    print ' '
-    print ' ################'
-    print ' ----------------'
-    print ' CALL MACKIE F2PY'
-    print ' ----------------'
-    print ' ################'
-    print ' '
+    #print ' '
+    #print ' ################'
+    #print ' ----------------'
+    #print ' CALL MACKIE F2PY'
+    #print ' ----------------'
+    #print ' ################'
+    #print ' '
     #print mod1D.shape, perpy.shape, X.shape, hx.shape,hy.shape,hz.shape
     hxsurf,hysurf,hzsurf,exsurf,eysurf=mackie3d.mtd3(mod1D,perpy,X,hx,hy,hz)
     ###########################
@@ -242,9 +241,9 @@ def XHI2(X):
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
     XHI2=(sum((np.real(z)-np.real(zc))**2/Erz**2)+sum((np.imag(z)-np.imag(zc))**2/Erz**2))/2
-    print ''
-    print 'Magnetotelluric Misfit XHI2=>',XHI2
-    print ''
+    #print ''
+    #print 'Magnetotelluric Misfit XHI2=>',XHI2
+    #print ''
     return XHI2
 
 
@@ -255,6 +254,10 @@ def XHI2(X):
 #                                   #
 #-----------------------------------#
 
+# -------- 
+# changing to run directory
+os.chdir(outdir)
+
 n_dim = nz
 
 Xstart = None
@@ -263,6 +266,8 @@ if rank == 0:
     for i in range(popsize):
         Xstart[i, :] = np.log10(rhosynth) + np.random.uniform(low=-cst_lower,
                                                   high=cst_upper, size=n_dim)
+
+
 
 Xstart = comm.bcast(Xstart, root=0)
 
@@ -365,7 +370,6 @@ if rank==0:
 
 if rank==0:
     outfile = outdir + irun + '.nc'
-    n_jobs=1
     nparam=n_dim
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
@@ -384,7 +388,6 @@ if rank==0:
     nc.createDimension('nz', nz)
     nc.createDimension('nparam', len(xopt))
     nc.createDimension('popsize', np.shape(ea.models)[0])
-    nc.createDimension('n_jobs', n_jobs)
     # Variables: name, format, shape
     nc.createVariable('hx', 'f8', ('nx'))
     nc.createVariable('hy', 'f8', ('ny'))
@@ -392,9 +395,9 @@ if rank==0:
     nc.createVariable('rho_i', 'f8', ('nx','ny','nz')) 
     nc.createVariable('xopt', 'f8', ('nparam'))
     nc.createVariable('log_xopt', 'f8', ('nparam'))
-    nc.createVariable('models', 'f8', ('n_jobs','popsize', 'nparam', 'max_iter'))
-    nc.createVariable('energy', 'f8', ('n_jobs','popsize', 'max_iter'))  
-    nc.createVariable('rho_opt', 'f8', ('nx', 'ny', 'nz', 'n_jobs')) 
+    nc.createVariable('models', 'f8', ('popsize', 'nparam', 'max_iter'))
+    nc.createVariable('energy', 'f8', ('popsize', 'max_iter'))  
+    nc.createVariable('rho_opt', 'f8', ('nx', 'ny', 'nz')) 
 
     
     # FILLING VALUES
@@ -410,10 +413,10 @@ if rank==0:
     # ----> modify [it_start:it_end]
     # ----> xopt and log_xopt are erased after each jobi
     # ----> Removed last 
-    nc.variables['rho_opt'][0, 0, :, 0] = 10**xopt
+    nc.variables['rho_opt'][0, 0, :] = 10**xopt
     nc.variables['xopt'][:] = xopt
-    nc.variables['models'][0,:, :, :] = ea.models[:, :, :]
-    nc.variables['energy'][0,:, :] = ea.energy[:, :]
+    nc.variables['models'][:, :, :] = ea.models[:, :, :]
+    nc.variables['energy'][:, :] = ea.energy[:, :]
     nc.close()
 
 """

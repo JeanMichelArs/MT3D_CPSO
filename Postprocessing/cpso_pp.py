@@ -169,6 +169,7 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     for iparam in range(nparam):
        for i_inter in range(n_inter):
             p_inter = lower + i_inter * (upper-lower) / n_inter + m_best[iparam]
+            print p_inter
             x_bin[iparam, i_inter] = p_inter
             i_mod = np.abs(m_grid[:, iparam] - p_inter + eps) <= (upper - lower) \
                     / n_inter * 0.5
