@@ -163,14 +163,13 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     x_bin = np.empty(shape=(nparam, n_inter))
     f_best = np.min(f_grid)
     lmbda = 0.5 / kappa
-    eps = 5 * 1e-3
+    eps = 5 * 1e-6
     if rms==True:
-        f_grid=np.sqrt(f_grid/ndata)
+        f_grid = np.sqrt(f_grid / ndata)
     for iparam in range(nparam):
        for i_inter in range(n_inter):
             p_inter = lower + i_inter * (upper-lower) / n_inter + m_best[iparam]
-            print p_inter
-            x_bin[iparam, i_inter] = p_inter
+            x_bin[iparam, i_inter] = np.squeeze(p_inter)
             i_mod = np.abs(m_grid[:, iparam] - p_inter + eps) <= (upper - lower) \
                     / n_inter * 0.5
             n_bin[iparam, i_inter] = np.sum(i_mod)
