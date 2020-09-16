@@ -48,6 +48,7 @@ z = None
 Erz = None
 nz = None
 rhosynth = None
+FLAGS=None
 
 if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
@@ -121,7 +122,8 @@ if rank==0:
     exc = np.conj(exi)
     eyc = np.conj(eyi)
     # Determinant
-    det = -1*(hxc[:,0] * hyc[:,1] - hxc[:,1] * hyc[:,0])
+    FLAGS = 1
+    det = FLAGS * (hxc[:, 0]*hyc[:, 1] - hxc[:, 1]*hyc[:, 0])
     # ANTI-DIAG TERM => Zyx
     z = hyc[:,1] * eyc[:,0] - hyc[:,0] * eyc[:,1]
     z = -z / (det * fmu)
@@ -159,6 +161,7 @@ nz = comm.bcast(nz, root=0)
 rhosynth = comm.bcast(rhosynth, root=0)
 popsize = comm.bcast(popsize, root=0)
 max_iter = comm.bcast(max_iter, root=0)
+FLAGS=comm.bcast(FLAGS, root=0)
 
 #---------------------------------#
 #                                 #
@@ -220,7 +223,7 @@ def XHI2(X):
     exc=np.conj(exi)
     eyc=np.conj(eyi)
     # Determinant
-    det=-1*((hxc[:,0]*hyc[:,1])-(hxc[:,1]*hyc[:,0]))
+    det = FLAGS * (hxc[:, 0]*hyc[:, 1] - hxc[:, 1]*hyc[:, 0])
     # ANTI-DIAG TERM => Zyx
     zc=(hyc[:,1]*eyc[:,0])-(hyc[:,0]*eyc[:,1])
     zc=-zc/(det*fmu)
