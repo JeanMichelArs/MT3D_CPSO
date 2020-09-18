@@ -9,7 +9,6 @@ sys.path.append('/data/users/j/jcollin/MT3D_CPSO/Analyse/')
 import numpy as np
 import linecache
 import matplotlib.pyplot as plt
-import mackie3d
 from scipy.interpolate import griddata,interp1d,Rbf
 import utm
 from stochopy import MonteCarlo, Evolutionary
@@ -18,6 +17,49 @@ from mpi4py import MPI
 import os
 import seaborn as sns
 from netCDF4 import Dataset
+
+
+def MT1D_analytic(thick,rho,per):
+    if len(thick)==len(rho):
+        thick=thick[0:-1]
+
+    nlay=len(rho)
+    frequencies = 1/per
+    amu=4*np.pi*10**(-7) #Magnetic Permeability (H/m)
+    Z=np.empty(len(per),dtype=complex)
+    arho=np.empty(len(per))
+    phase=np.empty(len(per))   
+    for iff,frq in enumerate(frequencies):
+        nlay=len(rho)
+        w =  2*np.pi*frq       
+        imp = list(range(nlay))
+        #compute basement impedance
+        imp[nlay-1] = np.sqrt(w*amu*rho[nlay-1]*1j)
+        for j in range(nlay-2,-1,-1):
+            rholay = rho[j]
+            thicklay = thick[j]
+            # 3. Compute apparent rholay from top layer impedance
+            #Step 2. Iterate from bottom layer to top(not the basement) 
+            # Step 2.1 Calculate the intrinsic impedance of current layer
+            dj = np.sqrt((w * amu * (1/rholay))*1j)
+            wj = dj * rholay
+            ej = np.exp(-2*thicklay*dj)
+            #The next step is to calculate the reflection coeficient (F6) and impedance (F7) using the current layer intrinsic impedance and the prior computer layer impedance j+1.
+            belowImp = imp[j+1]
+            rj = (wj - belowImp)/(wj + belowImp)
+            re = rj*ej 
+            Zj = wj * ((1 - re)/(1 + re))
+            imp[j] = Zj
+    
+        #Finally you can compute the apparent rholay F8 and phase F9 and print the resulting data!
+        Z[iff] = imp[0]
+        absZ = abs(Z[iff])
+        arho[iff] = (absZ * absZ)/(amu * w)
+        phase[iff] = np.arctan2(np.imag(Z[iff]), np.real(Z[iff]))*180/np.pi
+        #if convert to microvolt/m/ntesla
+        Z[iff]=Z[iff]/np.sqrt(amu*amu*10**6)
+
+    return Z,arho,phase
 
 
 comm = MPI.COMM_WORLD
@@ -42,7 +84,7 @@ rho = None
 hx = None
 hy = None
 hz = None
-perpy = None
+per = None
 mod1D = None
 z = None
 Erz = None
@@ -54,98 +96,63 @@ if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
     #--------------------------------------------
     #Read 1D model
-    conf_path = '../Config/1D'
-    filed = conf_path + '/mod1D_Bolivia_001'#raw_input("Initial 1D MT model:")
-    hz,rhosynth = np.loadtxt(filed,unpack=True)
-    nz = len(hz)
-    hx = np.array([10000])#np.ones([5])*1000
-    hy = np.array([10000])#np.ones([5])*1000
-    nx = 1
-    ny = 1
+    filed='mod1D_Bolivia_001'#raw_input("Initial 1D MT model:")
+    hz,rhosynth=np.loadtxt(filed,unpack=True)
+    nz=len(hz)
+    hx=np.array([10000])#np.ones([5])*1000
+    hy=np.array([10000])#np.ones([5])*1000
+    nx=1
+    ny=1
     # CPSO parameter
-    popsize = 18 #input("Size of model SWARM:")
-    max_iter = 100 *nz #input("Number of iteration:")
+    popsize=8#input("Size of model SWARM:")
+    max_iter=100*nz#input("Number of iteration:")
+    """
     #Periods
-    perpy = np.loadtxt(conf_path + '/per',skiprows=1)
-    nper = len(perpy)
-    #Create 1D bottom
-    mod1D = np.loadtxt(conf_path + '/ini1d',skiprows=1)
-    n1d = len(mod1D)
-    # FORTRAN FORMAT ARRAYS
-    mod1D = np.asfortranarray(mod1D)
-    perpy = np.asfortranarray(perpy)
-    hx = np.asfortranarray(hx)
-    hy = np.asfortranarray(hy)
-    hz = np.asfortranarray(hz)
+    per=np.loadtxt('per',skiprows=1)
+    nper=len(per)
     # COMPUTE MT1D DATA
     #---------------------
     print ' '
     print ' #################'
     print ' -----------------'
-    print ' COMPUTE MT1D RESP'
+    print ' COMPUTE MT1D DATA'
     print ' -----------------'
     print ' #################'
     print ' '
-    mod1D = np.asfortranarray(mod1D)
-    perpy = np.asfortranarray(perpy)
-    resistpy = np.asfortranarray(rhosynth)
-    hx = np.asfortranarray(hx)
-    hy = np.asfortranarray(hy)
-    hz = np.asfortranarray(hz)
-    # CALL MACKIE
-    hxsurf,hysurf,hzsurf,exsurf,eysurf=mackie3d.mtd3(mod1D,perpy,resistpy,hx,hy,hz)
-    ###########################
-    #                         #
-    #       MT1D TENSOR       #
-    #                         #
-    ###########################
-    fmu = 4 * np.pi * 10**(-4)
-    amu = 4 * np.pi * 10**(-7)
+    z,rho,phi=MT1D_analytic(hz,rhosynth,per)
     # NOISE & ERROR LEVEL IN %
     #------------------------#
-    noise = 0.005
-    error = 0.05
+    noise=0.005
+    error=0.05
     #------------------------#
-    per = perpy
-    hxi = hxsurf[:,:,0]
-    hyi = hysurf[:,:,0]
-    hzi = hzsurf[:,:,0]
-    exi = exsurf[:,:,0]
-    eyi = eysurf[:,:,0]
-    # COMPUTE IMPEDANCE TENSOR
-    #-------------------------
-    # mackie en -iomegat, donc partie conjuguee des champs pour etre
-    # meme cadran que 2d, data,...
-    hxc = np.conj(hxi)   # (per,pol,site)
-    hyc = np.conj(hyi)
-    hzc = np.conj(hzi)
-    exc = np.conj(exi)
-    eyc = np.conj(eyi)
-    # Determinant
-    FLAGS = 1
-    det = FLAGS * (hxc[:, 0]*hyc[:, 1] - hxc[:, 1]*hyc[:, 0])
-    # ANTI-DIAG TERM => Zyx
-    z = hyc[:,1] * eyc[:,0] - hyc[:,0] * eyc[:,1]
-    z = -z / (det * fmu)
-    # Adding noise to Zyx
-    Erz = error * np.abs(z) #np.random.normal(0,error,len(zyx))*np.abs(zyx)+1e-6
-    Rz = np.real(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
-    Iz = np.imag(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
-    # Roayx & Phiyx
-    zt = np.abs(z)
-    rho = zt * zt * amu * 10**6 / (2. * np.pi / per)
-    rho = 10**(np.log10(rho) + np.random.normal(0, noise * np.mean(abs(np.log10(rho))),len(z)))
-    Erho = 10**(np.random.normal(0, error * np.mean(abs(np.log10(rho))), len(z)))
-    phi = np.arctan2(np.imag(z), np.real(z)) * 180 / np.pi
-    phi = phi + np.random.normal(0, noise * np.mean(abs(phi)), len(z))
-    Ephi = np.random.normal(0, error * np.mean(abs(phi)), len(z))
+    # Adding noise to Z
+    Erz=error*np.abs(z)
+    Rz=np.real(z)+np.random.normal(0,noise,len(z))*np.abs(z)
+    Iz=np.imag(z)+np.random.normal(0,noise,len(z))*np.abs(z)
+    # Rho & Phi
+    rho=rho+np.random.normal(0,noise,len(z))*abs(rho)
+    Erho=error*abs(rho)
+    phi=phi+np.random.normal(0,noise,len(z))*np.abs(phi)
+    Ephi=error*np.abs(phi)
     # WRITE DATA FILE FORMAT *.ro11, *.ro12, *.ro21, *.ro22
     #-----------------------------------------------------
-    idd = '001'    
-    file = conf_path + '/' + idd + '.ro'
+    idd='001'    
+    file='data/'+idd+'.ro'
     #WRITE DATA
-    np.savetxt(file, np.transpose((per, Rz, Iz, Erz, rho, Erho, phi, Ephi)), 
-               fmt= '%16.10f',delimiter='     ')
+    np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
+    """
+    # READ MT1D DATA
+    #---------------------
+    print ' '
+    print ' #################'
+    print ' -----------------'
+    print ' READ MT1D DATA'
+    print ' -----------------'
+    print ' #################'
+    print ' '
+    idd='001'
+    per,Rz,Iz,Erz,rho,Erho,phi,Ephi=np.loadtxt(idd+'.ro',unpack=True)
+    z=Rz+1j*Iz
 
 
 # SHARE MPI VARIABLE
@@ -153,7 +160,7 @@ if rank==0:
 hx = comm.bcast(hx, root=0)
 hy = comm.bcast(hy, root=0)
 hz = comm.bcast(hz, root=0)
-perpy = comm.bcast(perpy, root=0)
+per = comm.bcast(per, root=0)
 mod1D = comm.bcast(mod1D, root=0)
 z = comm.bcast(z, root=0)
 Erz = comm.bcast(Erz, root=0)
@@ -171,8 +178,8 @@ FLAGS=comm.bcast(FLAGS, root=0)
 
 #COST FUNCTION
 def F(X):
-    rest = 10**X
-    cost = XHI2(rest)
+    rest=10**X
+    cost=XHI2(rest)
     return cost
     ###rest=np.zeros(nx*ny*nz)
     ###print model.shape, rest.shape
@@ -186,51 +193,17 @@ def F(X):
 
 #MT MISFIT
 def XHI2(X):
-    # FORTRAN FORMAT ARRAYS
-    X = np.asfortranarray(X)
+     # COMPUTE MT1D RESP
+    #---------------------
     print ' '
-    print ' ################'
-    print ' ----------------'
-    print ' CALL MACKIE F2PY'
-    print ' ----------------'
-    print ' ################'
+    print ' #################'
+    print ' -----------------'
+    print ' COMPUTE MT1D RESP'
+    print ' -----------------'
+    print ' #################'
     print ' '
-    #print mod1D.shape, perpy.shape, X.shape, hx.shape,hy.shape,hz.shape
-    hxsurf,hysurf,hzsurf,exsurf,eysurf=mackie3d.mtd3(mod1D,perpy,X,hx,hy,hz)
-    ###########################
-    #                         #
-    #       MT MISFIT         #
-    #                         #
-    ###########################
-    fmu=4*np.pi*10**(-4)
-    amu=4*np.pi*10**(-7)
-    per_c=perpy
-    XHI2=0  
-    #------------------------#
-    perd=perpy
-    hxi=hxsurf[:,:,0]
-    hyi=hysurf[:,:,0]
-    hzi=hzsurf[:,:,0]
-    exi=exsurf[:,:,0]
-    eyi=eysurf[:,:,0]
-    # COMPUTE IMPEDANCE TENSOR
-    #-------------------------
-    # mackie en -iomegat, donc partie conjuguee des champs pour etre
-    # meme cadran que 2d, data,...
-    hxc=np.conj(hxi)   # (per,pol,site)
-    hyc=np.conj(hyi)
-    hzc=np.conj(hzi)
-    exc=np.conj(exi)
-    eyc=np.conj(eyi)
-    # Determinant
-    det = FLAGS * (hxc[:, 0]*hyc[:, 1] - hxc[:, 1]*hyc[:, 0])
-    # ANTI-DIAG TERM => Zyx
-    zc=(hyc[:,1]*eyc[:,0])-(hyc[:,0]*eyc[:,1])
-    zc=-zc/(det*fmu)
-    # Roayx & Phiyx
-    zt=np.abs(zc)
-    rhoc=zt*zt*amu*10**6/(2.*np.pi/perd)
-    phic=np.arctan2(np.imag(zc),np.real(zc))*180/np.pi
+    zc,rhoc,phic=MT1D_analytic(hz,X,per)
+    print 
     #---------------------------------------------------
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
@@ -279,41 +252,7 @@ if rank==0:
     print ' #################'
     print ' '
     print 'RHO_BEST:',10**xopt
-    hxsurf,hysurf,hzsurf,exsurf,eysurf=mackie3d.mtd3(mod1D,perpy,10**xopt,hx,hy,hz)
-    ###########################
-    #                         #
-    #       MT MISFIT         #
-    #                         #
-    ###########################
-    fmu=4*np.pi*10**(-4)
-    amu=4*np.pi*10**(-7)
-    per_c=perpy
-    XHI2=0  
-    #------------------------#
-    perd=perpy
-    hxi=hxsurf[:,:,0]
-    hyi=hysurf[:,:,0]
-    hzi=hzsurf[:,:,0]
-    exi=exsurf[:,:,0]
-    eyi=eysurf[:,:,0]
-    # COMPUTE IMPEDANCE TENSOR
-    #-------------------------
-    # mackie en -iomegat, donc partie conjuguee des champs pour etre
-    # meme cadran que 2d, data,...
-    hxc=np.conj(hxi)   # (per,pol,site)
-    hyc=np.conj(hyi)
-    hzc=np.conj(hzi)
-    exc=np.conj(exi)
-    eyc=np.conj(eyi)
-    # Determinant
-    det=-1*((hxc[:,0]*hyc[:,1])-(hxc[:,1]*hyc[:,0]))
-    # ANTI-DIAG TERM => Zyx
-    zc=(hyc[:,1]*eyc[:,0])-(hyc[:,0]*eyc[:,1])
-    zc=-zc/(det*fmu)
-    # Roayx & Phiyx
-    zt=np.abs(zc)
-    rhoc=zt*zt*amu*10**6/(2.*np.pi/per)
-    phic=np.arctan2(np.imag(zc),np.real(zc))*180/np.pi
+    zc,rhoc,phic=MT1D_analytic(hz,10**xopt,per)
     #---------------------------------------------------
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
