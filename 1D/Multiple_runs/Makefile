@@ -4,21 +4,29 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/Bolivia_1D_8param'
-n_start=151
-n_end=200
+RUN_DIR='/postproc/COLLIN/MTD3/Analytic_1D_Bolivia_8nz'
+n_start=0
+n_end=49
 j=${n_start}
 
 # ----------------------------------------------------------------------------
 #  Multiple runs of 1d cpso
 
-.PHONY: multi_run
+.PHONY: multi_run multi_ana
 
+# ---> analytical forward modelling
+multi_ana: 
+	for i in $(shell seq ${n_start} ${n_end}); do \
+	  (python  MT1D_analytic_CPSO.py $$i &> log.$$i &); \
+	done
+
+# ---> mackie 1D run 
 multi_run: 
 	for i in $(shell seq ${n_start} ${n_end}); do \
 	  (python MT1D_CPSO_chained.py $$i &> log.$$i &); \
 	done
 
+# ---> watch job progress, does not work
 .PHONY: watch
 
 watch:
