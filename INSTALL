@@ -1,11 +1,29 @@
 Be carefull when setting conda environment numpy1.16 version does not work
 there are segmentation faults occurency (f2py being part of numpy)
+! This may be innacurate ??? ! It is true when using f2py to compile mackie3d
+
+# ---> general install (cross-platform)
+
+  > conda env create -f mt3d.yml
+  > conda activate mt3d
+
+NB: you may want to change env name, if so just edit name in mt3d.yml file
+
+  > cd Stochopy
+  > python setup.py install
+
+# ---> datarmor use
 
 Use latest anaconda version (recommanded on datarmor) be carefull not to have other 
 anaconda modules loaded. 
 
 > module load conda/latest
 
+Do not use > conda init command as it would conflict with datarmor environment
+
+
+# ----> Old installation (linux 64 only)
+ 
 Create anaconda environment with appropriate numpy version
 -- from install file:
 
@@ -18,7 +36,7 @@ Create anaconda environment with appropriate numpy version
   # -- csh
   > conda activate mackie_conda
 
----- Install stochopy
+----> Install stochopy
   To Edit Stochopy at developpment version:
   load your conda environment for MT3D_CPSO
   > cp -f MT3D_CPSO/evolutionnary.py MT3D_CPSO/StochOPy/stochopy/
