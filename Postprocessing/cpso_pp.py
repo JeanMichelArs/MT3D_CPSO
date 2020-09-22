@@ -86,15 +86,15 @@ def weighted_mean(m_grid, f_grid,ndata, kappa=1,rms=False, log=True, timing=True
     f_best = np.min(f_grid)
     m_weight = np.empty(shape=(nparam,))
     if rms==True:
-        f_grid=np.sqrt(f_grid/ndata)
-        S = 1 / np.sum(np.exp(- f_grid / 2 ))
+        f_grid=np.sqrt(f_grid / ndata)
+        S = 1 / np.sum(np.exp(-f_grid))
         if log:
             for iparam in range(nparam):
-                m_weight[iparam] = np.sum(np.exp(- f_grid / 2 ) * \
+                m_weight[iparam] = np.sum(np.exp(-f_grid) * \
                                     m_grid[:, iparam]) * S
         else: 
             for iparam in range(nparam):
-                m_weight[iparam] = np.sum(np.exp( - f_grid / 2 ) * \
+                m_weight[iparam] = np.sum(np.exp(-f_grid) * \
                                     10**m_grid[:, iparam]) * S
     else:    
         S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
@@ -148,9 +148,73 @@ def weighted_std(m_weight,m_grid, f_grid, ndata, kappa=1, rms=False, log=True, t
     return std_weight
 
 # ----------------------------------------------------------------------------
-def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1, 
+
+def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
+                 kappa=1, rms=False, timing=True, **kwargs):
+    """ parameter marginal laws around m_best 
+    if rms = True : stat are performed on rms instead of Xhi, ndata required!
+    kappa is deprecated, it used to be a damping coefficient
+    
+    inputs: 
+      - m_grid : moedls interpolated on a regular grid
+      - f_grid : cost function evalutation at m_grid
+      - ndata : number of measurements
+      - n_inter : number of intervals for probability density function
+      - upper, lower : windows to perform statistics around m_best (should be
+        the same than evolutionnary algorithm)
+
+    outputs :
+      - pdf_m : marginal laws for each parameter 
+      - n_bin : number of regrided models in each intervals
+      - x_bin : interval center for plot purpose
+    """
+    if timing:
+        t0 = time.clock()
+    nparam = m_grid.shape[1]
+    n_bin = np.empty(shape=(nparam, n_inter))
+    pdf_m = np.empty(shape=(nparam, n_inter))
+    x_bin = np.empty(shape=(nparam, n_inter))
+    f_best = np.min(f_grid)
+    lmbda = 0.5 / kappa
+    eps = 1e-3
+    L = upper - lower
+    p_inter = np.arange(n_inter + 1) * L / n_inter - L * 0.5
+    p_inter[0] = p_inter[0] - eps
+    p_inter[-1] = p_inter[-1] + eps
+    if rms==True:
+        f_grid = np.sqrt(f_grid / ndata)
+    for iparam in range(nparam):
+        for i_inter in range(n_inter):
+            x_bin[iparam, :] = np.squeeze(p_inter[:-1] + p_inter[1:]) * 0.5 \
+                               + m_best[iparam]
+            im = m_grid[:, iparam] - m_best[iparam] >= p_inter[i_inter]
+            ip = m_grid[:, iparam] - m_best[iparam] < p_inter[i_inter + 1]
+            i_mod = im & ip
+            n_bin[iparam, i_inter] = np.sum(i_mod)
+            if  np.sum(i_mod) >= 1:
+                if rms==True:
+                    pdf_m[iparam, i_inter] = np.sum(np.exp( - f_grid[i_mod] /2)) / \
+                                             np.sum(np.exp(- f_grid /2))
+                else:
+                    pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
+                                             * lmbda)) / \
+                                             np.sum(np.exp((f_best - f_grid) * lmbda))
+            else:
+                pdf_m[iparam, i_inter] = 0
+        print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100 
+        x_bin[:, 0] = x_bin[:, 0] + eps * 0.5
+        x_bin[:, -1] = x_bin[:, -1] - eps * 0.5
+
+    if timing:
+        print "ellapsed time in marginal_law", time.clock() - t0
+    return pdf_m, n_bin, x_bin
+
+
+# ----------------------------------------------------------------------------
+def old_marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1, 
                  kappa=100, rms=False, timing=True, **kwargs):
-    """ parameter marginal laws around m_best (is m_best, m_weighted ?)
+    """ DEPRECATED WRONG INTERVALS  
+    parameter marginal laws around m_best (is m_best, m_weighted ?)
     if rms = True : stat are performed on rms instead of Xhi, ndata required!
     for high energy values kappa must be applied
     a good approximation is based on regridding error
