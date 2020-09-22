@@ -18,19 +18,19 @@ import os
 import seaborn as sns
 from netCDF4 import Dataset
 
+# ----------------------------------------------------------------------------
+def MT1D_analytic(thick, rho, per):
+    if len(thick) == len(rho):
+        thick = thick[0:-1]
 
-def MT1D_analytic(thick,rho,per):
-    if len(thick)==len(rho):
-        thick=thick[0:-1]
-
-    nlay=len(rho)
-    frequencies = 1/per
-    amu=4*np.pi*10**(-7) #Magnetic Permeability (H/m)
-    Z=np.empty(len(per),dtype=complex)
-    arho=np.empty(len(per))
-    phase=np.empty(len(per))   
+    nlay = len(rho)
+    frequencies = 1 / per
+    amu = 4 * np.pi * 10**(-7) #Magnetic Permeability (H/m)
+    Z = np.empty(len(per), dtype=complex)
+    arho = np.empty(len(per))
+    phase = np.empty(len(per))   
     for iff,frq in enumerate(frequencies):
-        nlay=len(rho)
+        nlay =len(rho)
         w =  2*np.pi*frq       
         imp = list(range(nlay))
         #compute basement impedance
@@ -60,7 +60,7 @@ def MT1D_analytic(thick,rho,per):
         Z[iff]=Z[iff]/np.sqrt(amu*amu*10**6)
 
     return Z,arho,phase
-
+#---------------------------------------------------------------------------
 
 comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
@@ -178,19 +178,11 @@ FLAGS=comm.bcast(FLAGS, root=0)
 
 #COST FUNCTION
 def F(X):
-    rest=10**X
-    cost=XHI2(rest)
+    rest = 10**X
+    cost = XHI2(rest)
     return cost
-    ###rest=np.zeros(nx*ny*nz)
-    ###print model.shape, rest.shape
-    ###print np.unique(model)
-    ###for i in range(len(rest)):
-    ###    rest[i]=10**X[model[i]-1]
-    ###
 
-
-
-
+# ----------------------------------------------------------------------------
 #MT MISFIT
 def XHI2(X):
      # COMPUTE MT1D RESP
@@ -202,14 +194,15 @@ def XHI2(X):
     print ' -----------------'
     print ' #################'
     print ' '
-    zc,rhoc,phic=MT1D_analytic(hz,X,per)
+    zc, rhoc, phic = MT1D_analytic(hz, X, per)
     print 
     #---------------------------------------------------
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
-    XHI2=(sum((np.real(z)-np.real(zc))**2/Erz**2)+sum((np.imag(z)-np.imag(zc))**2/Erz**2))/2
+    XHI2 = (sum((np.real(z) - np.real(zc))**2 / Erz**2) + \
+            sum((np.imag(z) - np.imag(zc))**2 / Erz**2)) * 0.5
     print ''
-    print 'Magnetotelluric Misfit XHI2=>',XHI2
+    print 'Magnetotelluric Misfit XHI2=>', XHI2
     print ''
     return XHI2
 
