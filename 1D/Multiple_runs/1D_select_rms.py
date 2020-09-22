@@ -111,7 +111,7 @@ stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=1,
 print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 print''
 
-# ---- marginal laws using kappa damping coefficient
+# ---- marginal laws centered around solution 
 n_inter = 40
 lower = -2.  
 upper = 2. 
@@ -189,17 +189,5 @@ if save_plot:
         plt.suptitle('Parameter '+str(ipar+1)+' <Rho>:'+str(meanpar)+'$\Omega.m$ (log scale), STD:'+str(round(std_weight[ipar],2)),fontsize=12)
         plt.savefig(folder_save + '/' + 'Parameter_'+str(ipar+1)+'.png')
         plt.clf()
-
-
-
-        #plt.subplot(2, 1, 1)
-        #plt.plot(x_bin[iparam, :], pdf_m[iparam, :], 'r')
-        #plt.axvline(x=logrhosynth[iparam], color='red')
-        #plt.axvline(x=m_weight[iparam], color='blue')
-        #plt.xlim([-1, 1])
-        #plt.subplot(2, 1, 2)
-        #plt.plot(x_bin[iparam, :], n_bin[iparam, :])
-        #plt.xlim([-1, 1])
-        #plt.savefig(folder_save + '/' + "fun_diff"+  str(int(iparam)) )
-        #plt.clf()
+        
 
