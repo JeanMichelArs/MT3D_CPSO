@@ -8,7 +8,7 @@ RUN_DIR='/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
 .PHONY: merge 
 merge:
 	cd ${RUN_DIR}; \
-	ncecat mcm_exploration*.nc -O merged_mcm.nc
+	ncecat mcm_exploration*.nc -O merged.nc
 
 # ---------------------------------------------------------------------------
 .PHONY: clean_outdir

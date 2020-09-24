@@ -12,37 +12,74 @@ import numpy as np
 # ----------------------------------------------------------------------------
 
 def NaN_filter(models, energy, timing=True, **kwargs):
-    """ remove Nan values, usefull for runs that did not finish """
+    """ remove Nan values, usefull for runs that did not finish
+    """
     if timing:
         t0 = time.clock()
-    nruns, popsize, nparam, nitertot = models.shape
-    tmp = energy[energy < 1e20 ]
-    niter = len(tmp) // nruns // popsize
-    filt_energy = energy[:, :, :niter]
-    print "run stopped at it ", niter, ' / ', nitertot
-    if timing:
-        print "ellapsed time in NaN_filter", time.clock() - t0
-    return models[:, :, :, :niter], filt_energy, niter
+    if len(energy.shape) == 2:
+        "MCM format"
+        nruns, nparam, nitertot = models.shape
+        tmp = energy[energy < 1e20 ]
+        niter = len(tmp) // nruns
+        filt_energy = energy[:, :niter]
+        if timing:
+            print "ellapsed time in NaN_filter", time.clock() - t0
+        return models[:, :, :niter], filt_energy, niter
+    elif len(energy.shape) == 3:
+        "CPSO Format"
+        nruns, popsize, nparam, nitertot = models.shape
+        tmp = energy[energy < 1e20 ]
+        niter = len(tmp) // nruns // popsize
+        filt_energy = energy[:, :, :niter]
+        if timing:
+            print "ellapsed time in NaN_filter", time.clock() - t0
+        return models[:, :, :, :niter], filt_energy, niter
+    else:
+        print "Error wrong energy shape"
+        return None
+    
 
 # ----------------------------------------------------------------------------
 def value_filter(models, energy, threshold, timing=True, **kwargs):
     """ 
     filter models and corresponding energy with low pass filtr on energy
+    May seem unecessary for unr that finished but it shaped the data
+   in accordance with other postprocessing functions
     """
     if timing:
         t0 = time.clock()
-    nruns, popsize, nparam, nitertot = models.shape
-    f_best = np.min(energy)
-    i_best = np.where(energy == np.min(energy))
-    m_best = models[i_best[0], i_best[1], : , i_best[2]]
-    "! in some cases minimum may be found multiple times therefore we need to pick one"
-    if np.prod(m_best.shape) > nparam:
-        print "several(", m_best.shape[0] ,") best fit found; max diff between models:"
-        print  np.max(np.abs(np.diff(m_best, axis=0)))
-        m_best = m_best[0, :]
-    f_near = energy[energy < np.min(energy) + threshold]
-    i_near = np.where(energy < np.min(energy) + threshold)
-    m_near = models[i_near[0], i_near[1], :, i_near[2]]
+    # ---> cpso 
+    if len(energy.shape) == 3:
+        nruns, popsize, nparam, nitertot = models.shape
+        f_best = np.min(energy)
+        i_best = np.where(energy == np.min(energy))
+        m_best = models[i_best[0], i_best[1], : , i_best[2]]
+        "! in some cases minimum may be found multiple times therefore we need to pick one"
+        if np.prod(m_best.shape) > nparam:
+            print "several(", m_best.shape[0] ,") best fit found; max diff between models:"
+            print  np.max(np.abs(np.diff(m_best, axis=0)))
+            m_best = m_best[0, :]
+        f_near = energy[energy < np.min(energy) + threshold]
+        i_near = np.where(energy < np.min(energy) + threshold)
+        m_near = models[i_near[0], i_near[1], :, i_near[2]]
+    # ---> mcm
+    elif len(energy.shape) == 2:
+        nruns, nparam, nitertot = models.shape
+        f_best = np.min(energy)
+        i_best = np.where(energy == np.min(energy))
+        m_best = models[i_best[0], : , i_best[1]]
+        "! in some cases minimum may be found multiple times therefore we need to pick one"
+        if np.prod(m_best.shape) > nparam:
+            print "several(", m_best.shape[0] ,") best fit found; max diff between models:"
+            print  np.max(np.abs(np.diff(m_best, axis=0)))
+            m_best = m_best[0, :]
+        f_near = energy[energy < np.min(energy) + threshold]
+        i_near = np.where(energy < np.min(energy) + threshold)
+        m_near = models[i_near[0], :, i_near[1]]
+    else:
+        print "Error unsupported energy shape"
+        return None
+    # ---> 
     ncount = f_near.shape[0]
     ntot = np.prod(energy.shape)
     print "number of value filtered models :","{:e}".format(ncount), "/", "{:e}".format(ntot)

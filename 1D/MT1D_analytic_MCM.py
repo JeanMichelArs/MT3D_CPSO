@@ -247,6 +247,7 @@ nc.createVariable('models', 'f8', ('nparam', 'max_iter'))
 nc.createVariable('energy', 'f8', ('max_iter'))  
 nc.createVariable('rho_opt', 'f8', ('nz')) 
 # Filling values
+nc.variables['rho_i'][:] = rhosynth 
 nc.variables['hz'][:] = hz
 nc.variables['rho_opt'][:] = 10**xopt
 nc.variables['xopt'][:] = xopt

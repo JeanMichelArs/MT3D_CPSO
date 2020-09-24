@@ -34,6 +34,8 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
+method = 'MCM'
+
 cpso_path = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
 conf_dir = '../../Config/1D'
 folder_save = cpso_path + '/Analysis'  
@@ -55,12 +57,21 @@ if not os.path.exists(folder_save):
 # --- load data
 t0 = time.clock()
 nc = Dataset(cpso_path + '/merged.nc')
-energy = np.array(nc.variables['energy'][:nruns, :, :])
-models =  np.array(nc.variables['models'][:nruns, :, :, :])
-logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0, :])))
+if method is 'cpso':
+    energy = np.array(nc.variables['energy'][:nruns, :, :])
+    models =  np.array(nc.variables['models'][:nruns, :, :, :])
+    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0 :])))
+elif method is 'MCM':
+    energy = np.array(nc.variables['energy'][:nruns, :])
+    models =  np.array(nc.variables['models'][:nruns, :, :])
+    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
+else: 
+    print "Error method is not defined"
+
 nc.close()
 print "Ellapsed time reading netcdf file:", time.clock() - t0
 print''
+
 #---------------------------------------------------------------------------
 # MT data counting (needed for rms option)
 os.chdir(conf_dir)
@@ -71,15 +82,13 @@ for fn in glob.glob('*.ro*'):
 
 print "number of data for rms: ", "{:e}".format(ndata)
 print''
+
 # ---------------------------------------------------------------------------
 # global data
 
 i_gbest = np.where(energy == np.min(energy))
 f_gbest = np.min(energy)
 i_gbest = np.where(energy == np.min(energy))
-#m_gbest = models[i_gbest[0], : , i_gbest[1]]
-#m_gbest = m_gbest[0]
-
 
 # ----------------------------------------------------------------------------
 # First filter NaN values in case run did not finish 
@@ -89,11 +98,19 @@ del models, energy
 
 # --->  Prefilter models according to parameter space regular subgriding
 # !!! Care must be taken that we do this parameter log 
-nruns, popsize, nparam, niter = filt_models.shape
-print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
+
+if method is 'CPSO':
+    nruns, popsize, nparam, niter = filt_models.shape
+    print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
+elif method is 'MCM':
+    nruns, nparam, niter = filt_models.shape
+    print "number of models to filter: ", "{:e}".format(nruns * niter)
+else : print "Error undefined method"
+
 print''
 
-threshold = np.max(filt_energy) # np.median(filt_energy)
+# ---> filter extreme value old...
+threshold = np.max(filt_energy) 
 m_near, f_near = pp.value_filter(filt_models, filt_energy, threshold)
 
 # --- > regrid parameter space
