@@ -34,14 +34,19 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
-cpso_path = '/postproc/COLLIN/MTD3/Analytic_1D_Bolivia_8nz'
+cpso_path = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
 conf_dir = '../../Config/1D'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
-outfile = folder_save + "/mod1D_MargLaw_test.nc"
+outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
 save_netcdf = True
 nruns = 50 
-
+# ---> postproc
+n_inter = 40
+lower = -2.
+upper = 2.
+kappa = 1
+rms = False
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
@@ -100,24 +105,21 @@ print "Error in energy minimum after subgrid :", np.min(f_grid) - f_gbest
 print''
 
 # ---> Xi2 weighted mean model, in log and physical space
-m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
-mpow_weight = np.log10(pp.weighted_mean(m_grid, ndata, f_grid, kappa=1, rms=True, log=False))
+m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
+mpow_weight = np.log10(pp.weighted_mean(m_grid, ndata, f_grid, kappa=kappa, rms=rms, log=False))
 print "Mean-difference between log and physical space :", np.max(np.abs(mpow_weight - m_weight))
 print''
 
 # ---> Xi2 weighted STD model, in log and physical space
-std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
-stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=1, rms=True, log=False)
+std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
+stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=False)
 print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 print''
 
 # ---- marginal laws centered around solution 
-n_inter = 40
-lower = -2.  
-upper = 2. 
-kappa = 1
-
-pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, logrhosynth, ndata, n_inter=n_inter,lower=lower, upper=upper, kappa=kappa, rms=True)
+pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, logrhosynth, ndata,
+                       n_inter=n_inter,lower=lower, upper=upper, kappa=kappa,
+                       rms=rms)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 
 #      f_best, delta_m , xbin, n_bin, pdf_m, m_weight, m_pow

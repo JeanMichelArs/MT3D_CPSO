@@ -1,6 +1,5 @@
 # JCollin 2020
 # --------------------------------------------------------------------
-
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh

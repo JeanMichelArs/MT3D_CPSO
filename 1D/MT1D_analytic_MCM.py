@@ -1,8 +1,20 @@
 #!/usr/bin/python2.7
-# ----------------------------------------------------------------------------
-# MCM MT1D with analytic forward modelling for comparison to Tarits 
-# Monte Carlo Code
-# ----------------------------------------------------------------------------
+""" ----------------------------------------------------------------------------
+ MCM MT1D with analytic forward modelling for comparison to Tarits 
+ Monte Carlo Code
+
+ >>> mpirun -np 4 python MT1D_analytic_MCM.py &> mcm.log
+
+ Each mpi proc runs a separate MonteCarlo exploration startin from random Xstart
+ Results are stored in a netcdf file for each proc with models, energy ...
+ files maybe concatenated using 
+ 
+ >>> make merge 
+
+
+ TODO: Double check for Error I believe that error is recomputed at ervy run
+ when it should be read from a constant file
+ ---------------------------------------------------------------------------- """
 
 import numpy as np
 import linecache
@@ -108,6 +120,7 @@ if rank==0:
 # probabilistic param
 cst_lower = 2 
 cst_upper = 2
+max_iter = 800 
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
@@ -116,12 +129,9 @@ outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
 if not os.path.exists(folderout):
     os.makedirs(folderout)
 
-
-
 # DECLARE VARIABLE FOR MPI
 #-------------------------
 filed=None
-max_iter=None
 rho=None
 hz=None
 per=None
@@ -138,16 +148,13 @@ if rank==0:
     filed = conf_path + '/mod1D_Bolivia_001' # raw_input("Initial 1D MT model:")
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
-    nx = 1
-    ny = 1
     # CPSO parameter
-    popsize = 16 # input("Size of model SWARM:")
-    max_iter = 100 * nz # input("Number of iteration:")
     # Periods
     per = np.loadtxt(conf_path + '/per',skiprows=1)
     nper = len(per)
     # COMPUTE MT1D DATA
     z, rho, phi = MT1D_analytic(hz, rhosynth, per)
+    
     # NOISE & ERROR LEVEL IN %
     #------------------------#
     noise = 0.005
@@ -168,7 +175,7 @@ if rank==0:
     file= conf_path + '/' + idd + '.ro'
     #WRITE DATA
     #np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
-
+    
 
 # SHARE MPI VARIABLE
 #-------------------
@@ -178,7 +185,6 @@ z = comm.bcast(z, root=0)
 Erz = comm.bcast(Erz, root=0)
 nz = comm.bcast(nz, root=0)
 rhosynth = comm.bcast(rhosynth, root=0)
-max_iter = comm.bcast(max_iter, root=0)
 
 # ---------------------------------------------------------------------------
 def F(X):
