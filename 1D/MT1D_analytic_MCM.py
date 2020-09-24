@@ -111,7 +111,7 @@ cst_upper = 2
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
-outfile = folderout + '/mcm_exploration.nc'
+outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
 
 if not os.path.exists(folderout):
     os.makedirs(folderout)
@@ -121,19 +121,14 @@ if not os.path.exists(folderout):
 # DECLARE VARIABLE FOR MPI
 #-------------------------
 filed=None
-popsize=None
 max_iter=None
 rho=None
-hx=None
-hy=None
 hz=None
 per=None
-mod1D=None
 z=None
 Erz=None
 nz=None
 rhosynth=None
-FLAGS=None
 
 if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
@@ -143,8 +138,6 @@ if rank==0:
     filed = conf_path + '/mod1D_Bolivia_001' # raw_input("Initial 1D MT model:")
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
-    hx = np.array([10000])#np.ones([5])*1000
-    hy = np.array([10000])#np.ones([5])*1000
     nx = 1
     ny = 1
     # CPSO parameter
@@ -179,18 +172,13 @@ if rank==0:
 
 # SHARE MPI VARIABLE
 #-------------------
-hx = comm.bcast(hx, root=0)
-hy = comm.bcast(hy, root=0)
 hz = comm.bcast(hz, root=0)
 per = comm.bcast(per, root=0)
-mod1D = comm.bcast(mod1D, root=0)
 z = comm.bcast(z, root=0)
 Erz = comm.bcast(Erz, root=0)
 nz = comm.bcast(nz, root=0)
 rhosynth = comm.bcast(rhosynth, root=0)
-popsize = comm.bcast(popsize, root=0)
 max_iter = comm.bcast(max_iter, root=0)
-FLAGS = comm.bcast(FLAGS, root=0)
 
 # ---------------------------------------------------------------------------
 def F(X):
@@ -233,92 +221,30 @@ mc = MonteCarlo(F, lower = lower, upper = upper, max_iter = max_iter)
 # SOLVE
 xopt, gfit = mc.sample(sampler = "pure", xstart=Xstart)
 
-# ---> Plot best models response
-if rank == 0:
-    print 'RHO_BEST:',10**xopt
-    zc, rhoc, phic = MT1D_analytic(hz, 10**xopt, per)
-    #---------------------------------------------------
-    #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
-    #---------------------------------------------------
-    XHI2=(sum((np.real(z)-np.real(zc))**2/Erz**2)+sum((np.imag(z)-np.imag(zc))**2/Erz**2))/2
-    print ''
-    print 'Magnetotelluric Best Misfit =>',XHI2
-    print ''
-    #PLOT IMPEDANCE TENSOR
-    #---------------------
-    plt.figure(figsize=(14,15))
-    plt.subplot(211)
-    plt.errorbar(per,rho,yerr=Erho, label="$Z_{1D}^{data}$",fmt='o',markersize=10,elinewidth=2.5,color='blue')
-    plt.plot(per,rhoc,label="$Z_{1D}^{resp}$",linewidth=3,color='red')
-    plt.ylim(5,300)
-    plt.yscale('log', nonposy='clip')
-    plt.xscale('log', nonposx='clip')
-    plt.xlabel('period (sec)',fontsize=40)
-    plt.ylabel('Roa (Ohm.m)',fontsize=40)
-    xtick=10**np.arange(round(np.log10(min(per)),0),round(np.log10(max(per)),0)+1)#np.array([1e-3,1e-2,1e-1,1,1e1,1e2,1e3,1e4])
-    ytick=np.array([1,1e1,1e2,1e3])
-    plt.xticks(xtick,fontsize=30)
-    plt.yticks(ytick,fontsize=30)
-    plt.grid(True,which="both",ls="-")
-    plt.legend(prop={'size':30},loc=9,ncol=4)
-    plt.subplot(212)
-    plt.errorbar(per,phi,yerr=Ephi,label="$Z_{1D}^{data}$",fmt='o',markersize=10,elinewidth=2.5,color='blue')
-    plt.plot(per,phic,label="$Z_{1D}^{resp}$",linewidth=3,color='red')
-    plt.ylim(-180.,180,)
-    xtick=10**np.arange(round(np.log10(min(per)),0),round(np.log10(max(per)),0)+1)#np.array([1e-3,1e-2,1e-1,1,1e1,1e2,1e3,1e4])
-    ytick=np.array([-180,-135,-90,-45,0,45,90,135,180])
-    plt.xticks(xtick,fontsize=30)
-    plt.yticks(ytick,fontsize=30)
-    plt.xscale('log', nonposx='clip')
-    plt.xlabel('period (sec)',fontsize=40)
-    plt.ylabel('phase(deg)',fontsize=40)
-    plt.suptitle('site '+idd,fontsize=40)
-    plt.grid(True,which="both",ls="-")
-    plt.savefig('resp_mcm'+idd+'.eps',dpi=500, bbox_inches='tight')
-    # Print time
-    print("Elapsed time: %.2f seconds" % (time() - starttime))
+# ---> Each process writes outputs
 
-# ---> Write output
-# creating netcdf file
-
-if rank==0:
-    if os.path.isfile(outfile):
-        os.remove(outfile)
-    n_jobs = nprocs
-    nparam = n_dim
-    print "Writting in ", outfile
-    print "models shape:", np.shape(mc.models)
-    print ""
-    print "hx:", hx
-    print "xopt", np.shape(xopt)
-    print "models", np.shape(mc.models)
-    print "energy", np.shape(mc.energy)
-    # ---> maybe a check dimension and return 0 or 1 
-    nc = Dataset(outfile, "w", format='NETCDF4')
-    # dimensions: name, size
-    nc.createDimension('max_iter', max_iter) 
-    nc.createDimension('nz', nz)
-    nc.createDimension('nparam', len(xopt))
-    nc.createDimension('n_jobs', n_jobs)
-    # Variables: name, format, shape
-    nc.createVariable('hz', 'f8', ('nz',))
-    nc.createVariable('rho_i', 'f8', ('nz',)) 
-    nc.createVariable('xopt', 'f8', ('n_jobs', 'nparam'))
-    nc.createVariable('log_xopt', 'f8', ('nparam'))
-    nc.createVariable('models', 'f8', ('n_jobs', 'nparam', 'max_iter'))
-    nc.createVariable('energy', 'f8', ('n_jobs', 'max_iter'))  
-    nc.createVariable('rho_opt', 'f8', ('n_jobs', 'nz')) 
-    # Filling values
-    nc.variables['hz'][:] = hz
-    nc.close()
-
-# ---> each procs writes mcm outputs
-comm.Barrier()
-
-nc = Dataset(outfile, "r+", format='NETCDF4')
-nc.variables['rho_opt'][rank, :] = 10**xopt
-nc.variables['xopt'][rank, :] = xopt
-nc.variables['models'][rank, :, :] = mc.models[:, :]
-nc.variables['energy'][rank, :] = mc.energy[:]
+if os.path.isfile(outfile):
+    os.remove(outfile)
+nparam = n_dim
+# ---> maybe a check dimension and return 0 or 1 
+nc = Dataset(outfile, "w", format='NETCDF4')
+# dimensions: name, size
+nc.createDimension('max_iter', max_iter) 
+nc.createDimension('nz', nz)
+nc.createDimension('nparam', len(xopt))
+# Variables: name, format, shape
+nc.createVariable('hz', 'f8', ('nz',))
+nc.createVariable('rho_i', 'f8', ('nz',)) 
+nc.createVariable('xopt', 'f8', ('nparam'))
+nc.createVariable('log_xopt', 'f8', ('nparam'))
+nc.createVariable('models', 'f8', ('nparam', 'max_iter'))
+nc.createVariable('energy', 'f8', ('max_iter'))  
+nc.createVariable('rho_opt', 'f8', ('nz')) 
+# Filling values
+nc.variables['hz'][:] = hz
+nc.variables['rho_opt'][:] = 10**xopt
+nc.variables['xopt'][:] = xopt
+nc.variables['models'][:, :] = mc.models[:, :]
+nc.variables['energy'][:] = mc.energy[:]
 nc.close()
 
