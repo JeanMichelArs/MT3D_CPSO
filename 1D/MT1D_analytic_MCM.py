@@ -14,6 +14,10 @@
 
  TODO: Double check for Error I believe that error is recomputed at ervy run
  when it should be read from a constant file
+
+ ! it seems that MonteCarlo Algorithm explores out of initial parameter window
+ deterioring statistic analysis... 
+ to check 
  ---------------------------------------------------------------------------- """
 
 import numpy as np
@@ -22,7 +26,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata,interp1d,Rbf
 import utm
 from stochopy import MonteCarlo, Evolutionary
-from time import time
+import time
 from mpi4py import MPI
 import os
 import seaborn as sns
@@ -36,13 +40,10 @@ def MT1D_analytic(thick, rho, per):
       thick : layer thickness
       rho : resisistivity
       per : period
-    
     - outputs
-      
     """
     if len(thick) == len(rho):
         thick = thick[0:-1]
-
     nlay = len(rho)
     frequencies = 1 / per
     amu = 4 * np.pi * 10**(-7) #Magnetic Permeability (H/m)
@@ -80,7 +81,6 @@ def MT1D_analytic(thick, rho, per):
         phase[iff] = np.arctan2(np.imag(Z[iff]), np.real(Z[iff]))*180/np.pi
         #if convert to microvolt/m/ntesla
         Z[iff] = Z[iff] / np.sqrt(amu * amu * 10**6)
-
     return Z, arho, phase
 
 # ---------------------------------------------------------------------------
@@ -105,22 +105,46 @@ def XHI2(X):
     return RXHI2
 
 # ----------------------------------------------------------------------------
+def check_exploration(models=None, logrhosynth=None, cst_upper=None,
+                      cst_lower=None):
+    """
+    Ensure that model exploration is within parameter window
 
+    Parameters
+    ----------
+    models : ndarray
+        models after exploration in log10 space
+    rhosynth : np.array
+        center of exploration, solution estimate when possible
+    cst_upper, cst_lower : int
+        inf and sup limits around rhosynth for exploration
+    """
+    if np.min(models - logrhosynth) < -cst_lower \
+    or np.max(models - logrhosynth) > cst_upper:
+        print
+        print "Error model exploration out of window"
+        print "min", np.min(models - logrhosynth)
+        print "max", np.max(models - logrhosynth)
+        print
+    return None
+
+# ----------------------------------------------------------------------------
 comm = MPI.COMM_WORLD
 nprocs = comm.Get_size()
 rank = comm.Get_rank()
 
 # Initialize TIME
-starttime = time()
-
+starttime = time
+tt0 = time.clock()
 if rank==0:
     print 'job running on ',nprocs,' processors'
+    tstart = time.clock()
 
 # ---> run parameters
 # probabilistic param
 cst_lower = 2 
 cst_upper = 2
-max_iter = 800 
+max_iter = 8000 
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
@@ -131,14 +155,14 @@ if not os.path.exists(folderout):
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
-filed=None
-rho=None
-hz=None
-per=None
-z=None
-Erz=None
-nz=None
-rhosynth=None
+filed = None
+rho = None
+hz = None
+per = None
+z = None
+Erz = None
+nz = None
+rhosynth = None
 
 if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
@@ -154,7 +178,6 @@ if rank==0:
     nper = len(per)
     # COMPUTE MT1D DATA
     z, rho, phi = MT1D_analytic(hz, rhosynth, per)
-    
     # NOISE & ERROR LEVEL IN %
     #------------------------#
     noise = 0.005
@@ -221,11 +244,16 @@ Xstart = comm.bcast(Xstart, root=0)
 lower = np.log10(rhosynth) - np.ones(n_dim) * cst_lower 
 upper = np.log10(rhosynth) + np.ones(n_dim) * cst_upper 
 
+
 # Initialize SOLVER
 mc = MonteCarlo(F, lower = lower, upper = upper, max_iter = max_iter)
 
 # SOLVE
-xopt, gfit = mc.sample(sampler = "pure", xstart=Xstart)
+xopt, gfit = mc.sample(sampler = "pure")
+
+# check
+check_exploration(models=mc.models, logrhosynth=np.log10(rhosynth),
+                  cst_upper=cst_upper, cst_lower=cst_lower)
 
 # ---> Each process writes outputs
 
@@ -255,3 +283,6 @@ nc.variables['models'][:, :] = mc.models[:, :]
 nc.variables['energy'][:] = mc.energy[:]
 nc.close()
 
+print
+print "total ellapsed time :", time.clock() - tt0
+print 
