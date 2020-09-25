@@ -220,6 +220,10 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     p_inter[-1] = p_inter[-1] + eps
     if rms==True:
         f_grid = np.sqrt(f_grid / ndata)
+        S = 1 / np.sum(np.exp(- f_grid))
+    else:
+        S =  1 / np.sum(np.exp((f_best - f_grid) * 0.5))
+    
     for iparam in range(nparam):
         for i_inter in range(n_inter):
             x_bin[iparam, :] = np.squeeze(p_inter[:-1] + p_inter[1:]) * 0.5 \
@@ -230,12 +234,12 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
             n_bin[iparam, i_inter] = np.sum(i_mod)
             if  np.sum(i_mod) >= 1:
                 if rms==True:
-                    pdf_m[iparam, i_inter] = np.sum(np.exp(- f_grid[i_mod])) / \
-                                             np.sum(np.exp(- f_grid))
+                    pdf_m[iparam, i_inter] = np.sum(np.exp(- f_grid[i_mod])) \
+                                             * S
                 else:
                     pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
-                                             * lmbda)) / \
-                                             np.sum(np.exp((f_best - f_grid) * lmbda))
+                                             * lmbda)) * S
+                print iparam, np.sum(i_mod)
             else:
                 pdf_m[iparam, i_inter] = 0
         print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100 

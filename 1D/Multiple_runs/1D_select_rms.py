@@ -1,5 +1,11 @@
 # python 2.7
 '''
+compute <m> = sum(m * exp(F(-m))
+        pdf(m_i)
+        std(m_i)
+
+works for MT1D candidates 
+parameter space exploration can be performed through cpso or mcm algorithm
 
 '''
 
@@ -137,6 +143,10 @@ print''
 pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, logrhosynth, ndata,
                        n_inter=n_inter,lower=lower, upper=upper, kappa=kappa,
                        rms=rms)
+
+print "check marginal law intervals and window"
+print "should be ", nruns * niter
+print np.sum(n_bin, axis=1)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 
 #      f_best, delta_m , xbin, n_bin, pdf_m, m_weight, m_pow
