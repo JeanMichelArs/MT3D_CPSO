@@ -236,8 +236,8 @@ if rank==0:
 
 Xstart = comm.bcast(Xstart, root=0)
 
-lower=np.log10(rhosynth)-np.ones(n_dim)*cst_lower 
-upper=np.log10(rhosynth)+np.ones(n_dim)*cst_upper 
+lower = np.log10(rhosynth) - np.ones(n_dim) * cst_lower 
+upper = np.log10(rhosynth) + np.ones(n_dim) * cst_upper 
 
 # Initialize SOLVER
 ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter = max_iter, mpi = True, snap = True)
