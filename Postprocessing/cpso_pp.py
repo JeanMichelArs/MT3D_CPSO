@@ -18,13 +18,13 @@ def NaN_filter(models, energy, timing=True, **kwargs):
         t0 = time.clock()
     if len(energy.shape) == 2:
         "MCM format"
-        nruns, nparam, nitertot = models.shape
+        nruns, nitertot, nparam = models.shape
         tmp = energy[energy < 1e20 ]
         niter = len(tmp) // nruns
         filt_energy = energy[:, :niter]
         if timing:
             print "ellapsed time in NaN_filter", time.clock() - t0
-        return models[:, :, :niter], filt_energy, niter
+        return models[:, :niter, :], filt_energy, niter
     elif len(energy.shape) == 3:
         "CPSO Format"
         nruns, popsize, nparam, nitertot = models.shape
@@ -64,10 +64,10 @@ def value_filter(models, energy, threshold, timing=True, **kwargs):
         m_near = models[i_near[0], i_near[1], :, i_near[2]]
     # ---> mcm
     elif len(energy.shape) == 2:
-        nruns, nparam, nitertot = models.shape
+        nruns, nitertot, nparam = models.shape
         f_best = np.min(energy)
         i_best = np.where(energy == np.min(energy))
-        m_best = models[i_best[0], : , i_best[1]]
+        m_best = models[i_best[0], i_best[1], :]
         "! in some cases minimum may be found multiple times therefore we need to pick one"
         if np.prod(m_best.shape) > nparam:
             print "several(", m_best.shape[0] ,") best fit found; max diff between models:"
@@ -75,7 +75,7 @@ def value_filter(models, energy, threshold, timing=True, **kwargs):
             m_best = m_best[0, :]
         f_near = energy[energy < np.min(energy) + threshold]
         i_near = np.where(energy < np.min(energy) + threshold)
-        m_near = models[i_near[0], :, i_near[1]]
+        m_near = models[i_near[0], i_near[1], :]
     else:
         print "Error unsupported energy shape"
         return None
@@ -97,8 +97,8 @@ def regrid(m_near, f_near, delta_m, center=True, timing=True, **kwargs):
     if timing: 
         t0 = time.clock()
     if center:
-        m_grid, idx = np.unique((m_near + delta_m/2) // delta_m * delta_m, 
-                                 return_index=True, axis=0)
+        m_grid, idx = np.unique((m_near + delta_m/2) // delta_m * delta_m + delta_m/2, 
+                                 return_index=True, axis=0) 
         f_grid = f_near[idx]
     else:
         m_grid, idx = np.unique(m_near // delta_m * delta_m , return_index=True, axis=0)
