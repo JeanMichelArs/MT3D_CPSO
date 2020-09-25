@@ -7,6 +7,10 @@ compute <m> = sum(m * exp(F(-m))
 works for MT1D candidates 
 parameter space exploration can be performed through cpso or mcm algorithm
 
+Main issue is that models for MCM and CPSO have different shapes
+CPSO models (popsize, n_dim, max_iter)
+MCM models (max_iter, n_dim)
+
 '''
 
 #-----------------------------------------------------------------------------
@@ -48,7 +52,7 @@ folder_save = cpso_path + '/Analysis'
 save_plot = True
 outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
 save_netcdf = True
-nruns = 50 
+nruns = 1 
 # ---> postproc
 n_inter = 40
 lower = -2.
@@ -102,6 +106,13 @@ i_gbest = np.where(energy == np.min(energy))
 filt_models, filt_energy, niter = pp.NaN_filter(models, energy)
 del models, energy 
 
+# check for mcm exloration debug
+nparam = filt_models.shape[2]
+Err = np.zeros(shape=(nparam,))
+for iparam in range(nparam):
+    Err[iparam] = np.max(np.abs(filt_models[:, :, iparam] - logrhosynth[iparam]))
+if (Err > upper).any(): print "Error models out of window", Err
+
 # --->  Prefilter models according to parameter space regular subgriding
 # !!! Care must be taken that we do this parameter log 
 
@@ -109,7 +120,7 @@ if method is 'CPSO':
     nruns, popsize, nparam, niter = filt_models.shape
     print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
 elif method is 'MCM':
-    nruns, nparam, niter = filt_models.shape
+    nruns, niter, nparam = filt_models.shape
     print "number of models to filter: ", "{:e}".format(nruns * niter)
 else : print "Error undefined method"
 
@@ -119,6 +130,10 @@ print''
 threshold = np.max(filt_energy) 
 m_near, f_near = pp.value_filter(filt_models, filt_energy, threshold)
 
+# check
+# Error mcm exploration detected
+np.max(np.abs(m_near - logrhosynth))
+
 # --- > regrid parameter space
 delta_m = 1e-3 
 m_grid, f_grid, rgrid_error = pp.regrid(m_near, f_near, delta_m, center=True)
@@ -126,6 +141,9 @@ del m_near, f_near
 print "number of particles in subgrid", "{:e}".format(m_grid.shape[0])
 print "Error in energy minimum after subgrid :", np.min(f_grid) - f_gbest
 print''
+
+print "max distance between m_grid and logrhosynth :"
+print np.max(np.abs(m_grid - logrhosynth))
 
 # ---> Xi2 weighted mean model, in log and physical space
 m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)

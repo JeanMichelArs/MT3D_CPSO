@@ -111,7 +111,8 @@ def regrid(m_near, f_near, delta_m, center=True, timing=True, **kwargs):
     return m_grid, f_grid, rgrid_error
 
 # ----------------------------------------------------------------------------
-def weighted_mean(m_grid, f_grid,ndata, kappa=1,rms=False, log=True, timing=True, **kwargs):
+def weighted_mean(m_grid, f_grid, ndata, kappa=1,rms=False, log=True, 
+                  timing=True, **kwargs):
     """ mean models weighted by energy and kappa 
     if rms = True : stat are performed on rms instead of Xhi, ndata required!
     if log = True : stats are performed on models (log10 of real models)
@@ -239,7 +240,6 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
                 else:
                     pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
                                              * lmbda)) * S
-                print iparam, np.sum(i_mod)
             else:
                 pdf_m[iparam, i_inter] = 0
         print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100 

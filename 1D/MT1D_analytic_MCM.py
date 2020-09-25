@@ -271,7 +271,7 @@ nc.createVariable('hz', 'f8', ('nz',))
 nc.createVariable('rho_i', 'f8', ('nz',)) 
 nc.createVariable('xopt', 'f8', ('nparam'))
 nc.createVariable('log_xopt', 'f8', ('nparam'))
-nc.createVariable('models', 'f8', ('nparam', 'max_iter'))
+nc.createVariable('models', 'f8', ('max_iter', 'nparam'))
 nc.createVariable('energy', 'f8', ('max_iter'))  
 nc.createVariable('rho_opt', 'f8', ('nz')) 
 # Filling values
@@ -285,4 +285,16 @@ nc.close()
 
 print
 print "total ellapsed time :", time.clock() - tt0
-print 
+print
+
+# --------------------------------------
+# temporary checks
+energy = mc.energy
+models = mc.models
+
+i_gbest = np.where(energy == np.min(energy))
+f_gbest = np.min(energy)
+i_gbest = np.where(energy == np.min(energy))
+
+
+
