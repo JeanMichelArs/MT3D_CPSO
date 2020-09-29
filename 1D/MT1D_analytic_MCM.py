@@ -99,9 +99,11 @@ def XHI2(X):
     zc, rhoc, phic = MT1D_analytic(hz, X, per)
     RXHI2 = (np.sum((np.real(z) - np.real(zc))**2 / Erz**2) \
            + np.sum((np.imag(z) - np.imag(zc))**2 / Erz**2)) * 0.5
+    """
     print ''
     print 'Magnetotelluric Misfit XHI2=>', RXHI2
     print ''
+    """
     return RXHI2
 
 # ----------------------------------------------------------------------------
@@ -144,7 +146,7 @@ if rank==0:
 # probabilistic param
 cst_lower = 2 
 cst_upper = 2
-max_iter = 8000 
+max_iter = 80000 * 100 
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
@@ -225,9 +227,11 @@ def XHI2(X):
     zc, rhoc, phic = MT1D_analytic(hz, X, per)
     RXHI2 = (np.sum((np.real(z) - np.real(zc))**2 / Erz**2) \
            + np.sum((np.imag(z) - np.imag(zc))**2 / Erz**2)) * 0.5
+    """
     print ''
     print 'Magnetotelluric Misfit XHI2=>', RXHI2
     print ''
+    """
     return RXHI2
 
 # ----------------------------------------------------------------------------
@@ -288,13 +292,4 @@ print "total ellapsed time :", time.clock() - tt0
 print
 
 # --------------------------------------
-# temporary checks
-energy = mc.energy
-models = mc.models
-
-i_gbest = np.where(energy == np.min(energy))
-f_gbest = np.min(energy)
-i_gbest = np.where(energy == np.min(energy))
-
-
 

@@ -52,7 +52,7 @@ folder_save = cpso_path + '/Analysis'
 save_plot = True
 outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
 save_netcdf = True
-nruns = 1 
+nruns = 100 
 # ---> postproc
 n_inter = 40
 lower = -2.
