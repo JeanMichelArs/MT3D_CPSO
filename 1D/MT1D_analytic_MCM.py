@@ -15,10 +15,7 @@
  TODO: Double check for Error I believe that error is recomputed at ervy run
  when it should be read from a constant file
 
- ! it seems that MonteCarlo Algorithm explores out of initial parameter window
- deterioring statistic analysis... 
- to check 
- ---------------------------------------------------------------------------- """
+ --------------------------------------------------------------------------- """
 
 import numpy as np
 import linecache
@@ -186,18 +183,18 @@ if rank==0:
     error = 0.05
     #------------------------#
     # Adding noise to Z
-    Erz=error*np.abs(z)
-    Rz=np.real(z)+np.random.normal(0,noise,len(z))*np.abs(z)
-    Iz=np.imag(z)+np.random.normal(0,noise,len(z))*np.abs(z)
+    Erz = error * np.abs(z)
+    Rz = np.real(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
+    Iz =np.imag(z)+np.random.normal(0,noise,len(z)) * np.abs(z)
     # Rho & Phi
-    rho=rho+np.random.normal(0,noise,len(z))*abs(rho)
-    Erho=error*abs(rho)
-    phi=phi+np.random.normal(0,noise,len(z))*np.abs(phi)
-    Ephi=error*np.abs(phi)
+    rho = rho + np.random.normal(0, noise, len(z)) * abs(rho)
+    Erho = error * abs(rho)
+    phi = phi + np.random.normal(0, noise, len(z)) * np.abs(phi)
+    Ephi = error*np.abs(phi)
     # WRITE DATA FILE FORMAT *.ro11, *.ro12, *.ro21, *.ro22
     #-----------------------------------------------------
-    idd='001'    
-    file= conf_path + '/' + idd + '.ro'
+    idd = '001'    
+    file = conf_path + '/' + idd + '.ro'
     #WRITE DATA
     #np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
     
