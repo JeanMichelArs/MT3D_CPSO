@@ -150,9 +150,9 @@ if rank==0:
     print ' -----------------'
     print ' #################'
     print ' '
-    idd='001'
-    per,Rz,Iz,Erz,rho,Erho,phi,Ephi=np.loadtxt(idd+'.ro',unpack=True)
-    z=Rz+1j*Iz
+    idd = '001'
+    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(idd+'.ro', unpack=True)
+    z = Rz + 1j * Iz
 
 
 # SHARE MPI VARIABLE
