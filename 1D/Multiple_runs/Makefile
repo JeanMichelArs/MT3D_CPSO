@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/Analytic_1D_Bolivia_8nz'
+RUN_DIR='/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
 n_start=0
 n_end=49
 j=${n_start}

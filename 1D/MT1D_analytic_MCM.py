@@ -171,7 +171,7 @@ if rank==0:
     filed = conf_path + '/mod1D_Bolivia_001' # raw_input("Initial 1D MT model:")
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
-    # CPSO parameter
+    """
     # Periods
     per = np.loadtxt(conf_path + '/per',skiprows=1)
     nper = len(per)
@@ -197,7 +197,20 @@ if rank==0:
     file = conf_path + '/' + idd + '.ro'
     #WRITE DATA
     #np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
-    
+    """
+    # READ MT1D DATA
+    #---------------------
+    print ' '
+    print ' #################'
+    print ' -----------------'
+    print ' READ MT1D DATA'
+    print ' -----------------'
+    print ' #################'
+    print ' '
+    idd = '001'
+    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(idd+'.ro', unpack=True)
+    z = Rz + 1j * Iz
+
 
 # SHARE MPI VARIABLE
 #-------------------

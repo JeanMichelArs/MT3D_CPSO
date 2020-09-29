@@ -1,14 +1,18 @@
 #!/usr/bin/python2.7
-# ----------------------------------------------------------------------------
-# CPSO MT1D with analytic forward modelling for comparison to Tarits 
-# Monte Carlo Code
-#
-# For multiple runs python takes an input argument 
-# > mpirun -np $nprocs python MT1D_CPSO_chained.py $irun
-# where irun is an integer referring to the number of the run
-# output files will be written in outdir
+"""
+----------------------------------------------------------------------------
+ CPSO MT1D with analytic forward modelling for comparison to Tarits 
+ Monte Carlo Code
 
-# ----------------------------------------------------------------------------
+ For multiple runs python takes an input argument 
+ 
+ >>> mpirun -np $nprocs python  MT1D_analytic_CPSO.py $irun
+ 
+ where irun is an integer referring to the number of the run
+ output files will be written in outdir
+
+ ----------------------------------------------------------------------------
+"""
 
 import sys
 sys.path.append('../../Forward_MT/')
@@ -86,8 +90,11 @@ cst_lower = 2
 cst_upper = 2
 
 # ----
-outdir = '/postproc/COLLIN/MTD3/Analytic_1D_Bolivia_8nz/test'
+outdir = '/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
 irun = sys.argv[1]
+
+if not os.path.exists(outdir):
+    os.makedirs(outdir)
 
 
 # DECLARE VARIABLE FOR MPI
@@ -167,7 +174,8 @@ if rank==0:
     print ' #################'
     print ' '
     idd = '001'
-    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(idd+'.ro', unpack=True)
+    error_file = conf_path + '/' + idd + '.ro'
+    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(error_file, unpack=True)
     z = Rz + 1j * Iz
 
 
