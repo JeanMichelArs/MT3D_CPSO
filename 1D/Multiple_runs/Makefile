@@ -5,8 +5,8 @@ SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
 RUN_DIR='/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
-n_start=0
-n_end=49
+n_start=50
+n_end=100
 j=${n_start}
 
 # ----------------------------------------------------------------------------
@@ -30,7 +30,7 @@ multi_run:
 .PHONY: watch
 
 watch:
-	tail -f log.$$j
+	tail -f log.0
 
 # ----------------------------------------------------------------------------
 #  ${RUN_DIR}/merged.nc must be removed first

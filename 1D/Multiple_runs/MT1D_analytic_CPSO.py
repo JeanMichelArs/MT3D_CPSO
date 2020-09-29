@@ -205,29 +205,11 @@ def F(X):
     rest=10**X
     cost=XHI2(rest)
     return cost
-    ###rest=np.zeros(nx*ny*nz)
-    ###print model.shape, rest.shape
-    ###print np.unique(model)
-    ###for i in range(len(rest)):
-    ###    rest[i]=10**X[model[i]-1]
-    ###
-
-
-
 
 #MT MISFIT
 def XHI2(X):
      # COMPUTE MT1D RESP
-    #---------------------
-    print ' '
-    print ' #################'
-    print ' -----------------'
-    print ' COMPUTE MT1D RESP'
-    print ' -----------------'
-    print ' #################'
-    print ' '
-    zc,rhoc,phic=MT1D_analytic(hz,X,per)
-    print 
+    zc, rhoc, phic = MT1D_analytic(hz, X, per)
     #---------------------------------------------------
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
@@ -266,10 +248,6 @@ ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter =
 
 # SOLVE
 xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True)
-
-
-
-
 
 if rank==0:
     print ' '
@@ -323,9 +301,10 @@ if rank==0:
     print("Elapsed time: %.2f seconds" % (time() - starttime))
 
 
+# ---> Write data in netcdf file
 if rank==0:
-    outfile = outdir + irun + '.nc'
-    nparam=n_dim
+    outfile = outdir + '/test_' + irun + '.nc'
+    nparam = n_dim
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
     print ""
