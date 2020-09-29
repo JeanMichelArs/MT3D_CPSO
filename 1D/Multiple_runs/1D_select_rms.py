@@ -11,6 +11,8 @@ Main issue is that models for MCM and CPSO have different shapes
 CPSO models (popsize, n_dim, max_iter)
 MCM models (max_iter, n_dim)
 
+>>> python 1D_select_rms.py
+
 '''
 
 #-----------------------------------------------------------------------------
@@ -44,9 +46,9 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
-method = 'MCM'
+method = 'cpso'
 
-cpso_path = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
+cpso_path = '/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
 conf_dir = '../../Config/1D'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
@@ -58,7 +60,7 @@ n_inter = 40
 lower = -2.
 upper = 2.
 kappa = 1
-rms = False
+rms = True
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
