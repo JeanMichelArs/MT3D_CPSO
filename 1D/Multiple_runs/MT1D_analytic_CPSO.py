@@ -1,19 +1,25 @@
 #!/usr/bin/python2.7
-# ----------------------------------------------------------------------------
-# CPSO for MT1D problems 
-#
-# For multiple runs python takes an input argument 
-# > mpirun -np $nprocs python MT1D_CPSO_chained.py $irun
-#
-# where irun is an integer referring to the number of the run
-# output files will be written in outdir
-# ----------------------------------------------------------------------------
+"""
+----------------------------------------------------------------------------
+ CPSO MT1D with analytic forward modelling for comparison to Tarits 
+ Monte Carlo Code
+
+ For multiple runs python takes an input argument 
+ 
+ >>> mpirun -np $nprocs python  MT1D_analytic_CPSO.py $irun
+ 
+ where irun is an integer referring to the number of the run
+ output files will be written in outdir
+
+ ----------------------------------------------------------------------------
+"""
 
 import sys
 sys.path.append('../../Forward_MT/')
 import numpy as np
 import linecache
 import matplotlib.pyplot as plt
+#import mackie3d
 from scipy.interpolate import griddata,interp1d,Rbf
 import utm
 from stochopy import MonteCarlo, Evolutionary
@@ -23,6 +29,8 @@ import os
 import seaborn as sns
 from netCDF4 import Dataset
 
+
+# ----------------------------------------------------------------------------
 def MT1D_analytic(thick,rho,per):
     if len(thick)==len(rho):
         thick=thick[0:-1]
@@ -67,9 +75,7 @@ def MT1D_analytic(thick,rho,per):
 
 
 # ----------------------------------------------------------------------------
-outdir = '/postproc/COLLIN/MTD3/Bolivia_1D_8param/test'
-irun = sys.argv[1]
-# ----------------------------------------------------------------------------
+
 comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
 rank = comm.Get_rank()
@@ -83,22 +89,30 @@ if rank==0:
 cst_lower = 2 
 cst_upper = 2
 
+# ----
+outdir = '/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
+irun = sys.argv[1]
+
+if not os.path.exists(outdir):
+    os.makedirs(outdir)
+
+
 # DECLARE VARIABLE FOR MPI
 #-------------------------
-filed = None
-popsize = None
-max_iter = None
-rho = None
-hx = None
-hy = None
-hz = None
-per = None
-mod1D = None
-z = None
-Erz = None
-nz = None
-rhosynth = None
-FLAGS = None
+filed=None
+popsize=None
+max_iter=None
+rho=None
+hx=None
+hy=None
+hz=None
+per=None
+mod1D=None
+z=None
+Erz=None
+nz=None
+rhosynth=None
+FLAGS=None
 
 if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
@@ -106,25 +120,25 @@ if rank==0:
     #Read 1D model
     conf_path = '../../Config/1D'
     filed = conf_path + '/mod1D_Bolivia_001'#raw_input("Initial 1D MT model:")
-    hz,rhosynth = np.loadtxt(filed,unpack=True)
-    nz = len(hz)
-    hx = np.array([10000])#np.ones([5])*1000
-    hy = np.array([10000])#np.ones([5])*1000
-    nx = 1
-    ny = 1
+    hz,rhosynth=np.loadtxt(filed,unpack=True)
+    nz=len(hz)
+    hx=np.array([10000])#np.ones([5])*1000
+    hy=np.array([10000])#np.ones([5])*1000
+    nx=1
+    ny=1
     # CPSO parameter
-    popsize = 8 #input("Size of model SWARM:")
-    max_iter = 100 *nz #input("Number of iteration:")
+    popsize = 16#input("Size of model SWARM:")
+    max_iter = 100 * nz #input("Number of iteration:")
     """
     #Periods
-    per=np.loadtxt('per',skiprows=1)
+    per=np.loadtxt(conf_path + '/per',skiprows=1)
     nper=len(per)
     # COMPUTE MT1D DATA
     #---------------------
     print ' '
     print ' #################'
     print ' -----------------'
-    print ' COMPUTE MT1D DATA'
+    print ' COMPUTE MT1D RESP'
     print ' -----------------'
     print ' #################'
     print ' '
@@ -134,42 +148,6 @@ if rank==0:
     noise=0.005
     error=0.05
     #------------------------#
-<<<<<<< HEAD
-    per = perpy
-    hxi = hxsurf[:,:,0]
-    hyi = hysurf[:,:,0]
-    hzi = hzsurf[:,:,0]
-    exi = exsurf[:,:,0]
-    eyi = eysurf[:,:,0]
-    # COMPUTE IMPEDANCE TENSOR
-    #-------------------------
-    # mackie en -iomegat, donc partie conjuguee des champs pour etre
-    # meme cadran que 2d, data,...
-    hxc = np.conj(hxi)   # (per,pol,site)
-    hyc = np.conj(hyi)
-    hzc = np.conj(hzi)
-    exc = np.conj(exi)
-    eyc = np.conj(eyi)
-    # Determinant
-    FLAGS = 1
-    det = FLAGS * (hxc[:, 0]*hyc[:, 1] - hxc[:, 1]*hyc[:, 0])
-    det = -1*(hxc[:,0] * hyc[:,1] - hxc[:,1] * hyc[:,0])
-    # ANTI-DIAG TERM => Zyx
-    z = hyc[:,1] * eyc[:,0] - hyc[:,0] * eyc[:,1]
-    z = -z / (det * fmu)
-    # Adding noise to Zyx
-    Erz = error * np.abs(z) #np.random.normal(0,error,len(zyx))*np.abs(zyx)+1e-6
-    Rz = np.real(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
-    Iz = np.imag(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
-    # Roayx & Phiyx
-    zt = np.abs(z)
-    rho = zt * zt * amu * 10**6 / (2. * np.pi / per)
-    rho = 10**(np.log10(rho) + np.random.normal(0, noise * np.mean(abs(np.log10(rho))),len(z)))
-    Erho = 10**(np.random.normal(0, error * np.mean(abs(np.log10(rho))), len(z)))
-    phi = np.arctan2(np.imag(z), np.real(z)) * 180 / np.pi
-    phi = phi + np.random.normal(0, noise * np.mean(abs(phi)), len(z))
-    Ephi = np.random.normal(0, error * np.mean(abs(phi)), len(z))
-=======
     # Adding noise to Z
     Erz=error*np.abs(z)
     Rz=np.real(z)+np.random.normal(0,noise,len(z))*np.abs(z)
@@ -179,11 +157,10 @@ if rank==0:
     Erho=error*abs(rho)
     phi=phi+np.random.normal(0,noise,len(z))*np.abs(phi)
     Ephi=error*np.abs(phi)
->>>>>>> 46e1a3f63dc198d5dd252214d6898b7ba94cf8e6
     # WRITE DATA FILE FORMAT *.ro11, *.ro12, *.ro21, *.ro22
     #-----------------------------------------------------
     idd='001'    
-    file='data/'+idd+'.ro'
+    file= conf_path + '/' + idd + '.ro'
     #WRITE DATA
     np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
     """
@@ -196,25 +173,25 @@ if rank==0:
     print ' -----------------'
     print ' #################'
     print ' '
-    idd='001'
-    data_file=conf_path + '/' + idd + '.ro'
-    per,Rz,Iz,Erz,rho,Erho,phi,Ephi=np.loadtxt(data_file,unpack=True)
-    z=Rz+1j*Iz
+    idd = '001'
+    error_file = conf_path + '/' + idd + '.ro'
+    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(error_file, unpack=True)
+    z = Rz + 1j * Iz
 
 
 # SHARE MPI VARIABLE
 #-------------------
-hx = comm.bcast(hx, root=0)
-hy = comm.bcast(hy, root=0)
-hz = comm.bcast(hz, root=0)
-per = comm.bcast(per, root=0)
-mod1D = comm.bcast(mod1D, root=0)
-z = comm.bcast(z, root=0)
-Erz = comm.bcast(Erz, root=0)
-nz = comm.bcast(nz, root=0)
-rhosynth = comm.bcast(rhosynth, root=0)
-popsize = comm.bcast(popsize, root=0)
-max_iter = comm.bcast(max_iter, root=0)
+hx=comm.bcast(hx, root=0)
+hy=comm.bcast(hy, root=0)
+hz=comm.bcast(hz, root=0)
+per=comm.bcast(per, root=0)
+mod1D=comm.bcast(mod1D, root=0)
+z=comm.bcast(z, root=0)
+Erz=comm.bcast(Erz, root=0)
+nz=comm.bcast(nz, root=0)
+rhosynth=comm.bcast(rhosynth, root=0)
+popsize=comm.bcast(popsize, root=0)
+max_iter=comm.bcast(max_iter, root=0)
 FLAGS=comm.bcast(FLAGS, root=0)
 
 #---------------------------------#
@@ -225,32 +202,14 @@ FLAGS=comm.bcast(FLAGS, root=0)
 
 #COST FUNCTION
 def F(X):
-    rest = 10**X
-    cost = XHI2(rest)
+    rest=10**X
+    cost=XHI2(rest)
     return cost
-    ###rest=np.zeros(nx*ny*nz)
-    ###print model.shape, rest.shape
-    ###print np.unique(model)
-    ###for i in range(len(rest)):
-    ###    rest[i]=10**X[model[i]-1]
-    ###
-
-
-
 
 #MT MISFIT
 def XHI2(X):
-    # COMPUTE MT1D RESP
-    #---------------------
-    print ' '
-    print ' #################'
-    print ' -----------------'
-    print ' COMPUTE MT1D RESP'
-    print ' -----------------'
-    print ' #################'
-    print ' '
-    zc,rhoc,phic=MT1D_analytic(hz,X,per)
-    print 
+     # COMPUTE MT1D RESP
+    zc, rhoc, phic = MT1D_analytic(hz, X, per)
     #---------------------------------------------------
     #COMPUTE MT MISFIT USING IMPEDANCE TENSOR COMPONENTS
     #---------------------------------------------------
@@ -268,20 +227,16 @@ def XHI2(X):
 #                                   #
 #-----------------------------------#
 
-# -------- 
 # changing to run directory
 os.chdir(outdir)
 
 n_dim = nz
 
 Xstart = None
-if rank == 0:
-    Xstart = np.zeros((popsize, n_dim))
+if rank==0:
+    Xstart=np.zeros((popsize,n_dim))
     for i in range(popsize):
-        Xstart[i, :] = np.log10(rhosynth) + np.random.uniform(low=-cst_lower,
-                                                  high=cst_upper, size=n_dim)
-
-
+        Xstart[i, :] = np.log10(rhosynth) + np.random.uniform(low=-cst_lower, high=cst_upper, size=n_dim)
 
 Xstart = comm.bcast(Xstart, root=0)
 
@@ -289,12 +244,10 @@ lower = np.log10(rhosynth) - np.ones(n_dim) * cst_lower
 upper = np.log10(rhosynth) + np.ones(n_dim) * cst_upper 
 
 # Initialize SOLVER
-ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, 
-                  max_iter = max_iter, mpi = True, snap = True)
+ea = Evolutionary(F, lower = lower, upper = upper, popsize = popsize, max_iter = max_iter, mpi = True, snap = True)
 
 # SOLVE
-xopt, gfit = ea.optimize(solver = "cpso", xstart = Xstart , sync = True)
-
+xopt,gfit=ea.optimize(solver = "cpso", xstart = Xstart , sync = True)
 
 if rank==0:
     print ' '
@@ -348,9 +301,10 @@ if rank==0:
     print("Elapsed time: %.2f seconds" % (time() - starttime))
 
 
+# ---> Write data in netcdf file
 if rank==0:
-    outfile = outdir + irun + '.nc'
-    nparam=n_dim
+    outfile = outdir + '/test_' + irun + '.nc'
+    nparam = n_dim
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
     print ""
