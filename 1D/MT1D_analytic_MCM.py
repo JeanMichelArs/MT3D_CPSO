@@ -143,13 +143,13 @@ if rank==0:
 # probabilistic param
 cst_lower = 2 
 cst_upper = 2
-max_iter = 80000 * 100 
+max_iter = 800 * 500 
 
 # outputs
-folderout = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
+folderout = '/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
 outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
 
-if not os.path.exists(folderout):
+if (rank == 0) and (not os.path.exists(folderout)):
     os.makedirs(folderout)
 
 # DECLARE VARIABLE FOR MPI
@@ -171,44 +171,10 @@ if rank==0:
     filed = conf_path + '/mod1D_Bolivia_001' # raw_input("Initial 1D MT model:")
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
-    """
-    # Periods
-    per = np.loadtxt(conf_path + '/per',skiprows=1)
-    nper = len(per)
-    # COMPUTE MT1D DATA
-    z, rho, phi = MT1D_analytic(hz, rhosynth, per)
-    # NOISE & ERROR LEVEL IN %
-    #------------------------#
-    noise = 0.005
-    error = 0.05
-    #------------------------#
-    # Adding noise to Z
-    Erz = error * np.abs(z)
-    Rz = np.real(z) + np.random.normal(0, noise, len(z)) * np.abs(z)
-    Iz =np.imag(z)+np.random.normal(0,noise,len(z)) * np.abs(z)
-    # Rho & Phi
-    rho = rho + np.random.normal(0, noise, len(z)) * abs(rho)
-    Erho = error * abs(rho)
-    phi = phi + np.random.normal(0, noise, len(z)) * np.abs(phi)
-    Ephi = error*np.abs(phi)
-    # WRITE DATA FILE FORMAT *.ro11, *.ro12, *.ro21, *.ro22
-    #-----------------------------------------------------
-    idd = '001'    
-    file = conf_path + '/' + idd + '.ro'
-    #WRITE DATA
-    #np.savetxt(file,np.transpose(np.vstack((per,Rz,Iz,Erz,rho,Erho,phi,Ephi))),fmt= '%16.10f',delimiter='     ')
-    """
-    # READ MT1D DATA
-    #---------------------
-    print ' '
-    print ' #################'
-    print ' -----------------'
-    print ' READ MT1D DATA'
-    print ' -----------------'
-    print ' #################'
-    print ' '
+    # ---> read MT DATA
     idd = '001'
-    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(idd+'.ro', unpack=True)
+    error_file = conf_path + '/' + idd + '.ro'
+    per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(error_file, unpack=True)
     z = Rz + 1j * Iz
 
 

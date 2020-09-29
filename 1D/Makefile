@@ -3,7 +3,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
+RUN_DIR='/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
 
 .PHONY: merge 
 merge:

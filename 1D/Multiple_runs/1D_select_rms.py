@@ -46,21 +46,21 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
-method = 'cpso'
+method = 'MCM'
 
-cpso_path = '/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
 conf_dir = '../../Config/1D'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
 save_netcdf = True
-nruns = 100 
+nruns = 50 
 # ---> postproc
 n_inter = 40
 lower = -2.
 upper = 2.
 kappa = 1
-rms = True
+rms = False
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
@@ -72,7 +72,8 @@ nc = Dataset(cpso_path + '/merged.nc')
 if method is 'cpso':
     energy = np.array(nc.variables['energy'][:nruns, :, :])
     models =  np.array(nc.variables['models'][:nruns, :, :, :])
-    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0 :])))
+    #logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0 :])))
+    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][:])))
 elif method is 'MCM':
     energy = np.array(nc.variables['energy'][:nruns, :])
     models =  np.array(nc.variables['models'][:nruns, :, :])
