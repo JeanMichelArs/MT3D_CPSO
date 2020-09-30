@@ -91,8 +91,6 @@ conf_path = '../../Config/1D'
 filed = conf_path + '/mod1D_Bolivia_001'
 
 # ---> cpso parameters
-conf_path = '../../Config/1D'
-filed = conf_path + '/mod1D_Bolivia_001'
 cst_lower = 2 
 cst_upper = 2
 popsize = 8
@@ -100,7 +98,7 @@ max_iter =  2 * 100 * 8
 
 
 # ----> outputs
-outdir = '/postproc/COLLIN/MTD3/CPSO_ana_8nz_cst_ERROR'
+outdir = '/postproc/COLLIN/MTD3/CPSO_8nz_pop8'
 irun = sys.argv[1]
 
 if not os.path.exists(outdir):
@@ -109,15 +107,15 @@ if not os.path.exists(outdir):
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
-rho=None
-hz=None
-per=None
-mod1D=None
-z=None
-Erz=None
-nz=None
-rhosynth=None
-FLAGS=None
+rho = None
+hz = None
+per = None
+mod1D = None
+z = None
+Erz = None
+nz = None
+rhosynth = None
+FLAGS = None
 
 if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT

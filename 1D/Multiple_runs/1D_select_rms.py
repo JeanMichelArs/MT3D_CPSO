@@ -46,9 +46,10 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
-method = 'MCM'
+method = 'cpso'
+rms = True
 
-cpso_path = '/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
+cpso_path = '/postproc/COLLIN/MTD3/CPSO_8nz_pop8'
 conf_dir = '../../Config/1D'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
@@ -60,7 +61,6 @@ n_inter = 40
 lower = -2.
 upper = 2.
 kappa = 1
-rms = False
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
@@ -73,8 +73,8 @@ if method is 'cpso':
     energy = np.array(nc.variables['energy'][:nruns, :, :])
     models =  np.array(nc.variables['models'][:nruns, :, :, :])
     #logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0 :])))
-    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][:])))
-elif method is 'MCM':
+    logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
+elif method is 'mcm':
     energy = np.array(nc.variables['energy'][:nruns, :])
     models =  np.array(nc.variables['models'][:nruns, :, :])
     logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
@@ -119,10 +119,10 @@ if (Err > upper).any(): print "Error models out of window", Err
 # --->  Prefilter models according to parameter space regular subgriding
 # !!! Care must be taken that we do this parameter log 
 
-if method is 'CPSO':
+if method is 'cpso':
     nruns, popsize, nparam, niter = filt_models.shape
     print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
-elif method is 'MCM':
+elif method is 'mcm':
     nruns, niter, nparam = filt_models.shape
     print "number of models to filter: ", "{:e}".format(nruns * niter)
 else : print "Error undefined method"
@@ -165,8 +165,8 @@ pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, logrhosynth, ndata,
                        n_inter=n_inter,lower=lower, upper=upper, kappa=kappa,
                        rms=rms)
 
-print "check marginal law intervals and window"
-print "should be ", nruns * niter
+print "check marginal law intervals and window for each parameter"
+print "should be ", m_grid.shape[0]
 print np.sum(n_bin, axis=1)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 

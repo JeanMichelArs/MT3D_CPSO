@@ -15,7 +15,7 @@ j=${n_start}
 .PHONY: multi_run multi_ana
 
 # ---> analytical forward modelling
-multi_ana: 
+multi_ana:
 	for i in $(shell seq ${n_start} ${n_end}); do \
 	  (python  MT1D_analytic_CPSO.py $$i &> log.$$i &); \
 	done
