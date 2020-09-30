@@ -139,12 +139,14 @@ if rank==0:
     print 'job running on ',nprocs,' processors'
     tstart = time.clock()
 
+# ----------------------------------------------------------------------------
+# Parameters
 # ---> inputs
 conf_path = '../Config/1D/model_001'
 filed = conf_path + '/mod1D_Bolivia_001' 
-
-# ---> run parameters
-# probabilistic param
+idd = '001'
+error_file = conf_path + '/' + idd + '.ro'
+# ---> probabilistic param
 cst_lower = 2 
 cst_upper = 2
 max_iter = 800 * 500 
@@ -152,6 +154,9 @@ max_iter = 800 * 500
 # outputs
 folderout = '/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
 outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
+
+# ----------------------------------------------------------------------------
+# End of parameters
 
 if (rank == 0) and (not os.path.exists(folderout)):
     os.makedirs(folderout)
@@ -174,8 +179,6 @@ if rank==0:
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
     # ---> read MT DATA
-    idd = '001'
-    error_file = conf_path + '/' + idd + '.ro'
     per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(error_file, unpack=True)
     z = Rz + 1j * Iz
 

@@ -18,15 +18,15 @@ Example/*[0-9].py
 Postprocessing/pbest.py
 
 
-../Postprocessing_1D/mysfit_distribution.py
-../../Config/bolivia_24param.zip/
-../../Postprocessing/Makefile.local
-../../Postprocessing/analytical_test.py
-../../Postprocessing/cpso_pp.pyc
-../../Postprocessing/data/
-../../Postprocessing/m_select.bk.py
-../../Postprocessing/marginal_law.py
-../../Postprocessing/mp_test.py
-../../Postprocessing/mysift.py
-../../RUN/
-
+Postprocessing_1D/mysfit_distribution.py
+Config/bolivia_24param.zip/
+Postprocessing/Makefile.local
+Postprocessing/analytical_test.py
+Postprocessing/cpso_pp.pyc
+Postprocessing/data/
+Postprocessing/m_select.bk.py
+Postprocessing/marginal_law.py
+Postprocessing/mp_test.py
+Postprocessing/mysift.py
+RUN/
+1D/Postprocessing_1D/mysfit_distribution.py
