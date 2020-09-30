@@ -87,7 +87,7 @@ if rank==0:
     print 'job running on ',nproc,' processors'
 
 # ---> inputs
-conf_path = '../../Config/1D'
+conf_path = '../../Config/1D/model_001'
 filed = conf_path + '/mod1D_Bolivia_001'
 
 # ---> cpso parameters

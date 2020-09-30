@@ -1,4 +1,11 @@
 #!/usr/bin/python2.7
+"""
+Obsolete. see Multiple_runs/MT1D_analytic_CPSO.py
+
+
+"""
+
+
 # ----------------------------------------------------------------------------
 # CPSO MT1D with analytic forward modelling for comparison to Tarits 
 # Monte Carlo Code

@@ -50,7 +50,8 @@ method = 'cpso'
 rms = True
 
 cpso_path = '/postproc/COLLIN/MTD3/CPSO_8nz_pop8'
-conf_dir = '../../Config/1D'
+conf_dir = '../../Config/1D/model_001'
+data_file = conf_dir + '/001.ro' 
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
@@ -87,12 +88,7 @@ print''
 
 #---------------------------------------------------------------------------
 # MT data counting (needed for rms option)
-os.chdir(conf_dir)
-ndata = 0
-for fn in glob.glob('*.ro*'):
-	with open(fn) as f:
-		ndata=ndata+sum(1 for line in f if line.strip() and not line.startswith('#'))
-
+ndata = pp.get_ndata(data_file)
 print "number of data for rms: ", "{:e}".format(ndata)
 print''
 

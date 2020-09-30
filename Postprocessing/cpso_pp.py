@@ -8,6 +8,23 @@ CPSO postprocessing module
 import os
 import time
 import numpy as np
+import glob
+
+# ----------------------------------------------------------------------------
+
+def get_ndata(data_file):
+    """
+    returns number of observed measurement data of MT field
+
+    parameters:
+      - data_file : text file containing observations
+      - ndata : number of observations
+    """
+    ndata = 0
+    for fn in glob.glob(data_file):
+        with open(fn) as f:
+            ndata = ndata + sum(1 for line in f if line.strip() and not line.startswith('#'))
+    return ndata
 
 # ----------------------------------------------------------------------------
 

@@ -139,6 +139,10 @@ if rank==0:
     print 'job running on ',nprocs,' processors'
     tstart = time.clock()
 
+# ---> inputs
+conf_path = '../Config/1D/model_001'
+filed = conf_path + '/mod1D_Bolivia_001' 
+
 # ---> run parameters
 # probabilistic param
 cst_lower = 2 
@@ -167,8 +171,6 @@ if rank==0:
     # INITIALIZE RESISTIVITY MODEL & MACKIE INPUT
     #--------------------------------------------
     #Read 1D model
-    conf_path = '../Config/1D'
-    filed = conf_path + '/mod1D_Bolivia_001' # raw_input("Initial 1D MT model:")
     hz, rhosynth = np.loadtxt(filed, unpack=True)
     nz = len(hz)
     # ---> read MT DATA
