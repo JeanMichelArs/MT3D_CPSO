@@ -87,17 +87,18 @@ if rank==0:
     print 'job running on ', nproc, ' processors'
 
 # ---> inputs
-conf_path = '../../Config/1D/model_001'
-filed = conf_path + '/mod1D_Bolivia_001'
-
+conf_path = '../../Config/1D/model_000'
+filed = conf_path + '/mod1D_Bolivia_000'
+idd = '000'
+error_file = conf_path + '/' + idd + '.ro'
 # ---> cpso parameters
 cst_lower = 2 
 cst_upper = 2
-popsize = 8
+popsize = 4
 max_iter =  100 * popsize 
 
 # ----> outputs
-outdir = '/postproc/COLLIN/MTD3/Calibre_CPSO_8nz_pop8'
+outdir = '/postproc/COLLIN/MTD3/Calibre_CPSO_4nz'
 irun = sys.argv[1]
 
 
@@ -132,8 +133,6 @@ if rank==0:
     print ' -----------------'
     print ' #################'
     print ' '
-    idd = '001'
-    error_file = conf_path + '/' + idd + '.ro'
     per, Rz, Iz, Erz, rho, Erho, phi, Ephi = np.loadtxt(error_file, unpack=True)
     z = Rz + 1j * Iz
 
