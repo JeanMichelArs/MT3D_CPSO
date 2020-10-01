@@ -75,7 +75,7 @@ def MT1D_analytic(thick,rho,per):
 
 
 # ----------------------------------------------------------------------------
-
+# ---> mpi init
 comm = MPI.COMM_WORLD
 nproc = comm.Get_size()
 rank = comm.Get_rank()
@@ -86,21 +86,24 @@ starttime = time()
 if rank==0:
     print 'job running on ', nproc, ' processors'
 
+
+# ---------------- USER PARAMETER --------------------------------------------
 # ---> inputs
-conf_path = '../../Config/1D/model_000'
-filed = conf_path + '/mod1D_Bolivia_000'
-idd = '000'
+idd = '002'
+conf_path = '../../Config/1D/model_' + idd 
+filed = conf_path + '/mod1D_Bolivia_' + idd 
 error_file = conf_path + '/' + idd + '.ro'
 # ---> cpso parameters
 cst_lower = 2 
 cst_upper = 2
-popsize = 4
+popsize = 16
 max_iter =  100 * popsize 
 
 # ----> outputs
-outdir = '/postproc/COLLIN/MTD3/Calibre_CPSO_4nz'
+outdir = '/postproc/COLLIN/MTD3/Calibre_CPSO_8nz'
 irun = sys.argv[1]
 
+# --------------- ENF OF PARAMETERS ------------------------------------------
 
 if (rank==0) and (not os.path.exists(outdir)):
     os.makedirs(outdir)

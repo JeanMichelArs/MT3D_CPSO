@@ -48,11 +48,11 @@ def align_yaxis(ax1, v1, ax2, v2):
 
 method = 'cpso'
 rms = True
-nruns = 4 
+nruns = 16 
 
-cpso_path = '/postproc/COLLIN/MTD3/Calibre_CPSO_4nz'
-conf_dir = '../../Config/1D/model_000'
-data_file = conf_dir + '/000.ro' 
+cpso_path = '/postproc/COLLIN/MTD3/Calibre_CPSO_8nz'
+conf_dir = '../../Config/1D/model_002'
+data_file = conf_dir + '/002.ro' 
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/pdf_m_nruns" + str(nruns) + ".nc"
