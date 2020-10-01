@@ -48,15 +48,15 @@ def align_yaxis(ax1, v1, ax2, v2):
 
 method = 'cpso'
 rms = True
+nruns = 8 
 
-cpso_path = '/postproc/COLLIN/MTD3/CPSO_8nz_pop8'
+cpso_path = '/postproc/COLLIN/MTD3/Calibre_CPSO_8nz_pop8'
 conf_dir = '../../Config/1D/model_001'
 data_file = conf_dir + '/001.ro' 
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
-outfile = folder_save + "/mod1D_MargLaw_mcm.nc"
+outfile = folder_save + "/pdf_m_nruns" + str(nruns) + ".nc"
 save_netcdf = True
-nruns = 50 
 # ---> postproc
 n_inter = 40
 lower = -2.
@@ -233,7 +233,7 @@ if save_plot:
         align_yaxis(ax1, 0, ax2, 0)
         ax2.legend(loc=0,fontsize=10)
         plt.suptitle('Parameter '+str(ipar+1)+' <Rho>:'+str(meanpar)+'$\Omega.m$ (log scale), STD:'+str(round(std_weight[ipar],2)),fontsize=12)
-        plt.savefig(folder_save + '/' + 'Parameter_'+str(ipar+1)+'.png')
+        plt.savefig(folder_save + '/' + 'nruns' + str(nruns) +'_Parameter_'+str(ipar+1)+'.png')
         plt.clf()
         
 
