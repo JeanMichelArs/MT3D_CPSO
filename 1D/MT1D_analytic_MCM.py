@@ -142,18 +142,18 @@ if rank==0:
 # ----------------------------------------------------------------------------
 # Parameters
 # ---> inputs
-conf_path = '../Config/1D/model_001'
-filed = conf_path + '/mod1D_Bolivia_001' 
-idd = '001'
+idd = '000'
+conf_path = '../Config/1D/model_' + idd 
+filed = conf_path + '/mod1D_Bolivia_' + idd  
 error_file = conf_path + '/' + idd + '.ro'
 # ---> probabilistic param
 cst_lower = 2 
 cst_upper = 2
-max_iter = 800 * 500 
+max_iter = 500 
 
 # outputs
-folderout = '/postproc/COLLIN/MTD3/MCM_ana_8nz_cst_Error'
-outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
+folderout = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
+outfile = folderout + '/test_' + str(rank) + '.nc'
 
 # ----------------------------------------------------------------------------
 # End of parameters
@@ -163,7 +163,6 @@ if (rank == 0) and (not os.path.exists(folderout)):
 
 # DECLARE VARIABLE FOR MPI
 #-------------------------
-filed = None
 rho = None
 hz = None
 per = None

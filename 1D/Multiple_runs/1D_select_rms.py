@@ -92,11 +92,12 @@ def align_yaxis(ax1, v1, ax2, v2):
 
 method = 'mcm'
 rms = False
-nruns = 1 
+nruns = 2 
 
-cpso_path = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
 conf_dir = '../../Config/1D/model_001'
-data_file = conf_dir + '/001.ro' 
+data_file = conf_dir + '/001.ro'
+model_file = conf_dir + '/mod1D_Bolivia_001'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/debug_pdf" + str(nruns) + ".nc"
@@ -117,7 +118,6 @@ nc = Dataset(cpso_path + '/merged.nc')
 if method is 'cpso':
     energy = np.array(nc.variables['energy'][:nruns, :, :])
     models =  np.array(nc.variables['models'][:nruns, :, :, :])
-    #logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, 0, 0 :])))
     logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
 elif method is 'mcm':
     energy = np.array(nc.variables['energy'][:nruns, :])

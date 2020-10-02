@@ -4,9 +4,9 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/Calibre_CPSO_16nz'
-n_start=17
-n_end=100
+RUN_DIR='/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
+n_start=1
+n_end=2
 j=${n_start}
 
 # ----------------------------------------------------------------------------
