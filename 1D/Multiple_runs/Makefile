@@ -37,12 +37,7 @@ watch:
 .PHONY: merge merge50
 merge:
 	cd ${RUN_DIR}; \
-	ncecat test*nc -O merged.nc
-
-merge50:
-	cd ${RUN_DIR}; \
-	ncecat test[0-9].nc test[0-4][0-9].nc -O merged.nc
-
+	ncecat *exploration*nc -O merged.nc
 
 # ----------------------------------------------------------------------------
 

@@ -153,7 +153,7 @@ max_iter = 500
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
-outfile = folderout + '/test_' + str(rank) + '.nc'
+outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
 
 # ----------------------------------------------------------------------------
 # End of parameters

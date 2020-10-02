@@ -14,7 +14,7 @@ merge:
 .PHONY: clean_outdir
 
 # clean local Auto directory
-clean:
+clean_outdir:
 	cd ${RUN_DIR}; \
 	rm -f mcm_exploration*.nc
 	

@@ -260,7 +260,7 @@ if rank==0:
 
 # ---> Write data in netcdf file
 if rank==0:
-    outfile = outdir + '/test_' + irun + '.nc'
+    outfile = outdir + '/cpso_exploration_' + irun + '.nc'
     nparam = n_dim
     print "Writting in ", outfile
     print "models shape:", np.shape(ea.models)
