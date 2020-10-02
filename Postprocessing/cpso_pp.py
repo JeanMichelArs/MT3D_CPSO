@@ -114,7 +114,7 @@ def regrid(m_near, f_near, delta_m, center=True, timing=True, **kwargs):
     if timing: 
         t0 = time.clock()
     if center:
-        m_grid, idx = np.unique((m_near + delta_m/2) // delta_m * delta_m + delta_m/2, 
+        m_grid, idx = np.unique((m_near + delta_m/2) // delta_m * delta_m,  
                                  return_index=True, axis=0) 
         f_grid = f_near[idx]
     else:
@@ -233,7 +233,7 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     lmbda = 0.5 / kappa
     eps = 1e-3
     L = upper - lower
-    p_inter = np.arange(n_inter + 1) * L / n_inter - L * 0.5
+    p_inter = np.arange(n_inter + 1.) * L / n_inter - L * 0.5
     p_inter[0] = p_inter[0] - eps
     p_inter[-1] = p_inter[-1] + eps
     if rms==True:

@@ -46,16 +46,16 @@ def align_yaxis(ax1, v1, ax2, v2):
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
-method = 'cpso'
-rms = True
-nruns = 16 
+method = 'mcm'
+rms = False
+nruns = 1 
 
-cpso_path = '/postproc/COLLIN/MTD3/Calibre_CPSO_8nz'
-conf_dir = '../../Config/1D/model_002'
-data_file = conf_dir + '/002.ro' 
+cpso_path = '/postproc/COLLIN/MTD3/1D_MCM_ana_8param'
+conf_dir = '../../Config/1D/model_001'
+data_file = conf_dir + '/001.ro' 
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
-outfile = folder_save + "/pdf_m_nruns" + str(nruns) + ".nc"
+outfile = folder_save + "/debug_pdf" + str(nruns) + ".nc"
 save_netcdf = True
 # ---> postproc
 n_inter = 40

@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/Calibre_CPSO_8nz'
+RUN_DIR='/postproc/COLLIN/MTD3/Calibre_CPSO_16nz'
 n_start=17
 n_end=100
 j=${n_start}

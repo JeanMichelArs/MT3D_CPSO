@@ -2,7 +2,7 @@
 *.swo
 *.rslt
 *.log
-*log.[0-9]
+log.[0-9]*
 
 CHAINED_DATARMOR/Auto/mt3d_[0-9]*.py
 CHAINED_DATARMOR/Auto/run_[0-9]*.pbs
