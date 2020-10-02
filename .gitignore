@@ -30,5 +30,6 @@ Postprocessing/marginal_law.py
 Postprocessing/mp_test.py
 Postprocessing/mysift.py
 RUN/
-1D/Postprocessing_1D/mysfit_distribution.py
 
+1D/Postprocessing_1D/mysfit_distribution.py
+1D/Postprocessing_1D/debug_pdf_interval.py
