@@ -10,6 +10,12 @@ import time
 import numpy as np
 import glob
 
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.colors import BoundaryNorm
+from scipy.interpolate import griddata
+from netCDF4 import Dataset
+
 # ----------------------------------------------------------------------------
 
 def get_ndata(data_file):
@@ -311,5 +317,47 @@ def old_marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=
     if timing:
         print "ellapsed time in marginal_law", time.clock() - t0
     return pdf_m, n_bin, x_bin
+
+
+# ----------------------------------------------------------------------------
+def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
+        hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):
+    """  MEAN MODEL & PDF """
+    fig = plt.figure()
+    nparam = hz.shape[0]
+    dz = np.zeros(nparam + 1)
+    for k in range(nparam + 1):
+        dz[k] = np.sum(hz[0:k])
+    # SHADED LAW
+    cmm = cm.plasma
+    norm = BoundaryNorm(np.arange(0,1,0.01), ncolors=cmm.N, clip=True)
+    for ipar in range(nparam):
+        ddz = np.linspace(-dz[ipar+1], -dz[ipar], 10)
+        ddx = np.linspace(np.min(x_bin[ipar, :]), np.max(x_bin[ipar, :]), 80)
+        nn = len(ddz)
+        ll = pdf_m[ipar, :]
+        ll[ll < cut_off] = 'nan'
+        ml = griddata(x_bin[ipar, :], ll, ddx, method='linear')
+        shaded = np.tile(ml, (nn, 1))
+        mx, mz = np.meshgrid(ddx, ddz)
+        pcol = plt.pcolormesh(mx, mz, shaded, alpha=0.7, cmap=cmm, norm=norm,
+                              antialiased=True, linewidth=0.0, rasterized=True)
+        pcol.set_edgecolor('Face')
+
+    c = plt.colorbar()
+    c.set_label(label='PDF', fontsize=10)
+    c.ax.tick_params(axis='x', labelsize=8)
+    mean_mod = np.hstack((m_weight,m_weight[-1]))
+    synth_mod = np.hstack((logrhosynth, logrhosynth[-1]))
+    plt.step(mean_mod, -dz, linewidth=2, color='g', label='mean')
+    plt.step(synth_mod, -dz, linewidth=2, color='y', label='synth')
+    plt.legend(loc=0, fontsize=10)
+    plt.ylabel('Depth', fontsize=10)
+    plt.xlabel('Resistivity (Log-scale)', fontsize=10)
+    plt.xlim(0, 5.5)
+    #plt.show()
+    plt.savefig(figname, transparent=transparent)
+    return None
+
 # ----------------------------------------------------------------------------
 

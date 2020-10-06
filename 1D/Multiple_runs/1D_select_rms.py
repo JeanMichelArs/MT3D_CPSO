@@ -92,12 +92,12 @@ def align_yaxis(ax1, v1, ax2, v2):
 
 method = 'mcm'
 rms = False
-nruns = 25 
+nruns = 50
 
-cpso_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
-conf_dir = '../../Config/1D/model_001'
-data_file = conf_dir + '/001.ro'
-model_file = conf_dir + '/mod1D_Bolivia_001'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
+conf_dir = '../../Config/1D/model_000'
+data_file = conf_dir + '/000.ro'
+model_file = conf_dir + '/mod1D_Bolivia_000'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
@@ -196,14 +196,9 @@ print np.max(np.abs(m_grid - logrhosynth))
 
 # ---> Xi2 weighted mean model, in log and physical space
 m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
-mpow_weight = np.log10(pp.weighted_mean(m_grid, ndata, f_grid, kappa=kappa, rms=rms, log=False))
-print "Mean-difference between log and physical space :", np.max(np.abs(mpow_weight - m_weight))
-print''
 
 # ---> Xi2 weighted STD model, in log and physical space
 std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
-stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=False)
-print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 print''
 
 # ---- marginal laws centered around solution 
@@ -243,9 +238,7 @@ if save_netcdf:
     nc.createVariable('f_grid', 'f8', ('popsize'))
     nc.createVariable('m_synth', 'f8', ('nparam'))
     nc.createVariable('m_weight', 'f8', ('nparam'))
-    nc.createVariable('mpow_weight', 'f8', ('nparam'))
     nc.createVariable('std_weight', 'f8', ('nparam'))
-    nc.createVariable('stdpow_weight', 'f8', ('nparam'))
     nc.createVariable('pdf_m', 'f8', ('nparam', 'n_inter'))
     nc.createVariable('n_bin', 'f8', ('nparam', 'n_inter'))
     nc.createVariable('x_bin', 'f8', ('nparam', 'n_inter'))
@@ -254,12 +247,12 @@ if save_netcdf:
     nc.variables['f_grid'][:] = f_grid
     nc.variables['m_synth'][:] = logrhosynth
     nc.variables['m_weight'][:] = m_weight
-    nc.variables['mpow_weight'][:] = mpow_weight
     nc.variables['std_weight'][:] = std_weight
-    nc.variables['stdpow_weight'][:] = stdpow_weight
     nc.variables['pdf_m'][:, :] = pdf_m
     nc.variables['x_bin'][:, :] = x_bin
     nc.variables['n_bin'][:, :] = n_bin
+    nc.mysfit_mweight = XHI2
+    nc.ndata = ndata*2
     nc.rgrid_error = rgrid_error
     nc.f_gbest = f_gbest
     nc.delta_m = delta_m 
@@ -332,6 +325,6 @@ if save_plot:
     plt.ylabel('Depth',fontsize=10)
     plt.xlabel('Resistivity (Log-scale)',fontsize=10)
     plt.xlim(0,5.5)
-    plt.savefig(folder_save + '/PosteriorModel_'+str(ipar+1)+'.png',transparent=True)
+    plt.savefig(folder_save + '/PosteriorModel_nruns_' + str(nruns) + '_' + str(ipar+1)+'.png',transparent=True)
         
 
