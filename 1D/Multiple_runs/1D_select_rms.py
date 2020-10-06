@@ -33,7 +33,7 @@ from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from scipy.interpolate import griddata
 
-
+#-----------------------------------------------------------------------------
 def MT1D_analytic(thick,rho,per):
     if len(thick)==len(rho):
         thick=thick[0:-1]
@@ -92,7 +92,7 @@ def align_yaxis(ax1, v1, ax2, v2):
 
 method = 'mcm'
 rms = False
-nruns = 2 
+nruns = 25 
 
 cpso_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
 conf_dir = '../../Config/1D/model_001'
@@ -100,7 +100,7 @@ data_file = conf_dir + '/001.ro'
 model_file = conf_dir + '/mod1D_Bolivia_001'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
-outfile = folder_save + "/debug_pdf" + str(nruns) + ".nc"
+outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
 save_netcdf = True
 # ---> postproc
 n_inter = 40

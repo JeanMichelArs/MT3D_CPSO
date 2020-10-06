@@ -141,7 +141,7 @@ def weighted_mean(m_grid, f_grid, ndata, kappa=1,rms=False, log=True,
     f_best = np.min(f_grid)
     m_weight = np.empty(shape=(nparam,))
     if rms==True:
-        f_grid=np.sqrt(f_grid / ndata)
+        f_grid = np.sqrt(f_grid / ndata)
         S = 1 / np.sum(np.exp(-f_grid))
         if log:
             for iparam in range(nparam):
@@ -166,7 +166,8 @@ def weighted_mean(m_grid, f_grid, ndata, kappa=1,rms=False, log=True,
     return m_weight
 
 # ----------------------------------------------------------------------------
-def weighted_std(m_weight,m_grid, f_grid, ndata, kappa=1, rms=False, log=True, timing=True, **kwargs):
+def weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=False, log=True,
+                 timing=True, **kwargs):
     """ std models weighted by energy and kappa 
     if rms = True : stat are performed on rms instead of Xhi, ndata required!
     if log = True : stats are performed on models (log10 of real models)
@@ -177,15 +178,17 @@ def weighted_std(m_weight,m_grid, f_grid, ndata, kappa=1, rms=False, log=True, t
         t0 = time.clock()
 
     nparam = m_grid.shape[1]
-    nmodel=m_grid.shape[0]
+    nmodel = m_grid.shape[0]
     f_best = np.min(f_grid)
     std_weight = np.empty(shape=(nparam,))
     if rms==True:
-        f_grid=np.sqrt(f_grid/ndata)
-        S = 1 / np.sum(np.exp(- f_grid / 2 ))
+        f_grid = np.sqrt(f_grid / ndata)
+        S = 1 / np.sum(np.exp(-f_grid))
         if log:
             for iparam in range(nparam):
-                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp(- f_grid / 2 )* (m_grid[:, iparam]-m_weight[iparam])**2)*S)
+                std_weight[iparam] = np.sqrt((nmodel/(nmodel-1)) \
+                     * np.sum(np.exp(-f_grid) * (m_grid[:, iparam] \
+                                                 - m_weight[iparam])**2) * S)
         else: 
             for iparam in range(nparam):
                 std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp(- f_grid / 2 )* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)

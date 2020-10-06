@@ -142,14 +142,14 @@ if rank==0:
 # ----------------------------------------------------------------------------
 # Parameters
 # ---> inputs
-idd = '000'
+idd = '001'
 conf_path = '../Config/1D/model_' + idd 
 filed = conf_path + '/mod1D_Bolivia_' + idd  
 error_file = conf_path + '/' + idd + '.ro'
 # ---> probabilistic param
 cst_lower = 2 
 cst_upper = 2
-max_iter = 500 
+max_iter = 2 * 8000000 
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
