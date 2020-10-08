@@ -13,7 +13,7 @@ from matplotlib.colors import BoundaryNorm
 from scipy.interpolate import griddata
 from netCDF4 import Dataset
 
-sys.path.append('../../Postprocessing/')
+sys.path.append('../Postprocessing/')
 import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
