@@ -1,16 +1,12 @@
 # python 2.7
 '''
 JCollin 01-2020
+Jmars 10-2020
 
-same as mod_mselect_rms : only stop at nruns to show convergence...
+Compute several post-processing of cpso3D experience 
+for specific number of runs & % of total iterations available
 
-script to select models in order to avoid oversampling in local minimas
-Let's assume we dicretize the parameter space by Delta_m regular spacing 
-m_select = {mi | || mi - mj ||_inf >= Delta_m }
-
-TODO:
-- add timing + __name__ is main ! + write in hour/ minute / sec format
-- put functions in a module
+=> Needed to compute 2D map convergence of the parameters
 '''
 
 #-----------------------------------------------------------------------------
