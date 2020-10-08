@@ -6,3 +6,24 @@ analysis is performed using 1D_select_rms.py
 
 For multiple cpso runs see folder Multiple_runs
  
+Multiple runs of cpso in MT1D
+- MT1D_CPSO_chained.py : mackie3D CPSO (not recommanded)
+- MT1D_analytic_CPSO.py: Analytic forward modelling CPSO
+
+# ----> How to
+edit Makefile
+
+> make multi_run
+
+to merge results in a single netcdf file
+
+> make merge
+
+# ------------------------------------------------------------ 
+python takes positionnal arguments do identify different runs
+
+ex: to run a single run of cpso with tag number 1
+
+> python MT1D_CPSO_chained.py 1 
+
+---
