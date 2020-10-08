@@ -94,13 +94,21 @@ method = 'mcm'
 rms = False
 nruns = 50
 
-cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
-conf_dir = '../../Config/1D/model_000'
+###cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
+###conf_dir = '../../Config/1D/model_000'
+###data_file = conf_dir + '/000.ro'
+###model_file = conf_dir + '/mod1D_Bolivia_000'
+###folder_save = cpso_path + '/Analysis'  
+###save_plot = True
+###outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
+cpso_path = '/home/ars/Bureau'
+conf_dir = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/1D/model_000'
 data_file = conf_dir + '/000.ro'
 model_file = conf_dir + '/mod1D_Bolivia_000'
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
 outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
+save_netcdf = True
 save_netcdf = True
 # ---> postproc
 n_inter = 40
@@ -272,9 +280,10 @@ if save_plot:
         Sbin = sum(n_bin[ipar, :])
         hist = np.empty(int(Sbin))
         for j in range(len(n_bin[ipar, :])):
-            hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]-np.diff(x_bin[ipar, :])[0]/2
+            hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]
         ax1 = fig.add_subplot(111)
-        ax1.hist(hist,bins=x_bin[ipar, :]-np.diff(x_bin[ipar, :])[0]/2)
+        binplot=np.hstack((x_bin[ipar, :],x_bin[ipar,-1]+np.diff(x_bin[ipar, :])[-1]))-np.diff(x_bin[ipar, :])[0]/2.
+        ax1.hist(hist,bins=binplot)
         ax1.set_ylabel('Nbr of model', color='b',fontsize=10)
         ax1.set_xlabel('Resistivity (Log-scale)',fontsize=10)
         ax1.tick_params(axis='y', labelcolor='b',labelsize=8)

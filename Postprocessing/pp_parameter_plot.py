@@ -191,7 +191,7 @@ for ipar in np.arange(nparam):
     Sbin=sum(n_bin[ipar, :])
     hist=np.empty(int(Sbin))
     for j in range(len(n_bin[ipar, :])):
-        hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]+valpar-np.diff(x_bin[ipar, :])[0]/2
+        hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]+valpar
         
     par=np.full((nx,ny,nz),False)
     par[modelpp == ipar+1]=True
@@ -206,7 +206,8 @@ for ipar in np.arange(nparam):
     ax.invert_zaxis()
     ax.invert_xaxis()
     ax1 = fig.add_subplot(122)
-    ax1.hist(hist,bins=x_bin[ipar, :]+valpar-np.diff(x_bin[ipar, :])[0]/2)
+    binplot=np.hstack((x_bin[ipar, :],x_bin[ipar,-1]+np.diff(x_bin[ipar, :])[-1]))+valpar-np.diff(x_bin[ipar, :])[0]/2.
+    ax1.hist(hist,bins=binplot)
     ax1.set_ylabel('Nbr of model', color='b',fontsize=10)
     ax1.set_xlabel('Resistivity (Log-scale)',fontsize=10)
     ax1.tick_params(axis='y', labelcolor='b',labelsize=8)
