@@ -46,7 +46,7 @@ merge:
 
 ncfile=pdf_m_16.nc
 out_file=compressed_${ncfile}
-var=pdf_m,n_bin,x_bin,m_synth,std_weight
+var=pdf_m,n_bin,x_bin,m_synth,std_weight,m_weight
 extraction:  
 	cd ${RUN_DIR}/Analysis; \
 	echo ${PWD}; \

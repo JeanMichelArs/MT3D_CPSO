@@ -23,17 +23,25 @@ import numpy as np
 from netCDF4 import Dataset
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import glob
 
-sys.path.append('../../Postprocessing/')
-import cpso_pp as pp
+"""
+import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
+"""
+
 from scipy.interpolate import griddata
+import glob
+
+sys.path.append('../../Postprocessing/')
+sys.path.append('../../Forward_MT/')
+import cpso_pp as pp
+from forward_1d import MT1D_analytic
+
 
 #-----------------------------------------------------------------------------
+"""
 def MT1D_analytic(thick,rho,per):
     if len(thick)==len(rho):
         thick=thick[0:-1]
@@ -75,41 +83,37 @@ def MT1D_analytic(thick,rho,per):
         Z[iff]=Z[iff]/np.sqrt(amu*amu*10**6)
 
     return Z,arho,phase
-# ----------------------------------------------------------------------------
-def align_yaxis(ax1, v1, ax2, v2):
-    """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
-    _, y1 = ax1.transData.transform((0, v1))
-    _, y2 = ax2.transData.transform((0, v2))
-    inv = ax2.transData.inverted()
-    _, dy = inv.transform((0, 0)) - inv.transform((0, y1-y2))
-    miny, maxy = ax2.get_ylim()
-    ax2.set_ylim(miny+dy, maxy+dy)
+"""
+
 # ----------------------------------------------------------------------------
 # be careful if save_netcdf: outfile is removed before creating a new one
 # cpso_path : cpso output
 # conf_dir : configuration files
 # folder_save : parameter uncertainty estimates
 
+# ---> inputs
 method = 'mcm'
 rms = False
-nruns = 50
+nruns = 2
 
-###cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
-###conf_dir = '../../Config/1D/model_000'
-###data_file = conf_dir + '/000.ro'
-###model_file = conf_dir + '/mod1D_Bolivia_000'
-###folder_save = cpso_path + '/Analysis'  
-###save_plot = True
-###outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
-cpso_path = '/home/ars/Bureau'
-conf_dir = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/1D/model_000'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
+conf_dir = '../../Config/1D/model_000'
+#cpso_path = '/home/ars/Bureau'
+#conf_dir = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/1D/model_000'
 data_file = conf_dir + '/000.ro'
 model_file = conf_dir + '/mod1D_Bolivia_000'
+exploration_file = cpso_path + '/merged.nc'
+
+# ---> outputs
+# plots: fig_pdf is a generic name for pdf
 folder_save = cpso_path + '/Analysis'  
 save_plot = True
+fig_pdf = folder_save + '/pdf_m_nruns' + str(nruns) + '_' 
+fig_vert = folder_save + 'vert_pro_nruns' + str(nruns) + '.png' 
+
+save_netcdf = True
 outfile = folder_save + "/pdf_m_" + str(nruns) + ".nc"
-save_netcdf = True
-save_netcdf = True
+
 # ---> postproc
 n_inter = 40
 lower = -2.
@@ -122,7 +126,7 @@ if not os.path.exists(folder_save):
 
 # --- load data
 t0 = time.clock()
-nc = Dataset(cpso_path + '/merged.nc')
+nc = Dataset(exploration_file)
 if method is 'cpso':
     energy = np.array(nc.variables['energy'][:nruns, :, :])
     models =  np.array(nc.variables['models'][:nruns, :, :, :])
@@ -272,68 +276,12 @@ if save_netcdf:
 
 if save_plot:
     print "plot results"
-    for ipar in range(nparam):
-        # Marginal Laws
-        fig = plt.figure()
-        valpar = round(logrhosynth[ipar], 2)
-        meanpar = round(m_weight[ipar], 2)
-        Sbin = sum(n_bin[ipar, :])
-        hist = np.empty(int(Sbin))
-        for j in range(len(n_bin[ipar, :])):
-            hist[int(sum(n_bin[ipar, 0:j])):int(sum(n_bin[ipar, 0:j+1]))]=x_bin[ipar, j]
-        ax1 = fig.add_subplot(111)
-        binplot=np.hstack((x_bin[ipar, :],x_bin[ipar,-1]+np.diff(x_bin[ipar, :])[-1]))-np.diff(x_bin[ipar, :])[0]/2.
-        ax1.hist(hist,bins=binplot)
-        ax1.set_ylabel('Nbr of model', color='b',fontsize=10)
-        ax1.set_xlabel('Resistivity (Log-scale)',fontsize=10)
-        ax1.tick_params(axis='y', labelcolor='b',labelsize=8)
-        ax1.tick_params(axis='x',labelsize=8)
-        ax2 = ax1.twinx()
-        ax2.axvline(x=valpar, color='y',label='synth')
-        ax2.axvline(x=meanpar, color='g',label='mean')
-        ax2.plot(x_bin[ipar, :], pdf_m[ipar, :], 'r')
-        ax2.set_ylabel('Probability', color='r',fontsize=10)
-        ax2.tick_params(axis='y', labelcolor='r',labelsize=8)
-        align_yaxis(ax1, 0, ax2, 0)
-        ax2.legend(loc=0,fontsize=10)
-        plt.suptitle('Parameter '+str(ipar+1)+' <Rho>:'+str(meanpar)+'$\Omega.m$ (log scale), STD:'+str(round(std_weight[ipar],2)),fontsize=12)
-        plt.savefig(folder_save + '/' + 'nruns' + str(nruns) +'_Parameter_'+str(ipar+1)+'.png',transparent=True)
-        plt.clf()
-
-    # MEAN MODEL & PDF
-    fig = plt.figure()
-    dz=np.zeros(nparam+1)
-    for k in range(nparam+1):
-        dz[k]=sum(hz[0:k])
-    # SHADED LAW
-    cmm=cm.plasma
-    norm = BoundaryNorm(np.arange(0,1,0.01), ncolors=cmm.N, clip=True)
-    for ipar in range(nparam):
-        ddz=np.linspace(-dz[ipar+1],-dz[ipar],10)
-        ddx=np.linspace(min(x_bin[ipar, :]),max(x_bin[ipar, :]),80)
-        nn=len(ddz)
-        ll=pdf_m[ipar, :]
-        ll[ll<1e-3]='nan'
-        ml=griddata(x_bin[ipar, :],ll,ddx,method='linear')
-        shaded=np.tile(ml,(nn,1))
-        mx,mz=np.meshgrid(ddx,ddz)
-        pcol =plt.pcolormesh(mx,mz,shaded,alpha=0.7,cmap=cmm, norm=norm,antialiased=True, linewidth=0.0,rasterized=True)
-        pcol.set_edgecolor('Face')
-        #plt.contourf(mx,mz,shaded,np.arange(0,1,0.001),cmap=cmm,alpha=0.5)
-
-    c=plt.colorbar()
-    #c=plt.colorbar(ticks=np.arange(0,1.1,0.1),location='bottom',pad=0.1)
-    c.set_label(label='PDF',fontsize=10)
-    c.ax.tick_params(axis='x', labelsize=8)
-    #
-    mean_mod=np.hstack((m_weight,m_weight[-1]))
-    synth_mod=np.hstack((logrhosynth,logrhosynth[-1]))
-    plt.step(mean_mod,-dz,linewidth=2,color='g',label='mean')
-    plt.step(synth_mod,-dz,linewidth=2,color='y',label='synth')
-    plt.legend(loc=0,fontsize=10)
-    plt.ylabel('Depth',fontsize=10)
-    plt.xlabel('Resistivity (Log-scale)',fontsize=10)
-    plt.xlim(0,5.5)
-    plt.savefig(folder_save + '/PosteriorModel_nruns_' + str(nruns) + '_' + str(ipar+1)+'.png',transparent=True)
-        
+    # marginal laws
+    pp.plot_pdfm(gen_name=fig_pdf, pdf_m=pdf_m, x_bin=x_bin, n_bin=n_bin,
+              m_synth=logrhosynth, m_weight=m_weight, std_weight=std_weight,
+              transparent=False)
+    # vertical profile of <m> vs logrhosynth
+    pp.vertical_profile(figname=fig_vert, pdf_m=pdf_m, m_weight=m_weight,
+                 logrhosynth=logrhosynth, hz=hz, x_bin=x_bin, 
+                 transparent=False, cut_off=1e-3) 
 

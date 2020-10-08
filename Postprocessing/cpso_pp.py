@@ -278,48 +278,6 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
 
 
 # ----------------------------------------------------------------------------
-def old_marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1, 
-                 kappa=100, rms=False, timing=True, **kwargs):
-    """ DEPRECATED WRONG INTERVALS  
-    parameter marginal laws around m_best (is m_best, m_weighted ?)
-    if rms = True : stat are performed on rms instead of Xhi, ndata required!
-    for high energy values kappa must be applied
-    a good approximation is based on regridding error
-    """
-    if timing:
-        t0 = time.clock()
-    nparam = m_grid.shape[1]
-    n_bin = np.empty(shape=(nparam, n_inter))
-    pdf_m = np.empty(shape=(nparam, n_inter))
-    x_bin = np.empty(shape=(nparam, n_inter))
-    f_best = np.min(f_grid)
-    lmbda = 0.5 / kappa
-    eps = 5 * 1e-6
-    if rms==True:
-        f_grid = np.sqrt(f_grid / ndata)
-    for iparam in range(nparam):
-       for i_inter in range(n_inter):
-            p_inter = lower + i_inter * (upper-lower) / n_inter + m_best[iparam]
-            x_bin[iparam, i_inter] = np.squeeze(p_inter)
-            i_mod = np.abs(m_grid[:, iparam] - p_inter + eps) <= (upper - lower) \
-                    / n_inter * 0.5
-            n_bin[iparam, i_inter] = np.sum(i_mod)
-            if  np.sum(i_mod) >= 1:
-                if rms==True:
-                    pdf_m[iparam, i_inter] = np.sum(np.exp( - f_grid[i_mod] /2)) / \
-                                             np.sum(np.exp(- f_grid /2))
-                else:
-                    pdf_m[iparam, i_inter] = np.sum(np.exp((f_best - f_grid[i_mod]) \
-                                             * lmbda)) / \
-                                             np.sum(np.exp((f_best - f_grid) * lmbda))
-            else:
-                pdf_m[iparam, i_inter] = 0
-    if timing:
-        print "ellapsed time in marginal_law", time.clock() - t0
-    return pdf_m, n_bin, x_bin
-
-
-# ----------------------------------------------------------------------------
 def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
         hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):
     """  MEAN MODEL & PDF """
@@ -360,4 +318,58 @@ def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
     return None
 
 # ----------------------------------------------------------------------------
+def align_yaxis(ax1, v1, ax2, v2):
+    """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
+    _, y1 = ax1.transData.transform((0, v1))
+    _, y2 = ax2.transData.transform((0, v2))
+    inv = ax2.transData.inverted()
+    _, dy = inv.transform((0, 0)) - inv.transform((0, y1-y2))
+    miny, maxy = ax2.get_ylim()
+    ax2.set_ylim(miny+dy, maxy+dy)
 
+# ----------------------------------------------------------------------------
+
+def plot_pdfm(gen_name='pdf', pdf_m=None, x_bin=None, n_bin=None,
+              m_synth=None, m_weight=None, std_weight=None,
+              transparent=True, **kwargs):
+    """
+    plot marginal laws, parameter space exploration, synthetic model,
+    <m> and mbest
+    
+    arguments:
+      gen_name: generic figure name. Path + /pdf_myrun...
+      m_synth : synthetic model
+
+    """
+    nparam = m_synth.shape[0]
+    for ipar in range(nparam):
+        fig = plt.figure()
+        valpar = round(m_synth[ipar], 2)
+        meanpar = round(m_weight[ipar], 2)
+        Sbin = sum(n_bin[ipar, :])
+        hist = np.empty(int(Sbin))
+        for j in range(len(n_bin[ipar, :])):
+            hist[int(np.sum(n_bin[ipar, 0:j])) : int(np.sum(n_bin[ipar, 0:j+1]))] = x_bin[ipar, j]
+        ax1 = fig.add_subplot(111)
+        binplot = np.hstack((x_bin[ipar, :], x_bin[ipar, -1] \
+                + np.diff(x_bin[ipar, :])[-1])) - np.diff(x_bin[ipar, :])[0]/2.
+        ax1.hist(hist,bins=binplot)
+        ax1.set_ylabel('Nbr of model', color='b', fontsize=10)
+        ax1.set_xlabel('Resistivity (Log-scale)', fontsize=10)
+        ax1.tick_params(axis='y', labelcolor='b', labelsize=8)
+        ax1.tick_params(axis='x', labelsize=8)
+        ax2 = ax1.twinx()
+        ax2.axvline(x=valpar, color='y', label='synth')
+        ax2.axvline(x=meanpar, color='g', label='mean')
+        ax2.plot(x_bin[ipar, :], pdf_m[ipar, :], 'r')
+        ax2.set_ylabel('Probability', color='r',fontsize=10)
+        ax2.tick_params(axis='y', labelcolor='r',labelsize=8)
+        align_yaxis(ax1, 0, ax2, 0)
+        ax2.legend(loc=0, fontsize=10)
+        plt.suptitle('Parameter '+ str(ipar+1)+' <Rho>:' + str(meanpar) + '$\Omega.m$ (log scale), STD:' + str(round(std_weight[ipar], 2)), fontsize=12)
+        plt.savefig(gen_name + '_ip_' + str(ipar+1) + '.png', transparent=transparent)
+        plt.clf()
+
+    return None
+
+# ----------------------------------------------------------------------------
