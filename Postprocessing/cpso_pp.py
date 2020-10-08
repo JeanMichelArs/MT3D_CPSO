@@ -367,7 +367,7 @@ def plot_pdfm(gen_name='pdf', pdf_m=None, x_bin=None, n_bin=None,
         align_yaxis(ax1, 0, ax2, 0)
         ax2.legend(loc=0, fontsize=10)
         plt.suptitle('Parameter '+ str(ipar+1)+' <Rho>:' + str(meanpar) + '$\Omega.m$ (log scale), STD:' + str(round(std_weight[ipar], 2)), fontsize=12)
-        plt.savefig(gen_name + '_ip_' + str(ipar+1) + '.png', transparent=transparent)
+        plt.savefig(gen_name + 'ip_' + str(ipar+1) + '.png', transparent=transparent)
         plt.clf()
 
     return None
