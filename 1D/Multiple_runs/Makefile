@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 
 # RUN_DIR as to be the same than in mk_files.sh
-RUN_DIR='/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
+RUN_DIR=/postproc/COLLIN/MTD3/MCM_16nz_cst_Error
 n_start=1
 n_end=2
 j=${n_start}
@@ -34,13 +34,25 @@ watch:
 
 # ----------------------------------------------------------------------------
 #  ${RUN_DIR}/merged.nc must be removed first
-.PHONY: merge merge50
+.PHONY: merge 
 merge:
 	cd ${RUN_DIR}; \
 	ncecat *exploration*nc -O merged.nc
 
 # ----------------------------------------------------------------------------
+# exctract variables from netcdf files
 
+.PHONY: extraction
+
+ncfile=pdf_m_16.nc
+out_file=compressed_${ncfile}
+var=pdf_m,n_bin,x_bin,m_synth,std_weight
+extraction:  
+	cd ${RUN_DIR}/Analysis; \
+	echo ${PWD}; \
+	ncks -C -v ${var} ${ncfile} ${out_file}
+
+# ----------------------------------------------------------------------------
 
 .PHONY: clean
 
