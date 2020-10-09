@@ -1,5 +1,5 @@
 #!/bin/csh
-#PBS -l mem=512g
+#PBS -l mem=500g
 #PBS -l walltime=24:00:00
 #  COMMENT
 #  Tina ODAKA 06.03.2017
@@ -21,5 +21,5 @@ module load conda/latest
 conda activate mt3d
 
 date
-time python mod_m_select_rms.py > log.m_select_rms
+time python m_select_conv.py > log.m_select_conv_100_50
 date

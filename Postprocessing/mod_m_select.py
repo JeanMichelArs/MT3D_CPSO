@@ -27,7 +27,7 @@ import cpso_pp as pp
 # be careful if save_netcdf: outfile is removed before creating a new one
 run = 'Bolivia_115param_015'
 NCPATH = '/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/' + run
-folder_save = NCPATH + '/Postprocessing'
+folder_save = NCPATH + '/Postprocessing_NdataSmooth'
 save_plot = True
 outfile = folder_save + "/mselect_mod.nc"
 save_netcdf = True
@@ -74,6 +74,7 @@ print "number of models to filter: ", "{:e}".format(nruns * popsize * niter)
 
 threshold =np.max(filt_energy)# np.median(filt_energy)
 m_near, f_near = pp.value_filter(filt_models, filt_energy, threshold)
+del filt_models, filt_energy
 
 # --- > regrid parameter space
 delta_m = 1e-3 
@@ -93,7 +94,7 @@ stdpow_weight = pp.weighted_std(10**mpow_weight, m_grid, f_grid, ndata, kappa=1,
 print "STD-difference between log and physical space :", np.max(np.abs(stdpow_weight - std_weight))
 
 # ---- marginal laws using kappa damping coefficient
-n_inter = 20
+n_inter = 21
 lower = -1.  
 upper = 1. 
 kappa = ndata

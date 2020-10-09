@@ -1,12 +1,18 @@
 """
 script to analyze cpso convergence over the runs
 
+<<<<<<< HEAD
+- TODO:
+    - plot < m > for several number of runs [1, 5, 10, 20, 50, 75, 100]
+    - plot <std> //
+=======
 - plot < m > for several number of runs [1, 5, 10, 20, 50, 75, 100]
 - plot <std> //
 - log of error (norme2) E(nruns), for both < m > and < std >
 
 - TODO: 
     - plot error against pbest to see a convergence ?
+>>>>>>> d0cb2b5644f5e1cd35c4c4e582d0c007444ca91a
 """
 # ----------------------------------------------------------------------------
 import numpy as np
@@ -32,7 +38,8 @@ for irun in runs:
     std_weight[icount, :] = nc.variables['std_weight'][:]
     nc.close()
     icount = icount + 1
-
+    
+# ---- plot <m> and <std>
 plt.figure(figsize=(10, 8))
 for irun in range(len(runs)):
     plt.subplot(2, 1, 1)
@@ -44,6 +51,9 @@ for irun in range(len(runs)):
     plt.ylabel('<std>')
 
 plt.legend()
+plt.show()
+
+# ---- norme 2 
 figname = data_dir + '/likehood_std_convergence.png'
 plt.savefig(figname)
 plt.show()

@@ -3,6 +3,12 @@
 JCollin 06-2020
 
 CPSO postprocessing module
+
+- ! marginal_law: 
+  modification of interval, upper boundary was not taken into account
+- add possibility of single run NaNfiler
+- removed factor 2 divsion in rms marginal law function
+
 '''
 #-----------------------------------------------------------------------------
 import os
@@ -33,9 +39,10 @@ def get_ndata(data_file):
     return ndata
 
 # ----------------------------------------------------------------------------
-
-def NaN_filter(models, energy, timing=True, **kwargs):
+def NaN_filter(models, energy, timing=True, iterpercent=100, **kwargs):
     """ remove Nan values, usefull for runs that did not finish
+        args : 
+           iterpercent variable to select a % of total iter
     """
     if timing:
         t0 = time.clock()
@@ -44,6 +51,7 @@ def NaN_filter(models, energy, timing=True, **kwargs):
         nruns, nitertot, nparam = models.shape
         tmp = energy[energy < 1e20 ]
         niter = len(tmp) // nruns
+        niter = int(iterpercent * niter / 100)
         filt_energy = energy[:, :niter]
         if timing:
             print "ellapsed time in NaN_filter", time.clock() - t0
@@ -53,6 +61,7 @@ def NaN_filter(models, energy, timing=True, **kwargs):
         nruns, popsize, nparam, nitertot = models.shape
         tmp = energy[energy < 1e20 ]
         niter = len(tmp) // nruns // popsize
+        niter = int(iterpercent * niter / 100)
         filt_energy = energy[:, :, :niter]
         if timing:
             print "ellapsed time in NaN_filter", time.clock() - t0
@@ -60,8 +69,8 @@ def NaN_filter(models, energy, timing=True, **kwargs):
     else:
         print "Error wrong energy shape"
         return None
-    
 
+    
 # ----------------------------------------------------------------------------
 def value_filter(models, energy, threshold, timing=True, **kwargs):
     """ 
@@ -146,7 +155,7 @@ def weighted_mean(m_grid, f_grid, ndata, kappa=1,rms=False, log=True,
     nparam = m_grid.shape[1]
     f_best = np.min(f_grid)
     m_weight = np.empty(shape=(nparam,))
-    if rms==True:
+    if rms:
         f_grid = np.sqrt(f_grid / ndata)
         S = 1 / np.sum(np.exp(-f_grid))
         if log:
@@ -197,7 +206,9 @@ def weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=False, log=True,
                                                  - m_weight[iparam])**2) * S)
         else: 
             for iparam in range(nparam):
-                std_weight[iparam]=np.sqrt((nmodel/(nmodel-1))*np.sum(np.exp(- f_grid / 2 )* (10**m_grid[:, iparam]-m_weight[iparam])**2)*S)
+                std_weight[iparam] = np.sqrt((nmodel / (nmodel-1)) \
+                                   * np.sum(np.exp(f_grid) \
+                                   * (10**m_grid[:, iparam] - m_weight[iparam])**2) * S)
     else:
         S = 1 / np.sum(np.exp((f_best - f_grid) / 2 / kappa))
         if log:

@@ -2,6 +2,8 @@
 '''
 JCollin 01-2020
 
+same as mod_mselect_rms : only stop at nruns to show convergence...
+
 script to select models in order to avoid oversampling in local minimas
 Let's assume we dicretize the parameter space by Delta_m regular spacing 
 m_select = {mi | || mi - mj ||_inf >= Delta_m }
@@ -25,11 +27,13 @@ import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
 # be careful if save_netcdf: outfile is removed before creating a new one
+nruns = 100
+iterpercent = 50
 run = 'Bolivia_115param_015'
 NCPATH = '/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/' + run
-folder_save = NCPATH + '/Postprocessing_rms'
-save_plot = True
-outfile = folder_save + "/mselect_mod.nc"
+folder_save = NCPATH + '/convergence_rms/total_merged'
+save_plot = False
+outfile = folder_save + "/mselect_mod_nruns" + str(nruns)+'_iterpercent'+str(iterpercent) + ".nc"
 save_netcdf = True
 
 # --- create directory to save plots 
@@ -39,8 +43,8 @@ if not os.path.exists(folder_save):
 # --- load data
 t0 = time.clock()
 nc = Dataset(NCPATH + '/merged.nc')
-energy = np.array(nc.variables['energy'][:])
-models =  np.array(nc.variables['models'][:])
+energy = np.array(nc.variables['energy'][:nruns, :, :])
+models =  np.array(nc.variables['models'][:nruns, :, :, :])
 nc.close()
 print "Ellapsed time reading netcdf file:", time.clock() - t0
 
@@ -64,7 +68,7 @@ m_gbest = m_gbest[0]
 # ----------------------------------------------------------------------------
 # First filter NaN values in case run did not finish 
 
-filt_models, filt_energy, niter = pp.NaN_filter(models, energy)
+filt_models, filt_energy, niter = pp.NaN_filter(models, energy,iterpercent)
 del models, energy 
 
 # --->  Prefilter models according to parameter space regular subgriding
@@ -99,7 +103,7 @@ lower = -1.
 upper = 1. 
 kappa = 1 
 
-pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, m_gbest, ndata, n_inter=n_inter,lower=lower, upper=upper, kappa=kappa, rms=True)
+pdf_m, n_bin, x_bin = pp.marginal_law(m_grid, f_grid, m_gbest*0, ndata, n_inter=n_inter,lower=lower, upper=upper, kappa=kappa, rms=True)
 
 # ---> save m_grid, f_grid, r_grid_error, m_gbest, 
 #      f_best, delta_m , xbin, n_bin, pdf_m, m_weight, m_pow
@@ -156,6 +160,6 @@ if save_plot:
         plt.subplot(2, 1, 2)
         plt.plot(x_bin[iparam, :], n_bin[iparam, :])
         plt.xlim([-1, 1])
-        plt.savefig(folder_save + '/' + "fun_diff"+  str(int(iparam)) )
+        plt.savefig(folder_save + '/fun_diff' +  str(int(iparam)) + "nruns" + str(nruns))
         plt.clf()
 
