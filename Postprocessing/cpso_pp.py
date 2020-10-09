@@ -250,7 +250,6 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     pdf_m = np.empty(shape=(nparam, n_inter))
     x_bin = np.empty(shape=(nparam, n_inter))
     f_best = np.min(f_grid)
-    lmbda = 0.5 / kappa
     eps = 1e-3
     L = upper - lower
     p_inter = np.arange(n_inter + 1.) * L / n_inter - L * 0.5
@@ -271,8 +270,7 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
             i_mod = im & ip
             n_bin[iparam, i_inter] = np.sum(i_mod)
             if  np.sum(i_mod) >= 1:
-                pdf_m[iparam, i_inter] = np.sum(np.exp(- f_grid[i_mod])) \
-                                             * S
+                pdf_m[iparam, i_inter] = np.sum(np.exp(- f_grid[i_mod])) * S
             else:
                 pdf_m[iparam, i_inter] = 0
         print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100 
