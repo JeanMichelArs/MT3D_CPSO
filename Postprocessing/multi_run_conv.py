@@ -1,18 +1,12 @@
 """
 script to analyze cpso convergence over the runs
 
-<<<<<<< HEAD
-- TODO:
-    - plot < m > for several number of runs [1, 5, 10, 20, 50, 75, 100]
-    - plot <std> //
-=======
 - plot < m > for several number of runs [1, 5, 10, 20, 50, 75, 100]
 - plot <std> //
 - log of error (norme2) E(nruns), for both < m > and < std >
 
 - TODO: 
     - plot error against pbest to see a convergence ?
->>>>>>> d0cb2b5644f5e1cd35c4c4e582d0c007444ca91a
 """
 # ----------------------------------------------------------------------------
 import numpy as np
