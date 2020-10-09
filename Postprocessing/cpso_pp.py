@@ -282,7 +282,7 @@ def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
         hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):
     """  MEAN MODEL & PDF """
     fig = plt.figure()
-    nparam = hz.shape[0]
+    nparam = x_bin.shape[0]
     dz = np.zeros(nparam + 1)
     for k in range(nparam + 1):
         dz[k] = np.sum(hz[0:k])
