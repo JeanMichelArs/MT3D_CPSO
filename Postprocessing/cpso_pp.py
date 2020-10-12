@@ -5,6 +5,8 @@ JCollin 06-2020
 CPSO postprocessing module
 
 - ! marginal_law: 
+- 12 octobre 2020 
+  changed signed of non RMS cost function
   modification of interval, upper boundary was not taken into account
 - add possibility of single run NaNfiler
 - removed factor 2 divsion in rms marginal law function
@@ -258,11 +260,12 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     if rms==True:
         f_grid = np.sqrt(f_grid / ndata)
     else:
-        f_grid = (f_best - f_grid) * 0.5
+        f_grid = (f_grid - f_best) * 0.5
     
-    S = 1 / np.sum(np.exp(- f_grid))
+    S = 1. / np.sum(np.exp(- f_grid))
     for iparam in range(nparam):
         for i_inter in range(n_inter):
+
             x_bin[iparam, :] = np.squeeze(p_inter[:-1] + p_inter[1:]) * 0.5 \
                                + m_best[iparam]
             im = m_grid[:, iparam] - m_best[iparam] >= p_inter[i_inter]
@@ -274,8 +277,9 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
             else:
                 pdf_m[iparam, i_inter] = 0
         print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100 
-        x_bin[:, 0] = x_bin[:, 0] + eps * 0.5
-        x_bin[:, -1] = x_bin[:, -1] - eps * 0.5
+   
+    x_bin[:, 0] = x_bin[:, 0] + eps * 0.5
+    x_bin[:, -1] = x_bin[:, -1] - eps * 0.5
 
     if timing:
         print "ellapsed time in marginal_law", time.clock() - t0
