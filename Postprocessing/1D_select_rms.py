@@ -23,6 +23,8 @@ import glob
 
 import cpso_pp as pp
 
+# ----------------------------------------------------------------------------
+
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
     _, y1 = ax1.transData.transform((0, v1))
