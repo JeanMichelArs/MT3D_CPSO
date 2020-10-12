@@ -13,13 +13,14 @@ from matplotlib.colors import BoundaryNorm
 from scipy.interpolate import griddata
 from netCDF4 import Dataset
 
-sys.path.append('../Postprocessing/')
+sys.path.append('../')
 import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
+#stats_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error/Analysis/'
 stats_path = '/postproc/COLLIN/MTD3/Calibre_CPSO_16nz/Analysis/'
-stats_file = stats_path + 'pdf_m_nruns100.nc'
-figname = stats_path + 'vertical_profile_100runs.png'
+stats_file = stats_path + 'compressed_pdf_m_16.nc'
+figname = stats_path + 'vertical_profile_16runs.png'
 
 conf_dir = '../../Config/1D/model_002'
 model_file = conf_dir + '/mod1D_Bolivia_002'
