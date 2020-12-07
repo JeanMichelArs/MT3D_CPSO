@@ -272,7 +272,7 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
             ip = m_grid[:, iparam] - m_best[iparam] < p_inter[i_inter + 1]
             i_mod = im & ip
             n_bin[iparam, i_inter] = np.sum(i_mod)
-            if  np.sum(i_mod) >= 1:
+            if np.sum(i_mod) >= 1:
                 pdf_m[iparam, i_inter] = np.sum(np.exp(- f_grid[i_mod])) * S
             else:
                 pdf_m[iparam, i_inter] = 0
@@ -285,7 +285,73 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
         print "ellapsed time in marginal_law", time.clock() - t0
     return pdf_m, n_bin, x_bin
 
+# ----------------------------------------------------------------------------
+def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
+            lower=-1, upper=1, timing=True, verbose=True, **kwargs):
+    """
+    returns error on marginal laws obtained using uniform a priori and 
+    trials when sampling parameter space i.e Monte Carlo Method
+    Tarits et. al 94
 
+    standard deviation of marginal law obtained using uniform a priori law
+    on parameters and uniform law for sampling is 
+
+    err = sqrt(U_ikk / L), L number of trials
+    U_ikk = (V_ik * (E - E_ik)**2 + E_ik**2 * (V - V_ik)) / E**4
+
+    E = 1/L * sum(exp(-f))
+
+    F : f(Z|P)
+
+    beware: notation are not strictly the same in paper/comments and in the 
+    code. 
+    - L in paper is nmodels
+    - L in code is interval width
+    """
+    nparam = m_grid.shape[1]
+    nmodels = f_grid.shape
+    pdf_error = np.empty(shape=(nparam, n_inter))
+    eps = 1e-3
+    L = upper - lower
+    p_inter = np.arange(n_inter + 1.) * L / n_inter - L * 0.5
+    p_inter[0] = p_inter[0] - eps
+    p_inter[-1] = p_inter[-1] + eps
+    
+    if timing:
+        t0 = time.clock()
+    
+    """ 
+    if method is 'xhi':
+        F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
+    elif method is 'rms':
+        F = np.exp(-(np.sqrt(f_grid / ndata))
+    else:
+        print 'what is going on ?'
+    """
+
+    F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
+    E = np.sum(F) / nmodels
+    V = np.sum(F**2) / nmodels
+    for iparam in range(nparam):
+        for i_inter in range(n_inter):
+            im = m_grid[:, iparam] - m_synth[iparam] >= p_inter[i_inter]
+            ip = m_grid[:, iparam] - m_synth[iparam] < p_inter[i_inter + 1]
+            i_mod = im & ip
+            if np.sum(i_mod) >= 1:
+                E_ik = np.sum(F[i_mod]) / nmodels
+                V_ik = np.sum(F[i_mod]**2) / nmodels
+                U_ikk = (V_ik * (E - E_ik)**2 + E_ik**2 * (V - V_ik)) / E**4
+                pdf_error[iparam, i_inter] = np.sqrt(U_ikk)
+            else:
+                pdf_error[iparam, i_inter] = 0
+            pdf_error = pdf_error / np.sqrt(nmodels)
+            if verbose:
+                print '% Error on pdf, i=', iparam, "i_inter", i_inter,
+                print 'pdf_error=', pdf_error[iparam, i_inter]
+    if timing:
+        print "ellapsed time in marginal_law", time.clock() - t0
+    
+    return pdf_error, U_ikk
 # ----------------------------------------------------------------------------
 def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
         hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):
