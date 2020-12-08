@@ -84,6 +84,7 @@ for n_runs in nruns_range:
             # ---> Xi2 weighted mean model, in log and physical space
             m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
             # ---> Xi2 weighted STD model, in log and physical space
+            std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=1, rms=True, log=True)
             # ---- marginal laws using kappa damping coefficient
             n_inter = 20
             lower = -1.
