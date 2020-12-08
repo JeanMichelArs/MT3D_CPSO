@@ -26,18 +26,18 @@ import cpso_pp as pp
 nruns_range=np.array([100])#np.array([1,5,10,20,50,75,100],dtype=int)
 iterpercent_range=np.array([85])#np.array([10,30,50,65,75,85],dtype=int)
 
-for nruns in nruns_range:
+for n_runs in nruns_range:
     for iterpercent in iterpercent_range:
         print ''
-        print 'Computing stat for '+str(iterpercent) +' percent of total iteration of '+ str(nruns)+" runs merged"
+        print 'Computing stat for '+str(iterpercent) +' percent of total iteration of '+ str(n_runs)+" runs merged"
         print '--------------------------------------------------------------------------------------------------'
         # ----------------------------------------------------------------------------
         # be careful if save_netcdf: outfile is removed before creating a new one
         run = 'Bolivia_115param_015'
         NCPATH = '/home2/datawork/sflora/MT3D_CPSO/sensi_analysis/' + run
-        folder_save = NCPATH + '/convergence_rms/'+str(nruns)+'runs_merged'
+        folder_save = NCPATH + '/convergence_rms/'+str(n_runs)+'runs_merged'
         save_plot = False
-        outfile = folder_save + "/mselect_mod_nruns" + str(nruns)+'_iterpercent'+str(iterpercent) + ".nc"
+        outfile = folder_save + "/mselect_mod_nruns" + str(n_runs)+'_iterpercent'+str(iterpercent) + ".nc"
         save_netcdf = True              
         # --- create directory to save plots 
         if not os.path.exists(folder_save):
@@ -46,8 +46,8 @@ for nruns in nruns_range:
         # --- load data
         t0 = time.clock()
         nc = Dataset(NCPATH + '/merged.nc')
-        energy = np.array(nc.variables['energy'][:nruns, :, :])
-        models =  np.array(nc.variables['models'][:nruns, :, :, :])
+        energy = np.array(nc.variables['energy'][:n_runs, :, :])
+        models =  np.array(nc.variables['models'][:n_runs, :, :, :])
         nc.close()
         print "Ellapsed time reading netcdf file:", time.clock() - t0
         #---------------------------------------------------------------------------
