@@ -308,7 +308,12 @@ def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
     - L in paper is nmodels
     - L in code is interval width
     """
-    nparam = m_grid.shape[1]
+    if ('mpi' in kwargs) and (kwargs['mpi']==True):
+        print 'mpi version'
+        nparam = 1
+    else:
+        nparam = m_grid.shape[1]
+    
     nmodels = f_grid.shape
     pdf_error = np.empty(shape=(nparam, n_inter))
     eps = 1e-3
@@ -320,16 +325,14 @@ def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
     if timing:
         t0 = time.clock()
     
-    """ 
     if method is 'xhi':
         F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
     elif method is 'rms':
-        F = np.exp(-(np.sqrt(f_grid / ndata))
+        F = np.exp(-(np.sqrt(f_grid / ndata)))
     else:
-        print 'what is going on ?'
-    """
+        print 'unsupported method'
 
-    F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
+    #F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
     E = np.sum(F) / nmodels
     V = np.sum(F**2) / nmodels
     for iparam in range(nparam):
@@ -341,17 +344,17 @@ def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
                 E_ik = np.sum(F[i_mod]) / nmodels
                 V_ik = np.sum(F[i_mod]**2) / nmodels
                 U_ikk = (V_ik * (E - E_ik)**2 + E_ik**2 * (V - V_ik)) / E**4
-                pdf_error[iparam, i_inter] = np.sqrt(U_ikk)
+                pdf_error[iparam, i_inter] = np.sqrt(U_ikk / nmodels)
             else:
                 pdf_error[iparam, i_inter] = 0
-            pdf_error = pdf_error / np.sqrt(nmodels)
             if verbose:
                 print '% Error on pdf, i=', iparam, "i_inter", i_inter,
-                print 'pdf_error=', pdf_error[iparam, i_inter]
+                print 'pdf_error=', pdf_error[iparam, i_inter], 'nmods:', np.sum(i_mod)
+
     if timing:
         print "ellapsed time in marginal_law", time.clock() - t0
     
-    return pdf_error, U_ikk
+    return pdf_error
 # ----------------------------------------------------------------------------
 def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
         hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):
