@@ -17,19 +17,20 @@ import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
 # ---> inputs
-nruns = 50
+config = 'full'
+nruns = 25
 nmodels_cut = int(-1)
-cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error/Analysis'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error/Analysis'
 pdf_file = cpso_path + '/pdf_m_' + str(nruns) + '.nc'
 
 # ---> outputs
-method = 'rms'
+method = 'xhi'
 folder_save = cpso_path   
 save_plot = True
 save_netcdf = True
-outfile = folder_save + "/pdf_error_fun_" + method + str(nruns) + ".nc"
+outfile = folder_save + "/pdf_error_fun_" + method + str(nruns) + config + ".nc"
 timing = True
-figname = folder_save + '/' + 'pdf_error_fun_' + method + str(nruns) + '.png'
+figname = folder_save + '/' + 'pdf_error_fun_' + method + str(nruns) + config + '.png'
 
 # --- create directory to save plots 
 if not os.path.exists(folder_save):
