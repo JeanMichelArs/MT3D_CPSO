@@ -142,7 +142,7 @@ if rank==0:
 # ----------------------------------------------------------------------------
 # Parameters
 # ---> inputs
-idd = '001'
+idd = '002'
 conf_path = '../Config/1D/model_' + idd 
 filed = conf_path + '/mod1D_Bolivia_' + idd  
 error_file = conf_path + '/' + idd + '.ro'
@@ -153,7 +153,7 @@ max_iter = 2 * 8000000
 
 # outputs
 folderout = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error'
-outfile = folderout + '/mcm_exploration_' + str(rank) + '.nc'
+outfile = folderout + '/mcm_exploration_' + str(50 + rank) + '.nc'
 
 # ----------------------------------------------------------------------------
 # End of parameters

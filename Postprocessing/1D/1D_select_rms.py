@@ -34,7 +34,7 @@ from matplotlib.ticker import MaxNLocator
 from scipy.interpolate import griddata
 import glob
 
-sys.path.append('../Postprocessing/')
+sys.path.append('../')
 sys.path.append('../../Forward_MT/')
 import cpso_pp as pp
 from forward_1d import MT1D_analytic
@@ -49,14 +49,15 @@ from forward_1d import MT1D_analytic
 # ---> inputs
 method = 'mcm'
 rms = False
-nruns = 2
+nruns = 90
+idd = '002'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_16nz_cst_Error'
 
-cpso_path = '/postproc/COLLIN/MTD3/MCM_4nz_cst_Error'
-conf_dir = '../../Config/1D/model_000'
+conf_dir = '../../Config/1D/model_' + idd
 #cpso_path = '/home/ars/Bureau'
 #conf_dir = '/home/ars/Documents/CODE_TEST/MT3D_CPSO/1D/model_000'
-data_file = conf_dir + '/000.ro'
-model_file = conf_dir + '/mod1D_Bolivia_000'
+data_file = conf_dir + '/' + idd + '.ro'
+model_file = conf_dir + '/mod1D_Bolivia_' + idd 
 exploration_file = cpso_path + '/merged.nc'
 
 # ---> outputs
