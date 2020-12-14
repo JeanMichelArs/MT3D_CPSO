@@ -41,7 +41,7 @@ def get_ndata(data_file):
     return ndata
 
 # ----------------------------------------------------------------------------
-def NaN_filter(models, energy, iterpercent, timing=True,  **kwargs):
+def NaN_filter(models, energy, iterpercent=100, timing=True,  **kwargs):
     """ remove Nan values, usefull for runs that did not finish
         args : 
            iterpercent variable to select a % of total iter
