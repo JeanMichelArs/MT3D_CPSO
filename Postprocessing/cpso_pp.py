@@ -287,6 +287,81 @@ def marginal_law(m_grid, f_grid, m_best, ndata, n_inter=30, lower=-1, upper=1,
     return pdf_m, n_bin, x_bin
 
 # ----------------------------------------------------------------------------
+def raw_marginal_law(models, energy, m_synth, ndata, n_inter=30, lower=-1, 
+                     upper=1, rms=False, timing=True, **kwargs):
+    """
+    Computes marginal laws around m_synth +/- upper/lower 
+    low memory computation
+
+    Inputs: models, energy : straight from cpso output (no filter or regrid)
+    """
+    if timing:
+        t0 = time.clock()
+    nparam = models.shape[2]
+    n_bin = np.empty(shape=(nparam, n_inter))
+    pdf_m = np.empty(shape=(nparam, n_inter))
+    x_bin = np.empty(shape=(nparam, n_inter))
+    f_best = np.min(energy)
+    eps = 1e-3
+    L = upper - lower
+    p_inter = np.arange(n_inter + 1.) * L / n_inter - L * 0.5
+    p_inter[0] = p_inter[0] - eps
+    p_inter[-1] = p_inter[-1] + eps
+    if rms==True:
+        f_cost = np.exp(-np.sqrt(energy / ndata))
+    else:
+        f_cost = np.exp(-(energy - f_best) * 0.5)
+
+    S = 1. / np.sum(f_cost)
+    for iparam in range(nparam):
+        for i_inter in range(n_inter):
+            x_bin[iparam, :] = np.squeeze(p_inter[:-1] + p_inter[1:]) * 0.5 \
+                               + m_synth[iparam]
+            im = models[:, :, iparam] - m_synth[iparam] >= p_inter[i_inter]
+            ip = models[:, :, iparam] - m_synth[iparam] < p_inter[i_inter + 1]
+            i_mod = im & ip
+            n_bin[iparam, i_inter] = np.sum(i_mod)
+            if n_bin[iparam, i_inter] > 0:
+                pdf_m[iparam, i_inter] = np.sum(f_cost[i_mod]) * S
+            else:
+                pdf_m[iparam, i_inter] = 0
+        print '% Error on pdf, i=', iparam, 'E=', (1-np.sum(pdf_m[iparam, :]))*100
+
+    x_bin[:, 0] = x_bin[:, 0] + eps * 0.5
+    x_bin[:, -1] = x_bin[:, -1] - eps * 0.5
+
+    if timing:
+        print "ellapsed time in marginal_law", time.clock() - t0
+    return pdf_m, n_bin, x_bin
+
+# ----------------------------------------------------------------------------
+def raw_weighted_mean(models, energy, ndata, rms=False, timing=True, **kwargs):
+    """ 
+    USES raw models and energy without any filter or regrid
+    
+    mean models weighted by energy  
+    if rms = True : stat are performed on rms instead of Xhi, ndata required!
+    """
+    if timing:
+        t0 = time.clock()
+    nparam = models.shape[-1]
+    f_best = np.min(energy)
+    m_weight = np.empty(shape=(nparam,))
+    if rms:
+        f_cost = np.exp(-np.sqrt(energy / ndata))
+        S = 1 / np.sum(f_cost)
+        for iparam in range(nparam):
+            m_weight[iparam] = np.sum(f_cost * models[:, :, iparam]) * S
+    else:
+        f_cost = np.exp(-(energy - f_best) * 0.5)
+        S = 1 / np.sum(f_cost) 
+        for iparam in range(nparam):
+            m_weight[iparam] = np.sum(f_cost * models[:, :, iparam]) * S
+        if timing:
+            print "ellapsed time in weighted_mean", time.clock() - t0
+    return m_weight
+ 
+# ----------------------------------------------------------------------------
 def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
             lower=-1, upper=1, timing=True, verbose=True, **kwargs):
     """
