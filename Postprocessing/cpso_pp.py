@@ -384,11 +384,7 @@ def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
     - L in paper is nmodels
     - L in code is interval width
     """
-    if ('mpi' in kwargs) and (kwargs['mpi']==True):
-        print 'mpi version'
-        nparam = 1
-    else:
-        nparam = m_grid.shape[1]
+    nparam = m_grid.shape[1]
     
     nmodels = f_grid.shape
     pdf_error = np.empty(shape=(nparam, n_inter))
@@ -424,13 +420,65 @@ def pdf_std(m_grid, f_grid, m_synth, ndata, method='xhi', n_inter=40,
             else:
                 pdf_error[iparam, i_inter] = 0
             if verbose:
+                print '% Error on pdf, i=', iparam, "i_inter", i_inter
+                print 'pdf_error=', pdf_error[iparam, i_inter], 'nmods:', np.sum(i_mod)
+
+    if timing:
+        print "ellapsed time raw_pdf_std", time.clock() - t0
+    
+    return pdf_error
+
+# ----------------------------------------------------------------------------
+def raw_pdf_std(models, energy, m_synth, ndata, method='xhi', n_inter=40,
+            lower=-1, upper=1, timing=True, verbose=True, **kwargs):
+    """
+    returns pdf error using raw models and energy (Tarits 94)
+
+    """
+    nparam = models.shape[-1]
+
+    nmodels = np.prod(energy.shape)
+    pdf_error = np.empty(shape=(nparam, n_inter))
+    eps = 1e-3
+    L = upper - lower
+    p_inter = np.arange(n_inter + 1.) * L / n_inter - L * 0.5
+    p_inter[0] = p_inter[0] - eps
+    p_inter[-1] = p_inter[-1] + eps
+
+    if timing:
+        t0 = time.clock()
+
+    if method is 'xhi':
+        F = np.exp(-(energy - np.nanmin(energy)) * 0.5)
+    elif method is 'rms':
+        F = np.exp(-(np.sqrt(energy / ndata)))
+    else:
+        print 'unsupported method'
+
+    #F = np.exp(-(f_grid - np.nanmin(f_grid)) * 0.5)
+    E = np.sum(F) / nmodels
+    V = np.sum(F**2) / nmodels
+    for iparam in range(nparam):
+        for i_inter in range(n_inter):
+            im = models[:, :, iparam] - m_synth[iparam] >= p_inter[i_inter]
+            ip = models[:, :, iparam] - m_synth[iparam] < p_inter[i_inter + 1]
+            i_mod = im & ip
+            if i_mod.any():
+                E_ik = np.sum(F[i_mod]) / nmodels
+                V_ik = np.sum(F[i_mod]**2) / nmodels
+                U_ikk = (V_ik * (E - E_ik)**2 + E_ik**2 * (V - V_ik)) / E**4
+                pdf_error[iparam, i_inter] = np.sqrt(U_ikk / nmodels)
+            else:
+                pdf_error[iparam, i_inter] = 0
+            if verbose:
                 print '% Error on pdf, i=', iparam, "i_inter", i_inter,
                 print 'pdf_error=', pdf_error[iparam, i_inter], 'nmods:', np.sum(i_mod)
 
     if timing:
         print "ellapsed time in marginal_law", time.clock() - t0
-    
+
     return pdf_error
+
 # ----------------------------------------------------------------------------
 def vertical_profile(figname, pdf_m=None, m_weight=None, logrhosynth=None,
         hz=None, x_bin=None, cut_off=1e-3, transparent=True, **kwargs):

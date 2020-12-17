@@ -17,13 +17,17 @@ import cpso_pp as pp
 
 # ----------------------------------------------------------------------------
 # ---> inputs
-config = 'full'
-nruns = 25
+config = 'filter'
+nruns = 2
 nmodels_cut = int(-1)
-cpso_path = '/postproc/COLLIN/MTD3/MCM_8nz_cst_Error/Analysis'
-pdf_file = cpso_path + '/pdf_m_' + str(nruns) + '.nc'
+cpso_path = '/postproc/COLLIN/MTD3/MCM_16nz_cst_Error/raw'
+pdf_file = cpso_path + '/pdf_m_' + str(nruns) + config  + '.nc'
+# only for raw models
+exploration_file = cpso_path + '/../merged.nc'
+expl_cut = np.int(10**5)
 
 # ---> outputs
+filtered = True
 method = 'xhi'
 folder_save = cpso_path   
 save_plot = True
@@ -37,24 +41,48 @@ if not os.path.exists(folder_save):
 	os.makedirs(folder_save)
 
 # --- load data
-nc = Dataset(pdf_file)
-f_grid = np.array(nc.variables['f_grid'][:nmodels_cut])
-m_grid =  np.array(nc.variables['m_grid'][:nmodels_cut, :])
-pdf_m =  np.array(nc.variables['pdf_m'][:, :])
-m_synth =  np.array(nc.variables['m_synth'][:])
-ndata = nc.ndata
-upper = nc.upper
-lower = nc.lower
-nc.close()
+if filtered:
+    nc = Dataset(pdf_file, 'r')
+    """
+    f_grid = np.array(nc.variables['f_grid'][:nmodels_cut])
+    m_grid =  np.array(nc.variables['m_grid'][:nmodels_cut, :])
+    """
+    f_grid = np.array(nc.variables['f_grid'][:])
+    m_grid =  np.array(nc.variables['m_grid'][:, :])
+    pdf_m =  np.array(nc.variables['pdf_m'][:, :])
+    m_synth =  np.array(nc.variables['m_synth'][:])
+    ndata = nc.ndata
+    upper = nc.upper
+    lower = nc.lower
+    nc.close()
+    popsize = np.prod(f_grid.shape)
+else:
+    nc = Dataset(pdf_file)
+    pdf_m =  np.array(nc.variables['pdf_m'][:, :])
+    m_synth =  np.array(nc.variables['m_synth'][:])
+    ndata = nc.ndata
+    upper = nc.upper
+    lower = nc.lower
+    nc.close()
+    nc = Dataset(exploration_file, 'r')
+    models = np.array(nc.variables['models'][:nruns, :expl_cut, :])
+    energy = np.array(nc.variables['energy'][:nruns, :expl_cut])
+    nc.close()
+    popsize = np.prod(energy.shape)
 
 nparam, n_inter = pdf_m.shape
 
 #---------------------------------------------------------------------------
 # ---> compute uncertainties
 
-pdf_error = pp.pdf_std(m_grid, f_grid, m_synth, ndata, method=method,
-                              n_inter=n_inter, lower=lower, upper=upper,
-                              timing=timing)
+if filtered:
+    pdf_error = pp.pdf_std(m_grid, f_grid, m_synth, ndata, method=method,
+                           n_inter=n_inter, lower=lower, upper=upper,
+                           timing=timing)
+else:
+    pdf_error = pp.raw_pdf_std(models, energy, m_synth, ndata, method=method,
+                                n_inter=n_inter, lower=lower, upper=upper,
+                                timing=timing)
 # ---> plot test
 plt.figure()
 for iparam in range(nparam):
@@ -77,8 +105,8 @@ if save_netcdf:
         print "remove ", outfile
     nc = Dataset(outfile, "w", format='NETCDF4')
     # dimensions: name, size
-    nc.createDimension('popsize', f_grid.shape[0])
-    nc.createDimension('nparam', m_grid.shape[1])
+    nc.createDimension('popsize', popsize)
+    nc.createDimension('nparam', pdf_m.shape[0])
     nc.createDimension('n_inter', pdf_m.shape[1])
     # Variables: name, format, shape
     nc.createVariable('pdf_error', 'f8', ('nparam', 'n_inter'))
