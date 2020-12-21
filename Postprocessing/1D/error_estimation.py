@@ -3,6 +3,8 @@
 jeudi 3 decembre 2020, 14:27:33 (UTC+0100)
 
 Uncertainties estimation based on Tarits 94
+
+- computation on both filtered and raw models
 '''
 #-----------------------------------------------------------------------------
 import sys
@@ -48,9 +50,9 @@ if filtered:
     m_grid =  np.array(nc.variables['m_grid'][:nmodels_cut, :])
     """
     f_grid = np.array(nc.variables['f_grid'][:])
-    m_grid =  np.array(nc.variables['m_grid'][:, :])
-    pdf_m =  np.array(nc.variables['pdf_m'][:, :])
-    m_synth =  np.array(nc.variables['m_synth'][:])
+    m_grid = np.array(nc.variables['m_grid'][:, :])
+    pdf_m = np.array(nc.variables['pdf_m'][:, :])
+    m_synth = np.array(nc.variables['m_synth'][:])
     ndata = nc.ndata
     upper = nc.upper
     lower = nc.lower
