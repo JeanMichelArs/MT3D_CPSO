@@ -136,7 +136,7 @@ merge:
 	cd ${SAVE_DIR}; \
 	source /usr/share/Modules/3.2.10/init/bash; \
 	module load nco/4.7.1_conda; \
-	ncecat *nc -O merged.nc  
+	ncecat cpso_[0-9]*.nc -O merged.nc  
 
 multi_debug:
 	cd ${RUN_DIR}/run_1; qsub -I python -i  ;\

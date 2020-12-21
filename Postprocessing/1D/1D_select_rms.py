@@ -49,9 +49,9 @@ from forward_1d import MT1D_analytic
 # ---> inputs
 method = 'mcm'
 rms = False
-nruns = 90
+nruns = 16
 idd = '002'
-cpso_path = '/postproc/COLLIN/MTD3/MCM_16nz_cst_Error'
+cpso_path = '/home2/scratch/jcollin/MT3D_CPSO/mcm_16nz'
 
 conf_dir = '../../Config/1D/model_' + idd
 #cpso_path = '/home/ars/Bureau'
@@ -88,8 +88,8 @@ if method is 'cpso':
     models =  np.array(nc.variables['models'][:nruns, :, :, :])
     logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
 elif method is 'mcm':
-    energy = np.array(nc.variables['energy'][:nruns, :])
-    models =  np.array(nc.variables['models'][:nruns, :, :])
+    energy = np.array(nc.variables['energy'][:nruns, :1000000])
+    models =  np.array(nc.variables['models'][:nruns, :1000000, :])
     logrhosynth =  np.squeeze(np.log10(np.array(nc.variables['rho_i'][0, :])))
 else: 
     print "Error method is not defined"
@@ -163,10 +163,12 @@ print "max distance between m_grid and logrhosynth :"
 print np.max(np.abs(m_grid - logrhosynth))
 
 # ---> Xi2 weighted mean model, in log and physical space
-m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
+m_weight = pp.weighted_mean(m_grid, f_grid, ndata, kappa=kappa, rms=rms,
+                            log=True)
 
 # ---> Xi2 weighted STD model, in log and physical space
-std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=kappa, rms=rms, log=True)
+std_weight = pp.weighted_std(m_weight, m_grid, f_grid, ndata, kappa=kappa,
+                             rms=rms, log=True)
 print''
 
 # ---- marginal laws centered around solution 
