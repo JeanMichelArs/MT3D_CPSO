@@ -1,0 +1,37 @@
+#!/bin/bash
+#PBS -l mem=450g
+#PBS -l walltime=24:00:00
+#  COMMENT
+#  Tina ODAKA 06.03.2017
+#  example for using datarmor with 'queue omp' in a personalised way
+#  By default, if you use 'omp' it use 1 node with 2 openmp threads
+#  here we show you example of it using 10 openmp threads (specify ncpus=10)
+#  and it use 10g of memory in this example (specifly mem=10g)
+#  and you can run max for 30 minutes with walltime setting
+#  To optimised multi thread, you need to place a command 'omplace' before your 'exe'
+#  Here, in this example, we suppose that your code 'exe' is compiled with 
+#  gnu compiler.
+#  for the users who use intel compiler, plz use omp.10g.pbs
+#  
+# cd to the directory you submitted your job
+cd $PBS_O_WORKDIR
+qstat -f $PBS_JOBID
+
+###############################
+# C SHELL
+echo "source Bash"
+source /usr/share/Modules/3.2.10/init/bash
+###############################
+# Conda
+module load conda/latest
+source activate mt3d_stochopy
+
+date
+time python raw_pdf.py > log.raw_pdf
+date
+
+###############################
+# end of jobs info
+qstat -f $PBS_JOBID
+
+
